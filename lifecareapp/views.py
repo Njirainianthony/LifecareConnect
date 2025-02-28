@@ -6,3 +6,6 @@ def index(request):
 
 def inner(request):
     return render(request, 'inner-page.html')
+
+def login(request):
+    return render(request, 'login.html')
