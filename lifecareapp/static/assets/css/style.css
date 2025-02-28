@@ -141,9 +141,11 @@ h6 {
   background: #fff;
   transition: all 0.5s;
   z-index: 997;
-  padding: 20px 0;
-  top: 40px;
+  padding: 15px 0;
+  top: 0;
   box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.1);
+  margin-top: 0 !important;
+  position: fixed;
 }
 
 @media (max-width: 992px) {
@@ -1796,4 +1798,47 @@ section {
   padding-top: 10px;
   text-align: center;
   font-size: 13px;
+}
+
+/* Login Page */
+.login-body {
+  background: url("{% static 'assets/img/doctors/download.jpg' %}") no-repeat center center/cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 90px); /* Subtract header height */
+  margin: 0;
+  padding-top: 90px; /* Add padding equal to approximate header height */
+}
+
+.login-container {
+  max-width: 500px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  text-align: center;
+  margin: 20px; /* Add some margin for mobile responsiveness */
+}
+
+/* Signup Page */
+.signup-body {
+  background: url("{% static 'assets/img/doctors/download.jpg' %}") no-repeat center center/cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 90px); /* Subtract header height */
+  margin: 0;
+  padding-top: 90px; /* Add padding equal to approximate header height */
+}
+
+/* Sign-Up Container */
+.signup-container {
+  background: #ffffff;
+  width: 100%;
+  max-width: 400px;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  margin: 20px; /* Add some margin for mobile responsiveness */
 }
