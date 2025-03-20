@@ -19,8 +19,8 @@ from django.urls import path
 from lifecareapp import views
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', views.index, name='home'),
     path('inner/', views.inner, name='inner'),
-    path('login/', views.login, name='login'),
-    path('signup/', views.signup, name='signup'),
+    path('login/', views.user_login, name='login'),
+    path('signup/', views.user_signup, name='signup'),
 ]

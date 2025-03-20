@@ -84,14 +84,16 @@
   <div class="login-body">
     <div class="login-container">
         <h3>Login to Your Account</h3>
-        <form>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
             <div class="mb-3 input-group">
                 <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                <input type="email" class="form-control" placeholder="email@gmail.com" required>
+                <input type="email" class="form-control" placeholder="email@gmail.com" >
             </div>
             <div class="mb-3 input-group">
                 <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                <input type="password" class="form-control" placeholder="Password" required>
+                <input type="password" class="form-control" placeholder="Password" >
             </div>
             <button type="submit" class="btn btn-blue-green">Login</button>
         </form>
