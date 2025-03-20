@@ -18,7 +18,7 @@ def user_login(request):
             user = authenticate(request, username=username, password=password)
             if user:
                 login(request, user)
-                return redirect('home')
+                return redirect('addprofile')
     else:
         form = LoginForm()
     return render(request, 'login.html', {'form' : form})
@@ -36,3 +36,12 @@ def user_signup(request):
 def user_logout(request):
     logout(request)
     return redirect('login')
+
+def add_profile(request):
+    return render(request, 'addprofile.html')
+
+def patient_form(request):
+    return render(request, 'patientform.html')
+
+def doctor_form(request):
+    return render(request, 'doctorform.html')
