@@ -21,6 +21,14 @@ from lifecareapp import views
 urlpatterns = [
     path('', views.index, name='home'),
     path('inner/', views.inner, name='inner'),
+<<<<<<< HEAD
     path('login/', views.user_login, name='login'),
     path('signup/', views.user_signup, name='signup'),
+=======
+    path('login/', views.login, name='login'),
+    path('signup/', views.signup, name='signup'),
+    path('addprofile/', views.addprofile, name='addprofile'),
+    path('patientform/', views.patientform, name='patientform'),
+    path('doctorform/', views.doctorform, name='doctorform'),
+>>>>>>> f536867f1deeb86667616017dbf03cea233cbeab
 ]
