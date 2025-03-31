@@ -80,56 +80,83 @@
 
     </div>
   </header><!-- End Header -->
-    
-    <div class="signup-body">
-        <div class="signup-container">
-            <h3 class="text-center">Create an Account</h3>
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <!-- <div class="mb-3">
-                    <label for="email">Email (optional)</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                        <input type="email" class="form-control" id="email" placeholder="email@gmail.com">
-                    </div>
-                </div>
 
-                <div class="mb-3">
-                    <label for="phone">Phone Number</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-phone"></i></span>
-                        <input type="tel" class="form-control" id="phone" placeholder="7********" >
-                    </div>
+  <!-- Jumbotron -->
+  <div class="container py-4 mt-5">
+    <div class="row g-0 align-items-center">
+      <div class="col-lg-6 mb-5 mb-lg-0">
+        <div class="card cascading-right bg-body-tertiary" style="
+            backdrop-filter: blur(30px);
+            ">
+          <div class="card-body p-5 shadow-5 text-center">
+            <h2 class="fw-bold mb-5">Sign up now</h2>
+            <form>
+              <!-- 2 column grid layout with text inputs for the first and last names -->
+              <div class="row">
+                <div class="col-md-6 mb-4">
+                  <div data-mdb-input-init class="form-outline">
+                    <input type="text" id="form3Example1" class="form-control" />
+                    <label class="form-label" for="form3Example1">First name</label>
+                  </div>
                 </div>
-    
-                <div class="mb-3">
-                    <label for="password">Password</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                        <input type="password" class="form-control" id="password" placeholder="Password">
-                    </div>
+                <div class="col-md-6 mb-4">
+                  <div data-mdb-input-init class="form-outline">
+                    <input type="text" id="form3Example2" class="form-control" />
+                    <label class="form-label" for="form3Example2">Last name</label>
+                  </div>
                 </div>
-    
-                <div class="mb-3">
-                    <label for="confirm-password">Password (confirmation)</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                        <input type="password" class="form-control" id="confirm-password" placeholder="Confirm Password">
-                    </div>
-                </div> -->
-    
-                <button type="submit" class="btn btn-blue-green">Sign Up</button>
+              </div>
+
+              <!-- Email input -->
+              <div data-mdb-input-init class="form-outline mb-4">
+                <input type="email" id="form3Example3" class="form-control" />
+                <label class="form-label" for="form3Example3">Email address</label>
+              </div>
+
+              <!-- Password input -->
+              <div data-mdb-input-init class="form-outline mb-4">
+                <input type="password" id="form3Example4" class="form-control" />
+                <label class="form-label" for="form3Example4">Password</label>
+              </div>
+
+              <!-- Submit button -->
+              <button type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-blue-green">
+                Sign up
+              </button>
+
+              <!-- Register buttons -->
+              <div class="text-center">
+                <p>or sign up with:</p>
+                <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-link btn-floating mx-1">
+                  <i class="fab fa-facebook-f"></i>
+                </button>
+
+                <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-link btn-floating mx-1">
+                  <i class="fab fa-google"></i>
+                </button>
+
+                <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-link btn-floating mx-1">
+                  <i class="fab fa-twitter"></i>
+                </button>
+
+                <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-link btn-floating mx-1">
+                  <i class="fab fa-github"></i>
+                </button>
+              </div>
             </form>
-            
-            <div class="forgot-password text-center mt-3">
-                <a href="#">Forgot Password?</a>
-            </div>
-            <div class="signup-link text-center mt-2">
-                Already have an account? <a href="{% url 'login' %}">Log In</a>
-            </div>
+          </div>
         </div>
-        </div>
+      </div>
+
+      <div class="col-lg-6 mb-5 mb-lg-0">
+        <img src="{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}" class="w-100 rounded-4 shadow-4"
+          alt="" />
+      </div>
+    </div>
+  </div>
+  <!-- Jumbotron -->
+</section>
+<!-- Section: Design Block -->
 
  <!-- ======= Footer ======= -->
  <footer id="footer">
