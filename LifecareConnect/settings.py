@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -78,11 +82,11 @@ WSGI_APPLICATION = 'LifecareConnect.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Lifecare',
-        'USER': 'postgres',
-        'PASSWORD': 'Anthonynjoroge04*',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'NAME': os.getenv('LIFECARE_DATABASE_NAME'),
+        'USER': os.getenv('LIFECARE_DATABASE_USER'),
+        'PASSWORD': os.getenv('LIFECARE_DATABASE_PASSWORD'),
+        'HOST': os.getenv('LIFECARE_DATABASE_HOST'),
+        'PORT': os.getenv('LIFECARE_DATABASE_PORT'),
     }
 }
 
@@ -127,3 +131,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'lifecareapp.User'
