@@ -78,9 +78,9 @@ WSGI_APPLICATION = 'LifecareConnect.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'lifecare',
+        'NAME': 'Lifecare',
         'USER': 'postgres',
-        'PASSWORD': '40Sticks!!',
+        'PASSWORD': 'Anthonynjoroge04*',
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }
