@@ -1,124 +1,189 @@
-<!-- ======= Doctor/Nurse Profile Form ======= -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doctor/Nurse Profile Form</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
-    <style>
-        body {
-            background: linear-gradient(to right, #e3f2fd, #b2ebf2);
-            font-family: 'Poppins', sans-serif;
-        }
-        .form-container {
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            max-width: 800px;
-            margin: auto;
-        }
-        .form-header {
-            text-align: center;
-            font-weight: bold;
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: #333;
-        }
-        .btn-custom {
-            background-color: #4ec4c4;
-            color: white;
-            transition: background-color 0.3s;
-            width: 100%;
-        }
-        .btn-custom:hover {
-            background-color: #3ba3a3;
-        }
-        .form-control {
-            border-radius: 5px;
-            padding-left: 40px;
-        }
-        .input-group-text {
-            background: transparent;
-            border: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Create Doctor Profile | Lifecare Connect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Bootstrap & Icons -->
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+
+  <style>
+    body {
+      background: linear-gradient(to right, #e0f7fa, #e8f5e9);
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .profile-wrapper {
+      margin-top: 120px;
+      display: flex;
+      justify-content: center;
+      padding-bottom: 40px;
+    }
+
+    .profile-card {
+  display: flex;
+  width: 100%;
+  max-width: 1400px;
+  height: 100%; /* allow it to expand based on content */
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  flex-wrap: nowrap; /* prevent wrapping */
+  min-height: 600px; /* ensures logo side gets same height as form */
+}
+
+.form-side {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.image-side {
+  flex: 1;
+  background-color: #d0ece7;
+  display: flex;
+  align-items: stretch; /* stretches child image to match height */
+  justify-content: center;
+  padding: 0;
+}
+
+.image-side img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+    .form-title {
+      color: #00796b;
+      font-weight: bold;
+      font-size: 26px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .btn-blue-green {
+      background-color: #00796b;
+      color: #fff;
+      width: 100%;
+    }
+
+    .btn-blue-green:hover {
+      background-color: #004d40;
+    }
+
+    .form-control:focus {
+      border-color: #00796b;
+      box-shadow: 0 0 0 0.2rem rgba(0,121,107,.25);
+    }
+
+    @media (max-width: 768px) {
+      .profile-card {
+        flex-direction: column;
+      }
+      .form-side, .image-side {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <div class="container d-flex justify-content-center align-items-center vh-100">
-        <div class="form-container">
-            <div class="form-header">Doctor/Nurse Profile</div>
-            <form>
-                <div class="row">
-                    <div class="col-md-6 mb-3 input-group">
-                        <span class="input-group-text"><i class="bi bi-person"></i></span>
-                        <input type="text" class="form-control" id="fullName" placeholder="Full Name" required>
-                    </div>
-                    <div class="col-md-6 mb-3 input-group">
-                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                        <input type="email" class="form-control" id="email" placeholder="Email" required>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3 input-group">
-                        <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                        <input type="tel" class="form-control" id="phone" placeholder="Phone Number" required>
-                    </div>
-                    <div class="col-md-6 mb-3 input-group">
-                        <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                        <input type="text" class="form-control" id="address" placeholder="Address" required>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3 input-group">
-                        <span class="input-group-text"><i class="bi bi-map"></i></span>
-                        <input type="text" class="form-control" id="county" placeholder="County" required>
-                    </div>
-                    <div class="col-md-6 mb-3 input-group">
-                        <span class="input-group-text"><i class="bi bi-calendar"></i></span>
-                        <input type="date" class="form-control" id="dob" required>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="gender" class="form-label">Gender</label>
-                        <select class="form-control" id="gender" required>
-                            <option value="">Select</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6 mb-3 input-group">
-                        <span class="input-group-text"><i class="bi bi-heart-pulse"></i></span>
-                        <input type="text" class="form-control" id="specialization" placeholder="Specialization" required>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3 input-group">
-                        <span class="input-group-text"><i class="bi bi-bar-chart"></i></span>
-                        <input type="number" class="form-control" id="experience" min="0" placeholder="Years of Experience" required>
-                    </div>
-                    <div class="col-md-6 mb-3 input-group">
-                        <span class="input-group-text"><i class="bi bi-clock"></i></span>
-                        <input type="text" class="form-control" id="availability" placeholder="Availability (e.g. Weekdays 9 AM - 5 PM)" required>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label for="certifications" class="form-label">Certifications</label>
-                    <textarea class="form-control" id="certifications" rows="3" required></textarea>
-                </div>
-                <div class="mb-3">
-                    <label for="profilePicture" class="form-label">Upload Profile Picture</label>
-                    <input type="file" class="form-control" id="profilePicture" accept="image/*" required>
-                </div>
-                <div class="mb-3 text-center">
-                    <button type="submit" class="btn btn-custom">Submit</button>
-                </div>
-            </form>
+
+<div class="container profile-wrapper">
+  <div class="profile-card">
+    <!-- Form Side -->
+    <div class="form-side">
+      <h2 class="form-title">Doctor Profile Form</h2>
+      <form method="POST" enctype="multipart/form-data" action="{% url 'doctorform' %}">
+        {% csrf_token %}
+        <div class="row">
+          <!-- Full Name -->
+          <div class="mb-3 col-md-6">
+            <label for="fullname" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="fullname" name="fullname" required>
+          </div>
+
+          <!-- Professional Title -->
+          <div class="mb-3 col-md-6">
+            <label for="title" class="form-label">Professional Title</label>
+            <input type="text" class="form-control" id="title" name="title" required>
+          </div>
+
+          <!-- License Number -->
+          <div class="mb-3 col-md-6">
+            <label for="license" class="form-label">License Number</label>
+            <input type="text" class="form-control" id="license" name="license" required>
+          </div>
+
+          <!-- Qualifications -->
+          <div class="mb-3 col-md-6">
+            <label for="qualifications" class="form-label">Qualifications</label>
+            <textarea class="form-control" id="qualifications" name="qualifications" rows="2" placeholder="e.g. MBChB, MMed in Internal Medicine, BLS Certified"></textarea>
+          </div>
+
+          <!-- Areas of Expertise -->
+          <div class="mb-3 col-md-6">
+            <label for="expertise" class="form-label">Areas of Expertise</label>
+            <textarea class="form-control" id="expertise" name="expertise" rows="2" placeholder="e.g. Pediatrics, Neurology, Geriatric Care"></textarea>
+          </div>
+
+          <!-- Languages Spoken -->
+          <div class="mb-3 col-md-6">
+            <label for="languages" class="form-label">Languages Spoken</label>
+            <textarea class="form-control" id="languages" name="languages" rows="2" placeholder="e.g. English, Kiswahili, French"></textarea>
+          </div>
+
+          <!-- Available Location -->
+          <div class="mb-3 col-md-6">
+            <label for="location" class="form-label">Available Location</label>
+            <input type="text" class="form-control" id="location" name="location" required>
+          </div>
+
+          <!-- Contact -->
+          <div class="mb-3 col-md-6">
+            <label for="contact" class="form-label">Contact (Phone)</label>
+            <input type="tel" class="form-control" id="contact" name="contact" required>
+          </div>
+
+          <!-- Email -->
+          <div class="mb-3 col-md-6">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+          </div>
+
+          <!-- Charge Rates -->
+          <div class="mb-3 col-md-6">
+            <label for="rates" class="form-label">Charge Rates</label>
+            <input type="text" class="form-control" id="rates" name="rates" placeholder="e.g. KES 2,000/hour" required>
+          </div>
+
+          <!-- Profile Picture -->
+          <div class="mb-4 col-md-12">
+            <label for="profilepic" class="form-label">Upload Profile Picture</label>
+            <input class="form-control" type="file" id="profilepic" name="profilepic" accept="image/*">
+          </div>
         </div>
+
+        <button type="submit" class="btn btn-blue-green mt-3">Submit Doctor Profile</button>
+      </form>
     </div>
+
+    <!-- Image Side -->
+    <div class="image-side">
+      <img src="{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}" alt="Lifecare Connect Logo">
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html>
