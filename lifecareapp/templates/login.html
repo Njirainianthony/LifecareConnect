@@ -1,152 +1,171 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-
-  <title>Lifecare Connect</title>
-  <meta content="" name="description">
-  <meta content="" name="keywords">
-
-  {% load static %}
-
-  <!-- Favicons -->
-  <link href="{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}" rel="icon">
-  <link href="{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}" rel="apple-touch-icon">
+  <title>Lifecare Connect | Login</title>
 
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Roboto:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto|Poppins" rel="stylesheet">
 
-  <!-- Vendor CSS Files -->
-  <link href="{% static 'assets/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/animate.css/animate.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/aos/aos.css' %}" rel="stylesheet">
+  <!-- Vendor CSS -->
   <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
   <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
   <link href="{% static 'assets/vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
-
-  <!-- Template Main CSS File -->
   <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
 
-  <!-- =======================================================
-  * Template Name: Medicio
-  * Template URL: https://bootstrapmade.com/medicio-free-bootstrap-theme/
-  * Updated: Mar 17 2024 with Bootstrap v5.3.3
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
-  ======================================================== -->
+  <style>
+    body {
+      background: linear-gradient(to right, #e0f7fa, #e8f5e9);
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .login-wrapper {
+      margin-top: 120px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .login-card {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      max-width: 1000px;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .form-side, .image-side {
+      flex: 1;
+      padding: 40px;
+    }
+
+    .form-side {
+      background: #ffffff;
+    }
+
+    .image-side {
+      background-color: #d0ece7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .image-side img {
+      width: 80%;
+      max-width: 300px;
+    }
+
+    .form-title {
+      color: #00796b;
+      font-weight: bold;
+      font-size: 26px;
+      margin-bottom: 30px;
+    }
+
+    .btn-blue-green {
+      background-color: #00796b;
+      color: #fff;
+      width: 100%;
+    }
+
+    .btn-blue-green:hover {
+      background-color: #004d40;
+    }
+
+    .form-control:focus {
+      border-color: #00796b;
+      box-shadow: 0 0 0 0.2rem rgba(0,121,107,.25);
+    }
+
+    @media (max-width: 768px) {
+      .login-card {
+        flex-direction: column;
+      }
+
+      .image-side {
+        padding: 20px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-  <!-- ======= Top Bar ======= -->
-  <div id="topbar" class="d-flex align-items-center fixed-top">
-    <div class="container d-flex align-items-center justify-content-center justify-content-md-between">
-      <div class="align-items-center d-none d-md-flex">
-        <i class="bi bi-clock"></i> Monday - Saturday, 8AM to 11PM
-      </div>
-      <div class="d-flex align-items-center">
-        <i class="bi bi-phone"></i> Call us now +254 706572440
-      </div>
+<!-- ======= Top Bar ======= -->
+<div id="topbar" class="d-flex align-items-center fixed-top">
+  <div class="container d-flex align-items-center justify-content-center justify-content-md-between">
+    <div class="align-items-center d-none d-md-flex">
+      <i class="bi bi-clock"></i> Monday - Saturday, 8AM to 11PM
+    </div>
+    <div class="d-flex align-items-center">
+      <i class="bi bi-phone"></i> Call us now +254 706572440
     </div>
   </div>
+</div>
 
-  <!-- ======= Header ======= -->
-  <header id="header" class="fixed-top">
-    <div class="container d-flex align-items-center">
-
-      <a href="index.html" class="logo me-auto"><img src="{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}" alt=""></a>
-      <!-- Uncomment below if you prefer to use an image logo -->
-      <!-- <h1 class="logo me-auto"><a href="index.html">Medicio</a></h1> -->
-
-      <nav id="navbar" class="navbar order-last order-lg-0">
-        <ul>
-          <li><a class="nav-link scrollto " href="{% url 'home' %}">Home</a></li>
-          <li><a class="nav-link scrollto" href="{% url 'home' %}">About</a></li>
-          <li><a class="nav-link scrollto" href="{% url 'home' %}">Services</a></li>
-          <li><a class="nav-link scrollto" href="{% url 'home' %}">Departments</a></li>
-          <li><a class="nav-link scrollto" href="{% url 'home' %}">Doctors</a></li>
-          
-          <li><a class="nav-link scrollto" href="{% url 'home' %}">Contact</a></li>
-        </ul>
-        <i class="bi bi-list mobile-nav-toggle"></i>
-      </nav><!-- .navbar -->
-
-      <a href="{% url 'login' %}" class="appointment-btn scrollto"><span class="d-none d-md-inline">Login</span> </a>
-      <a href="{% url 'signup' %}" class="appointment-btn scrollto"><span class="d-none d-md-inline">Sign Up</span></a>
-
-    </div>
-  </header><!-- End Header -->
-  
-  <div class="login-body">    
-    <div class="card mb-3 w-50">
-      <div class="row g-0 d-flex align-items-center">
-        <div class="col-lg-4 d-none d-lg-flex">
-          <img src="{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}" alt="Lifecare Connect"
-            class="resized-image rounded-t-5 rounded-tr-lg-0 rounded-bl-lg-5" />
-        </div>
-        <div class="col-lg-8">
-          <div class="card-body py-5 px-md-5">
-  
-            <form method="post" action="{% url 'login' %}">
-              <!-- Email input -->
-              <div data-mdb-input-init class="form-outline mb-4">
-                <input type="email" id="form2Example1" class="form-control" />
-                <label class="form-label" for="form2Example1">Email address</label>
-              </div>
-
-              <!-- Password input -->
-              <div data-mdb-input-init class="form-outline mb-4">
-                <input type="password" id="form2Example2" class="form-control" />
-                <label class="form-label" for="form2Example2">Password</label>
-              </div>
-
-              <!-- 2 column grid layout for inline styling -->
-              <div class="row mb-4">
-                <div class="col d-flex justify-content-center">
-                  <!-- Checkbox -->
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="form2Example31" checked />
-                    <label class="form-check-label" for="form2Example31"> Remember me </label>
-                  </div>
-                </div>
-  
-                <div class="col">
-                  <!-- Simple link -->
-                  <a href="#!">Forgot password?</a>
-                </div>
-              </div>
-  
-              <!-- Submit button -->
-              <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-blue-green">Login</button>
-  
-            </form>
-  
-          </div>
-        </div>
-      </div>
-    </div>
-  
-  </section>
-  <!-- Section: Design Block -->
-
+<!-- ======= Header ======= -->
+<header id="header" class="fixed-top">
+  <div class="container d-flex align-items-center">
+    <a href="{% url 'home' %}" class="logo me-auto">
+      <img src="{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}" alt="">
+    </a>
+    <nav id="navbar" class="navbar order-last order-lg-0">
+      <ul>
+        <li><a class="nav-link scrollto" href="#hero">Home</a></li>
+        <li><a class="nav-link scrollto" href="#about">About</a></li>
+        <li><a class="nav-link scrollto" href="#services">Services</a></li>
+        <li><a class="nav-link scrollto" href="#departments">Departments</a></li>
+        <li><a class="nav-link scrollto" href="#doctors">Doctors</a></li>
+        <li><a class="nav-link scrollto" href="#contact">Contact</a></li>
+      </ul>
+      <i class="bi bi-list mobile-nav-toggle"></i>
+    </nav>
+    <a href="{% url 'login' %}" class="appointment-btn scrollto"><span class="d-none d-md-inline">Login</span></a>
+    <a href="{% url 'signup' %}" class="appointment-btn scrollto"><span class="d-none d-md-inline">Sign Up</span></a>
   </div>
+</header>
 
- <!-- ======= Footer ======= -->
- <footer id="footer">
+<!-- ======= Login Section ======= -->
+<div class="container login-wrapper">
+  <div class="login-card">
+    <!-- Form Side -->
+    <div class="form-side">
+      <h2 class="form-title text-center">Welcome Back</h2>
+      <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="mb-3 form-check">
+          <input type="checkbox" class="form-check-input" id="rememberMe" checked>
+          <label class="form-check-label" for="rememberMe">Remember me</label>
+        </div>
+        <div class="text-end mb-3">
+          <a href="#">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn btn-blue-green">Login</button>
+      </form>
+    </div>
+
+    <!-- Logo Side -->
+    <div class="image-side">
+      <img src="{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}" alt="Lifecare Connect Logo">
+    </div>
+  </div>
+</div>
+
+<!-- ======= Footer ======= -->
+<footer id="footer">
   <div class="footer-top">
     <div class="container">
       <div class="row">
-
         <div class="col-lg-3 col-md-6">
           <div class="footer-info">
             <h3>Lifecare Connect</h3>
             <p>
-              Nairobi <br>
-              Kenya<br><br>
+              Nairobi<br>Kenya<br><br>
               <strong>Phone:</strong> +254 706572440<br>
               <strong>Email:</strong> info@lifecareconnect.com<br>
             </p>
@@ -159,7 +178,6 @@
             </div>
           </div>
         </div>
-
         <div class="col-lg-2 col-md-6 footer-links">
           <h4>Explore</h4>
           <ul>
@@ -167,7 +185,6 @@
             <li><i class="bx bx-chevron-right"></i> <a href="#">Doctors</a></li>
           </ul>
         </div>
-
         <div class="col-lg-3 col-md-6 footer-links">
           <h4>Legal</h4>
           <ul>
@@ -175,39 +192,26 @@
             <li><i class="bx bx-chevron-right"></i> <a href="#">Privacy Policy</a></li>
           </ul>
         </div>
-
       </div>
     </div>
   </div>
-
-  <div class="container">
+  <div class="container text-center">
     <div class="copyright">
       &copy; Copyright <strong><span>Lifecare Connect</span></strong>. All Rights Reserved
     </div>
     <div class="credits">
-      <!-- All the links in the footer should remain intact. -->
-      <!-- You can delete the links only if you purchased the pro version. -->
-      <!-- Licensing information: https://bootstrapmade.com/license/ -->
-      <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/medicio-free-bootstrap-theme/ -->
       Designed by <a href="https://bootstrapmade.com/">Lifecare Connect</a>
     </div>
   </div>
-</footer><!-- End Footer -->
+</footer>
 
-<div id="preloader"></div>
-<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
-<!-- Vendor JS Files -->
-<script src="{% static 'assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
-<script src="{% static 'assets/vendor/aos/aos.js' %}"></script>
+<!-- Scripts -->
 <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'assets/vendor/aos/aos.js' %}"></script>
 <script src="{% static 'assets/vendor/glightbox/js/glightbox.min.js' %}"></script>
 <script src="{% static 'assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
 <script src="{% static 'assets/vendor/php-email-form/validate.js' %}"></script>
-
-<!-- Template Main JS File -->
 <script src="{% static 'assets/js/main.js' %}"></script>
 
 </body>
-
 </html>

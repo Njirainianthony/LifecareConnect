@@ -1,43 +1,107 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Lifecare Connect | Sign Up</title>
 
-  <title>Lifecare Connect</title>
-  <meta content="" name="description">
-  <meta content="" name="keywords">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto|Poppins" rel="stylesheet">
 
-  {% load static %}
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
 
-  <!-- Favicons -->
+  <!-- Favicon -->
   <link href="{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}" rel="icon">
   <link href="{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}" rel="apple-touch-icon">
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Roboto:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to right, #e0f7fa, #e8f5e9);
+      font-family: 'Poppins', sans-serif;
+    }
 
-  <!-- Vendor CSS Files -->
-  <link href="{% static 'assets/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/animate.css/animate.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/aos/aos.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+    .signup-wrapper {
+      margin-top: 120px;
+      display: flex;
+      justify-content: center;
+    }
 
-  <!-- Template Main CSS File -->
-  <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+    .signup-card {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      max-width: 1000px;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
 
-  <!-- =======================================================
-  * Template Name: Medicio
-  * Template URL: https://bootstrapmade.com/medicio-free-bootstrap-theme/
-  * Updated: Mar 17 2024 with Bootstrap v5.3.3
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
-  ======================================================== -->
+    .form-side, .image-side {
+      flex: 1;
+      padding: 40px;
+    }
+
+    .form-side {
+      background: #ffffff;
+    }
+
+    .image-side {
+      background-color: #d0ece7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .image-side img {
+      width: 80%;
+      max-width: 300px;
+    }
+
+    .form-title {
+      color: #00796b;
+      font-weight: bold;
+      font-size: 26px;
+      margin-bottom: 30px;
+    }
+
+    .btn-blue-green {
+      background-color: #00796b;
+      color: #fff;
+      width: 100%;
+    }
+
+    .btn-blue-green:hover {
+      background-color: #004d40;
+    }
+
+    .form-control:focus {
+      border-color: #00796b;
+      box-shadow: 0 0 0 0.2rem rgba(0,121,107,.25);
+    }
+
+    .social-icons i {
+      font-size: 1.3rem;
+      margin: 0 10px;
+      color: #00796b;
+    }
+
+    @media (max-width: 768px) {
+      .signup-card {
+        flex-direction: column;
+      }
+
+      .image-side {
+        padding: 20px;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -57,11 +121,9 @@
   <!-- ======= Header ======= -->
   <header id="header" class="fixed-top">
     <div class="container d-flex align-items-center">
-
-      <a href="index.html" class="logo me-auto"><img src="{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}" alt=""></a>
-      <!-- Uncomment below if you prefer to use an image logo -->
-      <!-- <h1 class="logo me-auto"><a href="index.html">Medicio</a></h1> -->
-
+      <a href="{% url 'home' %}" class="logo me-auto">
+        <img src="{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}" alt="">
+      </a>
       <nav id="navbar" class="navbar order-last order-lg-0">
         <ul>
           <li><a class="nav-link scrollto " href="#hero">Home</a></li>
@@ -69,107 +131,54 @@
           <li><a class="nav-link scrollto" href="#services">Services</a></li>
           <li><a class="nav-link scrollto" href="#departments">Departments</a></li>
           <li><a class="nav-link scrollto" href="#doctors">Doctors</a></li>
-          
           <li><a class="nav-link scrollto" href="#contact">Contact</a></li>
         </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>
-      </nav><!-- .navbar -->
-
-      <a href="{% url 'login' %}" class="appointment-btn scrollto"><span class="d-none d-md-inline">Login</span> </a>
+      </nav>
+      <a href="{% url 'login' %}" class="appointment-btn scrollto"><span class="d-none d-md-inline">Login</span></a>
       <a href="{% url 'signup' %}" class="appointment-btn scrollto"><span class="d-none d-md-inline">Sign Up</span></a>
-
     </div>
-  </header><!-- End Header -->
+  </header>
+  <!-- End Header -->
 
-  <!-- Jumbotron -->
-  <div class="container py-4 mt-5">
-    <div class="row g-0 align-items-center">
-      <div class="col-lg-6 mb-5 mb-lg-0">
-        <div class="card cascading-right bg-body-tertiary" style="
-            backdrop-filter: blur(30px);
-            ">
-          <div class="card-body p-5 shadow-5 text-center">
-            <h2 class="fw-bold mb-5">Sign up now</h2>
-            <form method="post" action="{% url 'signup' %}">
-              <!-- 2 column grid layout with text inputs for the first and last names -->
-              <div class="row">
-                <div class="col-md-6 mb-4">
-                  <div data-mdb-input-init class="form-outline">
-                    <input type="text" id="form3Example1" class="form-control" />
-                    <label class="form-label" for="form3Example1">First name</label>
-                  </div>
-                </div>
-                <div class="col-md-6 mb-4">
-                  <div data-mdb-input-init class="form-outline">
-                    <input type="text" id="form3Example2" class="form-control" />
-                    <label class="form-label" for="form3Example2">Last name</label>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Email input -->
-              <div data-mdb-input-init class="form-outline mb-4">
-                <input type="email" id="form3Example3" class="form-control" />
-                <label class="form-label" for="form3Example3">Email address</label>
-              </div>
-
-              <!-- Password input -->
-              <div data-mdb-input-init class="form-outline mb-4">
-                <input type="password" id="form3Example4" class="form-control" />
-                <label class="form-label" for="form3Example4">Password</label>
-              </div>
-
-              <!-- Submit button -->
-              <button type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-blue-green">
-                Sign up
-              </button>
-
-              <!-- Register buttons -->
-              <div class="text-center">
-                <p>or sign up with:</p>
-                <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-link btn-floating mx-1">
-                  <i class="fab fa-facebook-f"></i>
-                </button>
-
-                <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-link btn-floating mx-1">
-                  <i class="fab fa-google"></i>
-                </button>
-
-                <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-link btn-floating mx-1">
-                  <i class="fab fa-twitter"></i>
-                </button>
-
-                <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-link btn-floating mx-1">
-                  <i class="fab fa-github"></i>
-                </button>
-              </div>
-            </form>
-          </div>
+  <!-- ======= Signup Section ======= -->
+  <div class="container signup-wrapper">
+    <div class="signup-card">
+      <!-- Form Side -->
+      <div class="form-side">
+        <h2 class="form-title text-center">Sign up now</h2>
+        <form method="POST" action="{% url 'signup' %}">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" class="btn btn-blue-green mt-2">Create Account</button>
+        </form>
+        <hr class="my-4">
+        <p class="text-center">or sign up with:</p>
+        <div class="text-center social-icons">
+          <i class="bi bi-facebook"></i>
+          <i class="bi bi-google"></i>
+          <i class="bi bi-twitter"></i>
+          <i class="bi bi-github"></i>
         </div>
       </div>
 
-      <div class="col-lg-6 mb-5 mb-lg-0">
-        <img src="{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}" class="w-100 rounded-4 shadow-4"
-          alt="" />
+      <!-- Logo Side -->
+      <div class="image-side">
+        <img src="{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}" alt="Lifecare Connect Logo">
       </div>
     </div>
   </div>
-  <!-- Jumbotron -->
-</section>
-<!-- Section: Design Block -->
 
- <!-- ======= Footer ======= -->
- <footer id="footer">
+  <!-- ======= Footer ======= -->
+  <footer id="footer">
     <div class="footer-top">
       <div class="container">
         <div class="row">
-
           <div class="col-lg-3 col-md-6">
             <div class="footer-info">
               <h3>Lifecare Connect</h3>
               <p>
-                Nairobi <br>
-                Kenya<br><br>
+                Nairobi<br>Kenya<br><br>
                 <strong>Phone:</strong> +254 706572440<br>
                 <strong>Email:</strong> info@lifecareconnect.com<br>
               </p>
@@ -182,7 +191,6 @@
               </div>
             </div>
           </div>
-
           <div class="col-lg-2 col-md-6 footer-links">
             <h4>Explore</h4>
             <ul>
@@ -190,7 +198,6 @@
               <li><i class="bx bx-chevron-right"></i> <a href="#">Doctors</a></li>
             </ul>
           </div>
-
           <div class="col-lg-3 col-md-6 footer-links">
             <h4>Legal</h4>
             <ul>
@@ -198,39 +205,27 @@
               <li><i class="bx bx-chevron-right"></i> <a href="#">Privacy Policy</a></li>
             </ul>
           </div>
-
         </div>
       </div>
     </div>
 
-    <div class="container">
+    <div class="container text-center">
       <div class="copyright">
         &copy; Copyright <strong><span>Lifecare Connect</span></strong>. All Rights Reserved
       </div>
       <div class="credits">
-        <!-- All the links in the footer should remain intact. -->
-        <!-- You can delete the links only if you purchased the pro version. -->
-        <!-- Licensing information: https://bootstrapmade.com/license/ -->
-        <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/medicio-free-bootstrap-theme/ -->
         Designed by <a href="https://bootstrapmade.com/">Lifecare Connect</a>
       </div>
     </div>
-  </footer><!-- End Footer -->
+  </footer>
 
-  <div id="preloader"></div>
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
-  <!-- Vendor JS Files -->
-  <script src="{% static 'assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
-  <script src="{% static 'assets/vendor/aos/aos.js' %}"></script>
+  <!-- Scripts -->
   <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/aos/aos.js' %}"></script>
   <script src="{% static 'assets/vendor/glightbox/js/glightbox.min.js' %}"></script>
   <script src="{% static 'assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
   <script src="{% static 'assets/vendor/php-email-form/validate.js' %}"></script>
-
-  <!-- Template Main JS File -->
   <script src="{% static 'assets/js/main.js' %}"></script>
 
 </body>
-
 </html>
