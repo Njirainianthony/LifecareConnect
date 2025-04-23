@@ -15,7 +15,10 @@ from dotenv import load_dotenv
 
 import os
 
-load_dotenv()
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(dotenv_path=BASE_DIR / ".env")
+print("Loaded DB password:", os.getenv("LIFECARE_DATABASE_PASSWORD"))
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
