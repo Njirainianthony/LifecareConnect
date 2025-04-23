@@ -1,0 +1,81 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Doctor Dashboard | Lifecare Connect</title>
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+  <style>
+    body {
+      background: #f1f7f6;
+      font-family: 'Poppins', sans-serif;
+      margin-top: 100px;
+    }
+    .profile-card {
+      max-width: 1000px;
+      margin: auto;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+    }
+    .profile-img {
+      width: 100%;
+      height: 100%;
+      max-height: 250px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    .profile-title {
+      color: #00796b;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-primary" href="#">Lifecare Connect</a>
+    <div class="collapse navbar-collapse justify-content-end">
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link text-success fw-semibold" href="#">Tasks</a></li>
+        <li class="nav-item"><a class="nav-link text-warning fw-semibold" href="{% url 'edit_doctor_profile' %}">Edit Profile</a></li>
+        <li class="nav-item"><a class="nav-link text-danger fw-semibold" href="{% url 'logout' %}">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="profile-card row g-4">
+    <div class="col-md-4">
+      {% if profile.profile_pic %}
+        <img src="{{ profile.profile_pic.url }}" class="profile-img" alt="Profile Photo">
+      {% else %}
+        <img src="{% static 'assets/img/default-profile.png' %}" class="profile-img" alt="No Photo">
+      {% endif %}
+    </div>
+    <div class="col-md-8">
+      <h3 class="profile-title">{{ profile.full_name }}</h3>
+      <p><strong>Professional Title:</strong> {{ profile.professional_title }}</p>
+      <p><strong>License Number:</strong> {{ profile.license_number }}</p>
+      <p><strong>Email:</strong> {{ profile.email }}</p>
+      <p><strong>Contact:</strong> {{ profile.contact }}</p>
+      <p><strong>Available Location:</strong> {{ profile.available_location }}</p>
+      <p><strong>Charge Rates:</strong> {{ profile.charge_rates }}</p>
+      <p><strong>Languages:</strong> {{ profile.languages }}</p>
+      <p><strong>Expertise:</strong> {{ profile.expertise }}</p>
+      <p><strong>Qualifications:</strong> {{ profile.qualifications }}</p>
+    </div>
+  </div>
+
+  <hr class="my-5">
+  <h5 class="text-muted text-center">Upcoming Tasks</h5>
+  <p class="text-center">Coming soon...</p>
+</div>
+
+<script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

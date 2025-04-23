@@ -1,6 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from .forms import SignupForm, LoginForm
+from .models import PatientProfile, DoctorProfile
+from .forms import PatientProfileForm, DoctorProfileForm
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 # Create your views here.
 def index(request):
@@ -37,11 +41,99 @@ def user_logout(request):
     logout(request)
     return redirect('login')
 
+@login_required
 def add_profile(request):
     return render(request, 'addprofile.html')
 
-def patient_form(request):
-    return render(request, 'patientform.html')
 
+# --- Patient Form View ---
+@login_required
+def patient_form(request):
+    if PatientProfile.objects.filter(user=request.user).exists():
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        form = PatientProfileForm(request.POST, request.FILES)
+        if form.is_valid():
+            profile = form.save(commit=False)
+            profile.user = request.user
+            profile.save()
+            return redirect('dashboard')
+    else:
+        form = PatientProfileForm()
+
+    return render(request, 'patientform.html', {'form': form})
+
+
+# --- Doctor Form View ---
+@login_required
 def doctor_form(request):
-    return render(request, 'doctorform.html')
+    if DoctorProfile.objects.filter(user=request.user).exists():
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        form = DoctorProfileForm(request.POST, request.FILES)
+        if form.is_valid():
+            profile = form.save(commit=False)
+            profile.user = request.user
+            profile.save()
+            return redirect('dashboard')
+    else:
+        form = DoctorProfileForm()
+
+    return render(request, 'doctorform.html', {'form': form})
+
+
+# --- Dashboard View ---
+@login_required
+def dashboard(request):
+    try:
+        profile = PatientProfile.objects.get(user=request.user)
+        return render(request, 'dashboard_patient.html', {'profile': profile})
+    except PatientProfile.DoesNotExist:
+        try:
+            profile = DoctorProfile.objects.get(user=request.user)
+            return render(request, 'dashboard_doctor.html', {'profile': profile})
+        except DoctorProfile.DoesNotExist:
+            return redirect('add_profile')
+        
+
+@login_required
+def edit_patient_profile(request):
+    try:
+        profile = PatientProfile.objects.get(user=request.user)
+    except PatientProfile.DoesNotExist:
+        return redirect('patientform')
+
+    if request.method == 'POST':
+        form = PatientProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Patient profile updated successfully.")
+            return redirect('dashboard')
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = PatientProfileForm(instance=profile)
+
+    return render(request, 'edit_patient_profile.html', {'form': form})
+
+
+def edit_doctor_profile(request):
+    try:
+        profile = DoctorProfile.objects.get(user=request.user)
+    except DoctorProfile.DoesNotExist:
+        return redirect('doctorform')
+
+    if request.method == 'POST':
+        form = DoctorProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Doctor profile updated successfully.")
+            return redirect('dashboard')
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = DoctorProfileForm(instance=profile)
+
+    return render(request, 'edit_doctor_profile.html', {'form': form})
