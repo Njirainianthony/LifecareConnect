@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from .forms import SignupForm, LoginForm
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from .forms import LoginForm
 
 # Create your views here.
 def index(request):
@@ -13,15 +15,23 @@ def user_login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            user = authenticate(request, username=username, password=password)
-            if user:
-                login(request, user)
-                return redirect('addprofile')
+            cd = form.cleaned_data
+            user = authenticate(
+                request,
+                username=cd['username'],
+                password=cd['password']
+            )
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return HttpResponse('Authenticated successfully')
+                else:
+                    return HttpResponse('Disabled Account')
+            else:
+                return HttpResponse('Invalid Login')
     else:
         form = LoginForm()
-    return render(request, 'login.html', {'form' : form})
+    return render(request, 'login.html', {'form':form})
 
 def user_signup(request):
     if request.method == 'POST':
@@ -32,6 +42,14 @@ def user_signup(request):
     else:
         form = SignupForm()
     return render(request, 'signup.html', {'form' : form})
+
+@login_required
+def dashboard(request):
+    return render(
+        request,
+        'dashboard.html',
+        {'section': 'dashboard'}
+    )
 
 def user_logout(request):
     logout(request)
