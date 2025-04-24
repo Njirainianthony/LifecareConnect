@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 #from .models import PatientProfile, DoctorProfile
-#from .forms import PatientProfileForm, DoctorProfileForm
+from .forms import UserRegistrationForm, PatientProfileForm, DoctorProfileForm
 from django.contrib import messages
 
 # Create your views here.
@@ -13,37 +13,30 @@ def index(request):
 def inner(request):
     return render(request, 'inner-page.html')
 
-def user_login(request):
+def signup(request):
     if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            cd = form.cleaned_data
-            user = authenticate(
-                request,
-                username=cd['username'],
-                password=cd['password']
+        user_form = UserRegistrationForm(request.POST)
+        if user_form.is_valid():
+            #Create a new user object but avoid saving it yet
+            new_user = user_form.save(commit=False)
+            #Set the chosen password
+            new_user.set_password(
+                user_form.cleaned_data['password']
             )
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    return HttpResponse('Authenticated successfully')
-                else:
-                    return HttpResponse('Disabled Account')
-            else:
-                return HttpResponse('Invalid Login')
+            #Save the user object
+            new_user.save()
+            return render(
+                request,
+                'signup_done.html',
+                {'new_user': new_user}
+            )
     else:
-        form = LoginForm()
-    return render(request, 'login.html', {'form':form})
-
-def user_signup(request):
-    if request.method == 'POST':
-        form = SignupForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('login')
-    else:
-        form = SignupForm()
-    return render(request, 'signup.html', {'form' : form})
+        user_form = UserRegistrationForm()
+        return render(
+            request,
+            'signup.html',
+            {'user_form': user_form}
+        )
 
 @login_required
 def dashboard(request):

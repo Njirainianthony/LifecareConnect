@@ -1880,33 +1880,83 @@ section {
 
 /* Signup Page */
 .signup-body {
-  background: url("{% static 'assets/img/doctors/download.jpg' %}") no-repeat center center/cover;
+  background: linear-gradient(to right, #e0f7fa, #e8f5e9);
+  font-family: 'Poppins', sans-serif;
+}
+
+.signup-wrapper {
+  margin-top: 120px;
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 90px); /* Subtract header height */
-  margin: 0;
-  padding-top: 90px; /* Add padding equal to approximate header height */
 }
 
-/* Sign-Up Container */
-.signup-container {
-  background: #ffffff;
+.signup-card {
+  display: flex;
+  flex-direction: row;
   width: 100%;
-  max-width: 400px;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  margin: 20px; /* Add some margin for mobile responsiveness */
+  max-width: 1000px;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
-.cascading-right {
-  margin-right: -50px;
+.form-side, .image-side {
+  flex: 1;
+  padding: 40px;
 }
 
-@media (max-width: 991.98px) {
-  .cascading-right {
-    margin-right: 0;
+.form-side {
+  background: #ffffff;
+}
+
+.image-side {
+  background-color: #d0ece7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-side img {
+  width: 80%;
+  max-width: 300px;
+}
+
+.form-title {
+  color: #00796b;
+  font-weight: bold;
+  font-size: 26px;
+  margin-bottom: 30px;
+}
+
+.btn-blue-green {
+  background-color: #00796b;
+  color: #fff;
+  width: 100%;
+}
+
+.btn-blue-green:hover {
+  background-color: #004d40;
+}
+
+.form-control:focus {
+  border-color: #00796b;
+  box-shadow: 0 0 0 0.2rem rgba(0,121,107,.25);
+}
+
+.social-icons i {
+  font-size: 1.3rem;
+  margin: 0 10px;
+  color: #00796b;
+}
+
+@media (max-width: 768px) {
+  .signup-card {
+    flex-direction: column;
+  }
+
+  .image-side {
+    padding: 20px;
   }
 }
 
