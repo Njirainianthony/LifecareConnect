@@ -5,7 +5,7 @@ from django.contrib.auth.base_user import BaseUserManager
 
 
 # Create your models here.
-
+"""
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -27,9 +27,11 @@ class UserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
 
         return self.create_user(email, password, **extra_fields)
+"""
 
+"""
 class User(AbstractUser):
-    name = models.CharField(max_length=255)
+   name = models.CharField(max_length=255)
     email = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=255)
     username = None
@@ -38,7 +40,9 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
     objects = UserManager()
+"""
 
+"""
 
 class PatientProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -58,6 +62,10 @@ class PatientProfile(models.Model):
     def __str__(self):
         return f"{self.full_name} - Patient"
 
+"""
+
+"""
+
 class DoctorProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=100)
@@ -75,6 +83,6 @@ class DoctorProfile(models.Model):
     def __str__(self):
         return f"{self.full_name} - Doctor"
     
-
+"""
     
 

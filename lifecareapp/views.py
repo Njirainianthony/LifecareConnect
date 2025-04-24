@@ -2,11 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from .forms import LoginForm
-from .forms import SignupForm, LoginForm
-from .models import PatientProfile, DoctorProfile
-from .forms import PatientProfileForm, DoctorProfileForm
-from django.contrib.auth.decorators import login_required
+#from .models import PatientProfile, DoctorProfile
+#from .forms import PatientProfileForm, DoctorProfileForm
 from django.contrib import messages
 
 # Create your views here.
@@ -52,7 +49,7 @@ def user_signup(request):
 def dashboard(request):
     return render(
         request,
-        'dashboard.html',
+        'dashboard_patient.html',
         {'section': 'dashboard'}
     )
 
@@ -60,6 +57,7 @@ def user_logout(request):
     logout(request)
     return redirect('login')
 
+"""
 @login_required
 def add_profile(request):
     return render(request, 'addprofile.html')
@@ -156,3 +154,5 @@ def edit_doctor_profile(request):
         form = DoctorProfileForm(instance=profile)
 
     return render(request, 'edit_doctor_profile.html', {'form': form})
+
+"""

@@ -25,11 +25,11 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('signup/', views.user_signup, name='signup'),
-    path('addprofile/', views.add_profile, name='add_profile'),
-    path('patientform/', views.patient_form, name='patientform'),
-    path('doctorform/', views.doctor_form, name='doctorform'),
-    path('dashboard/', views.dashboard, name='dashboard'),
-    path('edit-patient-profile/', views.edit_patient_profile, name='edit_patient_profile'),
-    path('edit-doctor-profile/', views.edit_doctor_profile, name='edit_doctor_profile'),
+    #path('addprofile/', views.add_profile, name='add_profile'),
+    #path('patientform/', views.patient_form, name='patientform'),
+    #path('doctorform/', views.doctor_form, name='doctorform'),
+    #path('dashboard/', views.dashboard, name='dashboard'),
+    #path('edit-patient-profile/', views.edit_patient_profile, name='edit_patient_profile'),
+    #path('edit-doctor-profile/', views.edit_doctor_profile, name='edit_doctor_profile'),
 
 ]

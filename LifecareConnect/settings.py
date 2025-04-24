@@ -15,8 +15,7 @@ from dotenv import load_dotenv
 
 import os
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(dotenv_path=BASE_DIR / ".env")
+load_dotenv()
 print("Loaded DB password:", os.getenv("LIFECARE_DATABASE_PASSWORD"))
 
 
