@@ -1,3 +1,4 @@
+<!-- START OF doctorform.html -->
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -6,9 +7,7 @@
   <title>Create Doctor Profile | Lifecare Connect</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Bootstrap & Icons -->
   <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
   <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
 
   <style>
@@ -25,41 +24,37 @@
     }
 
     .profile-card {
-  display: flex;
-  width: 100%;
-  max-width: 1400px;
-  height: 100%; /* allow it to expand based on content */
-  background: #fff;
-  border-radius: 15px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  flex-wrap: nowrap; /* prevent wrapping */
-  min-height: 600px; /* ensures logo side gets same height as form */
-}
+      display: flex;
+      width: 100%;
+      max-width: 1400px;
+      min-height: 600px;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      flex-wrap: nowrap;
+    }
 
-.form-side {
-  flex: 1;
-  padding: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
+    .form-side {
+      flex: 1;
+      padding: 40px;
+    }
 
-.image-side {
-  flex: 1;
-  background-color: #d0ece7;
-  display: flex;
-  align-items: stretch; /* stretches child image to match height */
-  justify-content: center;
-  padding: 0;
-}
+    .image-side {
+      flex: 1;
+      background-color: #d0ece7;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 0;
+    }
 
-.image-side img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-}
+    .image-side img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
 
     .form-title {
       color: #00796b;
@@ -88,13 +83,13 @@
       .profile-card {
         flex-direction: column;
       }
+
       .form-side, .image-side {
         flex: 1 1 100%;
       }
     }
   </style>
 </head>
-
 <body>
 
 <div class="container profile-wrapper">
@@ -105,74 +100,53 @@
       <form method="POST" enctype="multipart/form-data" action="{% url 'doctorform' %}">
         {% csrf_token %}
         <div class="row">
-          <!-- Full Name -->
           <div class="mb-3 col-md-6">
-            <label for="fullname" class="form-label">Full Name</label>
-            <input type="text" class="form-control" id="fullname" name="fullname" required>
+            <label for="full_name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="full_name" name="full_name" required>
           </div>
-
-          <!-- Professional Title -->
           <div class="mb-3 col-md-6">
-            <label for="title" class="form-label">Professional Title</label>
-            <input type="text" class="form-control" id="title" name="title" required>
+            <label for="professional_title" class="form-label">Professional Title</label>
+            <input type="text" class="form-control" id="professional_title" name="professional_title" required>
           </div>
-
-          <!-- License Number -->
           <div class="mb-3 col-md-6">
-            <label for="license" class="form-label">License Number</label>
-            <input type="text" class="form-control" id="license" name="license" required>
+            <label for="license_number" class="form-label">License Number</label>
+            <input type="text" class="form-control" id="license_number" name="license_number" required>
           </div>
-
-          <!-- Qualifications -->
           <div class="mb-3 col-md-6">
             <label for="qualifications" class="form-label">Qualifications</label>
-            <textarea class="form-control" id="qualifications" name="qualifications" rows="2" placeholder="e.g. MBChB, MMed in Internal Medicine, BLS Certified"></textarea>
+            <textarea class="form-control" id="qualifications" name="qualifications" rows="2"></textarea>
           </div>
-
-          <!-- Areas of Expertise -->
           <div class="mb-3 col-md-6">
             <label for="expertise" class="form-label">Areas of Expertise</label>
-            <textarea class="form-control" id="expertise" name="expertise" rows="2" placeholder="e.g. Pediatrics, Neurology, Geriatric Care"></textarea>
+            <textarea class="form-control" id="expertise" name="expertise" rows="2"></textarea>
           </div>
-
-          <!-- Languages Spoken -->
           <div class="mb-3 col-md-6">
             <label for="languages" class="form-label">Languages Spoken</label>
-            <textarea class="form-control" id="languages" name="languages" rows="2" placeholder="e.g. English, Kiswahili, French"></textarea>
+            <textarea class="form-control" id="languages" name="languages" rows="2"></textarea>
           </div>
-
-          <!-- Available Location -->
           <div class="mb-3 col-md-6">
-            <label for="location" class="form-label">Available Location</label>
-            <input type="text" class="form-control" id="location" name="location" required>
+            <label for="available_location" class="form-label">Available Location</label>
+            <input type="text" class="form-control" id="available_location" name="available_location" required>
           </div>
-
-          <!-- Contact -->
           <div class="mb-3 col-md-6">
-            <label for="contact" class="form-label">Contact (Phone)</label>
-            <input type="tel" class="form-control" id="contact" name="contact" required>
+            <label for="contact" class="form-label">Contact</label>
+            <input type="text" class="form-control" id="contact" name="contact" required>
           </div>
-
-          <!-- Email -->
           <div class="mb-3 col-md-6">
-            <label for="email" class="form-label">Email Address</label>
+            <label for="email" class="form-label">Email</label>
             <input type="email" class="form-control" id="email" name="email" required>
           </div>
-
-          <!-- Charge Rates -->
           <div class="mb-3 col-md-6">
-            <label for="rates" class="form-label">Charge Rates</label>
-            <input type="text" class="form-control" id="rates" name="rates" placeholder="e.g. KES 2,000/hour" required>
+            <label for="charge_rates" class="form-label">Charge Rates</label>
+            <input type="text" class="form-control" id="charge_rates" name="charge_rates">
           </div>
-
-          <!-- Profile Picture -->
-          <div class="mb-4 col-md-12">
-            <label for="profilepic" class="form-label">Upload Profile Picture</label>
-            <input class="form-control" type="file" id="profilepic" name="profilepic" accept="image/*">
+          <div class="mb-4 col-md-6">
+            <label for="profile_pic" class="form-label">Upload Profile Picture</label>
+            <input class="form-control" type="file" id="profile_pic" name="profile_pic" accept="image/*">
           </div>
         </div>
 
-        <button type="submit" class="btn btn-blue-green mt-3">Submit Doctor Profile</button>
+        <button type="submit" class="btn btn-blue-green mt-3">Submit Profile</button>
       </form>
     </div>
 
@@ -183,7 +157,7 @@
   </div>
 </div>
 
-<!-- Scripts -->
 <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html>
+<!-- END -->
