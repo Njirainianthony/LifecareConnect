@@ -35,6 +35,7 @@
     </div>
     <div class="col-md-8">
       <h3 class="profile-title">{{ profile.full_name }}</h3>
+      <p>Welcome to your dashboard. You can <a href="{% url 'edit' %}">edit your profile</a> or <a href="{% url 'password_change' %}">change your password</a>.</p>
       <p><strong>Professional Title:</strong> {{ profile.professional_title }}</p>
       <p><strong>License Number:</strong> {{ profile.license_number }}</p>
       <p><strong>Email:</strong> {{ profile.email }}</p>
