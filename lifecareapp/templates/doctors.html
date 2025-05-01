@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block body %}
+
+ <!-- ======= Doctors/Nurses Section ======= -->
+ <section id="doctors" class="doctors section-bg">
+    <div class="container" data-aos="fade-up">
+      <div class="section-title">
+        <h2>Doctors & Nurses</h2>
+        <p>Search through our wide range of doctors and nurses by name, location or specialization to find the best professional for your needs.</p>
+      </div>
+  
+      <!-- Search Bar -->
+      <div class="search-bar mb-4 d-flex">
+        <input type="text" class="form-control w-75" placeholder="Search by Name, Location, or Specialization" id="searchQuery">
+        <button class="btn" style="background-color: #4ec4c4; color: white; margin-left: 10px;">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+  
+      <div class="row" id="doctorsList">
+        <div class="col-lg-3 col-md-6 d-flex align-items-stretch">
+          <div class="member" data-aos="fade-up" data-aos-delay="100">
+            <div class="member-img">
+              <img src="{% static 'assets/img/doctors/doctors-1.jpg' %}" class="img-fluid" alt="">
+              <div class="social">
+                <a href=""><i class="bi bi-twitter"></i></a>
+                <a href=""><i class="bi bi-facebook"></i></a>
+                <a href=""><i class="bi bi-instagram"></i></a>
+                <a href=""><i class="bi bi-linkedin"></i></a>
+              </div>
+            </div>
+            <div class="member-info">
+              <h4>Walter White</h4>
+              <span>Chief Medical Officer</span>
+              <div class="d-flex justify-content-center mt-2">
+                <button class="btn" style="background-color: #4ec4c4; color: white; margin-right: 20px;">View Profile</button>
+                <button class="btn" style="background-color: #4ec4c4; color: white;">Book Appointment</button>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <div class="col-lg-3 col-md-6 d-flex align-items-stretch">
+          <div class="member" data-aos="fade-up" data-aos-delay="200">
+            <div class="member-img">
+              <img src="{% static 'assets/img/doctors/doctors-2.jpg' %}" class="img-fluid" alt="">
+              <div class="social">
+                <a href=""><i class="bi bi-twitter"></i></a>
+                <a href=""><i class="bi bi-facebook"></i></a>
+                <a href=""><i class="bi bi-instagram"></i></a>
+                <a href=""><i class="bi bi-linkedin"></i></a>
+              </div>
+            </div>
+            <div class="member-info">
+              <h4>Sarah Jhonson</h4>
+              <span>Anesthesiologist</span>
+              <div class="d-flex justify-content-center mt-2">
+                <button class="btn" style="background-color: #4ec4c4; color: white; margin-right: 20px;">View Profile</button>
+                <button class="btn" style="background-color: #4ec4c4; color: white;">Book Appointment</button>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <div class="col-lg-3 col-md-6 d-flex align-items-stretch">
+          <div class="member" data-aos="fade-up" data-aos-delay="300">
+            <div class="member-img">
+              <img src="{% static 'assets/img/doctors/doctors-3.jpg' %}" class="img-fluid" alt="">
+              <div class="social">
+                <a href=""><i class="bi bi-twitter"></i></a>
+                <a href=""><i class="bi bi-facebook"></i></a>
+                <a href=""><i class="bi bi-instagram"></i></a>
+                <a href=""><i class="bi bi-linkedin"></i></a>
+              </div>
+            </div>
+            <div class="member-info">
+              <h4>William Anderson</h4>
+              <span>Cardiology</span>
+              <div class="d-flex justify-content-center mt-2">
+                <button class="btn" style="background-color: #4ec4c4; color: white; margin-right: 20px;">View Profile</button>
+                <button class="btn" style="background-color: #4ec4c4; color: white;">Book Appointment</button>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <div class="col-lg-3 col-md-6 d-flex align-items-stretch">
+          <div class="member" data-aos="fade-up" data-aos-delay="400">
+            <div class="member-img">
+              <img src="{% static 'assets/img/doctors/doctors-4.jpg' %}" class="img-fluid" alt="">
+              <div class="social">
+                <a href=""><i class="bi bi-twitter"></i></a>
+                <a href=""><i class="bi bi-facebook"></i></a>
+                <a href=""><i class="bi bi-instagram"></i></a>
+                <a href=""><i class="bi bi-linkedin"></i></a>
+              </div>
+            </div>
+            <div class="member-info">
+              <h4>Amanda Jepson</h4>
+              <span>Neurosurgeon</span>
+              <div class="d-flex justify-content-center mt-2">
+                <button class="btn" style="background-color: #4ec4c4; color: white; margin-right: 20px;">View Profile</button>
+                <button class="btn" style="background-color: #4ec4c4; color: white;">Book Appointment</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% endblock %}

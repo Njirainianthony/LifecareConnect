@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block body %}
+
+<!-- ======= About Us Section ======= -->
+<section id="about" class="about">
+    <div class="container" data-aos="fade-up">
+
+      <div class="section-title">
+        <h2>About Us</h2>
+        <p>LifeCare Connect is a digital platform designed to address the critical need for reliable and professional homecare services.
+          By connecting families with registered nurses, the platform ensures personalized care for clients while offering nurses flexible earning opportunities.
+          Built on a commission-based revenue model, LifeCare Connect will revolutionize homecare delivery by integrating technology, trust and convenience.</p>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-6" data-aos="fade-right">
+          <img src="{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}" class="img-fluid" alt="">
+        </div>
+        <div class="col-lg-6 pt-4 pt-lg-0 content" data-aos="fade-left">
+          <h3>Your trusted partner in home healthcare management.</h3>
+          <p class="fst-italic">
+            We provide personalized medical, physical and emotional support to individuals in their own homes which encompasses a wide range of activities tailored to the specific needs of the person. This looks like:
+          </p>
+          <ul>
+            <li><i class="bi bi-check-circle"></i> Personalized health monitoring.</li>
+            <li><i class="bi bi-check-circle"></i> Physical therapy and rehabilitation.</li>
+            <li><i class="bi bi-check-circle"></i> Wound care and special medical needs.</li>
+            <li><i class="bi bi-check-circle"></i> Palliative or end-of-life care.</li>
+            <li><i class="bi bi-check-circle"></i> Companionship and emotional support.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section><!-- End About Us Section -->
+
+  {% endblock %}

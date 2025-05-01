@@ -21,6 +21,11 @@ from . import views
 urlpatterns = [
     path('', views.index, name='home'),
     path('inner/', views.inner, name='inner'),
+    path('about/', views.about, name='about'),
+    path('services/', views.services, name='services'),
+    path('departments/', views.departments, name='departments'),
+    path('doctors/', views.doctors, name='doctors'),
+    path('contact/', views.contact, name='contact'),
     #path('login/', auth_views.LoginView.as_view(), name='login'),
     #path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     #path('password-change/', auth_views.PasswordChangeView.as_view(), name='password_change'),

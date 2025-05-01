@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block body %}
+
+ <!-- ======= Departments Section ======= -->
+ <section id="departments" class="departments">
+    <div class="container" data-aos="fade-up">
+
+      <div class="section-title">
+        <h2>Departments</h2>
+        <p>💙 Our homecare services are divided into specialized departments to ensure the highest level of care for every client. Whether you need elderly support, post-surgery recovery, chronic disease management, or maternity care, our dedicated professionals are here to help. Explore our departments and find the right care for you or your loved ones.</p>
+      </div>
+
+      <div class="row" data-aos="fade-up" data-aos-delay="100">
+        <div class="col-lg-4 mb-5 mb-lg-0">
+          <ul class="nav nav-tabs flex-column">
+            <li class="nav-item">
+              <a class="nav-link active show" data-bs-toggle="tab" data-bs-target="#tab-1">
+                <h4>Geriatric Care Department 👵🏽🧑‍⚕️</h4>
+                <p>Specializing in elderly care, dementia support, and daily living assistance</p>
+              </a>
+            </li>
+            <li class="nav-item mt-2">
+              <a class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-2">
+                <h4> Post-Surgery & Rehabilitation Department 🏥💊</h4>
+                <p>Focused on recovery care, wound management, and physiotherapy for post-surgery patients.</p>
+              </a>
+            </li>
+            <li class="nav-item mt-2">
+              <a class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-3">
+                <h4>Chronic Disease Management Department 🩺💙</h4>
+                <p>Providing long-term support for conditions like diabetes, hypertension, and arthritis.</p>
+              </a>
+            </li>
+            <li class="nav-item mt-2">
+              <a class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-4">
+                <h4>Emergency & Urgent Care Department 🚑⚡</h4>
+                <p>Providing rapid-response nursing care for medical emergencies at home.</p>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="col-lg-8">
+          <div class="tab-content">
+            <div class="tab-pane active show" id="tab-1">
+              <h3>Geriatric Care Department 👵🏽🧑‍⚕️</h3>
+              <p class="fst-italic">Specializing in elderly care, dementia support, and daily living assistance.</p>
+              <img src="{% static 'assets/img/Geriatric-department.jpg' %}" alt="" class="img-fluid">
+              <p>As people age, they require more attention, companionship, and specialized care. Our Geriatric Care Department is dedicated to providing seniors with professional home-based support, including help with daily activities, mobility assistance, medication management, and emotional well-being. We focus on enhancing the quality of life for elderly individuals while ensuring they maintain their independence and dignity.</p>
+            </div>
+            <div class="tab-pane" id="tab-2">
+              <h3> Post-Surgery & Rehabilitation Department 🏥💊</h3>
+              <p class="fst-italic">Focused on recovery care, wound management, and physiotherapy for post-surgery patients</p>
+              <img src="{% static 'assets/img/post-surgery-department.jpg' %}" alt="" class="img-fluid">
+              <p>Recovering from surgery requires expert care to prevent complications and promote healing. Our Post-Surgery & Rehabilitation Department provides personalized care plans that include wound care, medication administration, physical therapy, and pain management. Whether recovering from major surgery or a minor procedure, our trained professionals ensure a smooth and comfortable healing process at home.</p>
+            </div>
+            <div class="tab-pane" id="tab-3">
+              <h3>Chronic Disease Management Department 🩺💙</h3>
+              <p class="fst-italic">Providing long-term support for conditions like diabetes, hypertension, and arthritis.</p>
+              <img src="{% static 'assets/img/chronic-department.jpg' %}" alt="" class="img-fluid">
+              <p>Managing chronic illnesses can be challenging, but you don’t have to do it alone. Our Chronic Disease Management Department offers continuous monitoring and assistance for individuals with conditions such as diabetes, hypertension, heart disease, and arthritis. Our caregivers help with medication adherence, lifestyle adjustments, and regular health check-ups to prevent complications and improve overall well-being.</p>
+            </div>
+            <div class="tab-pane" id="tab-4">
+              <h3> Emergency & Urgent Care Department 🚑⚡</h3>
+              <p class="fst-italic">Providing rapid-response nursing care for medical emergencies at home.</p>
+              <img src="{% static 'assets/img/emergency1.avif' %}" alt="" class="img-fluid">
+              <p>Medical emergencies require immediate attention, and our Emergency & Urgent Care Department ensures that help is always within reach. Whether it’s a sudden health crisis, an accident at home, or an urgent need for medical support, our professional caregivers respond quickly to provide life-saving care and stabilization until further medical help is available.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section><!-- End Departments Section -->
+
+  {% endblock %}

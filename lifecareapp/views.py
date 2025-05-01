@@ -13,6 +13,21 @@ def index(request):
 def inner(request):
     return render(request, 'inner-page.html')
 
+def about(request):
+    return render(request, 'about.html')
+
+def services(request):
+    return render(request, 'services.html')
+
+def departments(request):
+    return render(request, 'departments.html')
+
+def doctors(request):
+    return render(request, 'doctors.html')
+
+def contact(request):
+    return render(request, 'contact.html')
+
 def signup(request):
     if request.method == 'POST':
         user_form = UserRegistrationForm(request.POST)

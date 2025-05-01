@@ -13,15 +13,50 @@
 
   <style>
     body {
-      background: linear-gradient(to right, #e0f7fa, #e8f5e9);
       font-family: 'Poppins', sans-serif;
+      background: url("{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}") no-repeat center top;
+      background-size: cover;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.78); /* Soft white overlay */
+      z-index: 0;
+    }
+
+    #topbar {
+      background-color: #00796b;
+      color: white;
+      font-size: 14px;
+      padding: 10px 0;
+      z-index: 1000;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+    }
+
+    #topbar i {
+      margin-right: 5px;
+      color: white;
     }
 
     .profile-select-wrapper {
-      margin-top: 100px;
+      margin-top: 120px;
       display: flex;
       justify-content: center;
       padding-bottom: 40px;
+      position: relative;
+      z-index: 1;
     }
 
     .profile-select-card {
@@ -38,11 +73,12 @@
       border-radius: 10px;
       background: #f5f5f5;
       box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
-      transition: transform 0.3s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     .option-card:hover {
-      transform: translateY(-8px);
+      transform: scale(1.05);
+      box-shadow: 0 10px 25px rgba(0, 121, 107, 0.3);
     }
 
     .option-card img {
@@ -55,6 +91,7 @@
     .btn-blue-green {
       background-color: #00796b;
       color: white;
+      transition: background-color 0.3s ease;
     }
 
     .btn-blue-green:hover {
@@ -73,7 +110,7 @@
 <body>
 
 <!-- ======= Top Bar ======= -->
-<div id="topbar" class="d-flex align-items-center fixed-top">
+<div id="topbar" class="d-flex align-items-center">
   <div class="container d-flex align-items-center justify-content-center justify-content-md-between">
     <div class="align-items-center d-none d-md-flex">
       <i class="bi bi-clock"></i> Monday - Saturday, 8AM to 11PM
@@ -87,7 +124,7 @@
 <!-- ======= Main Section ======= -->
 <div class="container profile-select-wrapper">
   <div class="profile-select-card">
-    <h3 class="text-center mb-5 text-primary">Choose Your Profile Type</h3>
+    <h3 class="text-center mb-5 text-dark">Choose Your Profile Type</h3>
     <div class="row g-4 justify-content-center">
       <!-- Patient Profile -->
       <div class="col-md-6 col-lg-5">
@@ -98,6 +135,7 @@
           <a href="{% url 'patientform' %}" class="btn btn-blue-green mt-2">Continue as Patient</a>
         </div>
       </div>
+
       <!-- Doctor Profile -->
       <div class="col-md-6 col-lg-5">
         <div class="card option-card text-center p-4">
