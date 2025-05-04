@@ -54,6 +54,8 @@ class PatientProfile(models.Model):
     allergies = models.TextField(blank=True)
     preferred_care_type = models.CharField(max_length=100, blank=True)
     profile_pic = models.ImageField(upload_to='patient_profiles/', blank=True, null=True)
+    medical_history_pdf = models.FileField(upload_to='patient_medical_history/', blank=True, null=True)
+    medical_history_uploaded_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
         return f"{self.full_name} - Patient"

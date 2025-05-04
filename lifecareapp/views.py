@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from .models import PatientProfile, DoctorProfile, Profile
 from .forms import UserRegistrationForm, PatientProfileForm, DoctorProfileForm, UserEditForm, ProfileEditForm
 from django.contrib import messages
+from django.urls import reverse 
 
 # Create your views here.
 def index(request):
@@ -42,10 +43,15 @@ def signup(request):
             new_user.save()
             #Create the user profile
             Profile.objects.create(user=new_user)
+            #Add a success message
+            messages.success(request, "Your account has been successfully created. You can now log in.")
+            return redirect(reverse('login'))
+        #This handles invalid forms
+        else:
             return render(
                 request,
-                'signup_done.html',
-                {'new_user': new_user}
+                'signup.html',
+                {'user_form': user_form}
             )
     else:
         user_form = UserRegistrationForm()
@@ -80,16 +86,6 @@ def edit(request):
              'profile_form': profile_form
              }
         )
-
-"""
-@login_required
-def dashboard(request):
-    return render(
-        request,
-        'dashboard_patient.html',
-        {'section': 'dashboard'}
-    )
-"""
 
 def user_logout(request):
     logout(request)

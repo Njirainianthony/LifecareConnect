@@ -79,6 +79,24 @@
         <img src="{% static 'assets/img/default-profile.png' %}" class="profile-img" alt="No Photo">
       {% endif %}
     </div>
+    <div class="card-body">
+      <h5>Medical History</h5>
+      {% if profile.medical_history_pdf %}
+          <p>
+              <a href="{{ profile.medical_history_pdf.url }}" class="btn btn-sm btn-primary" target="_blank">
+                  <i class="fas fa-file-pdf"></i> View Medical History
+              </a>
+              <small class="text-muted">
+                  Last updated: {{ profile.medical_history_uploaded_at|date:"F j, Y" }}
+              </small>
+          </p>
+      {% else %}
+          <p class="text-muted">No medical history document has been uploaded.</p>
+          <a href="{% url 'edit_patient_profile' %}" class="btn btn-sm btn-outline-primary">
+              Add Medical History
+          </a>
+      {% endif %}
+    </div>
     <div class="col-md-8">
       <h3 class="profile-title">{{ profile.full_name }}</h3>
       <p><strong>Email:</strong> {{ profile.email }}</p>

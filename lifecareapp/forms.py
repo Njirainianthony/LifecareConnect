@@ -41,7 +41,21 @@ class PatientProfileForm(forms.ModelForm):
             'dob': forms.DateInput(attrs={'type': 'date'}),
             'medical_conditions': forms.Textarea(attrs={'rows': 2}),
             'allergies': forms.Textarea(attrs={'rows': 2}),
+            'medical_history_pdf': forms.FileInput(attrs={
+                'accept': 'application/pdf',
+                'class': 'form-control'
+            }),
         }
+
+        def clean_medical_history_pdf(self):
+            pdf = self.cleaned_data.get('medical_history_pdf')
+            if pdf:
+                if not pdf.name.endswith('.pdf'):
+                    raise forms.ValidationError('File must be a PDF')
+                if pdf.size > 5 * 1024 * 1024: #5mb in bytes
+                    raise forms.ValidationError('File size must be no more than 5MB')
+            return pdf
+
 
 class DoctorProfileForm(forms.ModelForm):
     class Meta:

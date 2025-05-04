@@ -57,6 +57,27 @@
         {% endfor %}
       {% endif %}
 
+      {% if form.instance.medical_history_pdf %}
+      <p>
+        <a href="{{ form.instance.medical_history_pdf.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+          <i class="fas fa-file-pdf"></i> View Current Medical History
+        </a>
+        <small class="text-muted">
+          (Uploaded: {{ form.instance.medical_history_uploaded_at|date:"F j, Y" }})
+        </small>
+      </p>
+      {% else %}
+      <p class="text-muted">No medical history document uploaded.</p>
+      {% endif %}
+
+      {{ form.medical_history_pdf }}
+      {% if form.medical_history_pdf.errors %}
+      <div class="invalid-feedback d-block">
+        {{ form.medical_history_pdf.errors }}
+      </div>
+      {% endif %}
+      <small class="form-text text-muted">Upload your medical history as a PDF (max 5MB).</small>
+
       <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         {% for field in form %}
