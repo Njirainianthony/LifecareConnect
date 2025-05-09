@@ -5,7 +5,10 @@ from django.http import HttpResponse
 from .models import PatientProfile, DoctorProfile, Profile
 from .forms import UserRegistrationForm, PatientProfileForm, DoctorProfileForm, UserEditForm, ProfileEditForm
 from django.contrib import messages
-from django.urls import reverse 
+from django.urls import reverse
+from django.db.models import Q 
+from django.core.paginator import Paginator
+
 
 # Create your views here.
 def index(request):
@@ -24,7 +27,21 @@ def departments(request):
     return render(request, 'departments.html')
 
 def doctors(request):
-    return render(request, 'doctors.html')
+    query = request.GET.get('q')
+    doctors_list = DoctorProfile.objects.all()
+
+    if query:
+        doctors_list = doctors_list.filter(
+            Q(full_name__icontains=query) |
+            Q(expertise__icontains=query) |
+            Q(available_location__icontains=query)
+        )
+
+    paginator = Paginator(doctors_list, 6)  # Show 6 doctors per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'doctors.html', {'page_obj': page_obj})
 
 def contact(request):
     return render(request, 'contact.html')

@@ -1,114 +1,201 @@
 {% extends 'base.html' %}
-
 {% load static %}
 {% block body %}
 
- <!-- ======= Doctors/Nurses Section ======= -->
- <section id="doctors" class="doctors section-bg">
-    <div class="container" data-aos="fade-up">
-      <div class="section-title">
-        <h2>Doctors & Nurses</h2>
-        <p>Search through our wide range of doctors and nurses by name, location or specialization to find the best professional for your needs.</p>
-      </div>
-  
-      <!-- Search Bar -->
-      <div class="search-bar mb-4 d-flex">
-        <input type="text" class="form-control w-75" placeholder="Search by Name, Location, or Specialization" id="searchQuery">
-        <button class="btn" style="background-color: #4ec4c4; color: white; margin-left: 10px;">
-          <i class="bi bi-search"></i>
-        </button>
-      </div>
-  
-      <div class="row" id="doctorsList">
-        <div class="col-lg-3 col-md-6 d-flex align-items-stretch">
-          <div class="member" data-aos="fade-up" data-aos-delay="100">
-            <div class="member-img">
-              <img src="{% static 'assets/img/doctors/doctors-1.jpg' %}" class="img-fluid" alt="">
-              <div class="social">
-                <a href=""><i class="bi bi-twitter"></i></a>
-                <a href=""><i class="bi bi-facebook"></i></a>
-                <a href=""><i class="bi bi-instagram"></i></a>
-                <a href=""><i class="bi bi-linkedin"></i></a>
-              </div>
-            </div>
-            <div class="member-info">
-              <h4>Walter White</h4>
-              <span>Chief Medical Officer</span>
-              <div class="d-flex justify-content-center mt-2">
-                <button class="btn" style="background-color: #4ec4c4; color: white; margin-right: 20px;">View Profile</button>
-                <button class="btn" style="background-color: #4ec4c4; color: white;">Book Appointment</button>
-              </div>
-            </div>
-          </div>
-        </div>
-  
-        <div class="col-lg-3 col-md-6 d-flex align-items-stretch">
-          <div class="member" data-aos="fade-up" data-aos-delay="200">
-            <div class="member-img">
-              <img src="{% static 'assets/img/doctors/doctors-2.jpg' %}" class="img-fluid" alt="">
-              <div class="social">
-                <a href=""><i class="bi bi-twitter"></i></a>
-                <a href=""><i class="bi bi-facebook"></i></a>
-                <a href=""><i class="bi bi-instagram"></i></a>
-                <a href=""><i class="bi bi-linkedin"></i></a>
-              </div>
-            </div>
-            <div class="member-info">
-              <h4>Sarah Jhonson</h4>
-              <span>Anesthesiologist</span>
-              <div class="d-flex justify-content-center mt-2">
-                <button class="btn" style="background-color: #4ec4c4; color: white; margin-right: 20px;">View Profile</button>
-                <button class="btn" style="background-color: #4ec4c4; color: white;">Book Appointment</button>
-              </div>
-            </div>
-          </div>
-        </div>
-  
-        <div class="col-lg-3 col-md-6 d-flex align-items-stretch">
-          <div class="member" data-aos="fade-up" data-aos-delay="300">
-            <div class="member-img">
-              <img src="{% static 'assets/img/doctors/doctors-3.jpg' %}" class="img-fluid" alt="">
-              <div class="social">
-                <a href=""><i class="bi bi-twitter"></i></a>
-                <a href=""><i class="bi bi-facebook"></i></a>
-                <a href=""><i class="bi bi-instagram"></i></a>
-                <a href=""><i class="bi bi-linkedin"></i></a>
-              </div>
-            </div>
-            <div class="member-info">
-              <h4>William Anderson</h4>
-              <span>Cardiology</span>
-              <div class="d-flex justify-content-center mt-2">
-                <button class="btn" style="background-color: #4ec4c4; color: white; margin-right: 20px;">View Profile</button>
-                <button class="btn" style="background-color: #4ec4c4; color: white;">Book Appointment</button>
-              </div>
-            </div>
-          </div>
-        </div>
-  
-        <div class="col-lg-3 col-md-6 d-flex align-items-stretch">
-          <div class="member" data-aos="fade-up" data-aos-delay="400">
-            <div class="member-img">
-              <img src="{% static 'assets/img/doctors/doctors-4.jpg' %}" class="img-fluid" alt="">
-              <div class="social">
-                <a href=""><i class="bi bi-twitter"></i></a>
-                <a href=""><i class="bi bi-facebook"></i></a>
-                <a href=""><i class="bi bi-instagram"></i></a>
-                <a href=""><i class="bi bi-linkedin"></i></a>
-              </div>
-            </div>
-            <div class="member-info">
-              <h4>Amanda Jepson</h4>
-              <span>Neurosurgeon</span>
-              <div class="d-flex justify-content-center mt-2">
-                <button class="btn" style="background-color: #4ec4c4; color: white; margin-right: 20px;">View Profile</button>
-                <button class="btn" style="background-color: #4ec4c4; color: white;">Book Appointment</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+<style>
+  body {
+    padding: 100px 30px;
+    background-color: #f8f9fa;
+  }
 
-  {% endblock %}
+  .search-bar {
+  max-width: 700px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.search-bar input[type="text"] {
+  padding-right: 40px;
+  height: 48px;
+  transition: box-shadow 0.3s ease
+}
+
+.search-bar .search-icon {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  color: #00796b;
+  font-size: 18px;
+}
+
+.search-bar input[type="text"]:focus {
+  box-shadow: 0 0 5px rgba(0, 121, 107, 0.5);
+  border-color: #00796b;
+}
+
+.heading-section h2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+
+  .card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 10px 25px rgba(0, 121, 107, 0.2);
+  }
+
+  .card-img-top {
+    height: 200px;
+    object-fit: cover;
+  }
+
+  .card-body {
+    flex-grow: 1;
+  }
+
+  .card-footer {
+    background-color: #fff;
+    border-top: none;
+  }
+
+  .card-footer .btn {
+    min-width: 120px;
+  }
+
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.6em;
+    border-radius: 12px;
+    margin-top: 5px;
+    display: inline-block;
+  }
+
+  .badge-available {
+    background-color: #c8e6c9;
+    color: #256029;
+  }
+
+  .badge-location {
+    background-color: #e1f5fe;
+    color: #0277bd;
+    margin-top: 10px;
+  }
+
+  .badge-lang {
+    background-color: #f1f8e9;
+    color: #33691e;
+    margin-right: 5px;
+  }
+
+  .specialization-icon {
+    margin-right: 5px;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+  }
+
+  .pagination a, .pagination span {
+    margin: 0 5px;
+    padding: 8px 16px;
+    background-color: #00796b;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+  }
+
+  .pagination .current {
+    background-color: #004d40;
+  }
+
+  @media (max-width: 768px) {
+    .col-md-4 {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .col-md-4 {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+</style>
+
+
+
+<div class="container">
+
+<!-- Page Heading -->
+<div class="heading-section text-center mb-4">
+  <h2 class="fw-bold" style="color: #00796b;">Doctors & Nurses</h2>
+  <p style="max-width: 700px; margin: 0 auto; color: #555;">
+    Search through our wide range of doctors and nurses by name, location, or specialization to find the best professional for your needs.
+  </p>
+</div>
+
+<!-- Search Bar -->
+<div class="search-bar mb-5">
+  <form method="GET" action="" class="position-relative">
+    <input type="text" name="q" value="{{ request.GET.q }}" class="form-control shadow-sm" placeholder="Search by name, specialization, or location">
+    <i class="bi bi-search search-icon"></i>
+  </form>
+</div>
+
+  <div class="row justify-content-center gx-5 gy-4">
+    {% for doctor in page_obj %}
+      <div class="col-md-4 d-flex">
+        <div class="card w-100 text-center border-0 shadow-sm">
+          <img src="{{ doctor.profile_pic.url }}" class="card-img-top rounded-top" alt="{{ doctor.full_name }}">
+          <div class="card-body d-flex flex-column justify-content-between">
+            <h5 class="card-title fw-bold">{{ doctor.full_name }}</h5>
+            <p class="text-muted">
+              <i class="bi bi-star specialization-icon"></i> {{ doctor.specialization }}
+            </p>
+            <span class="badge badge-available">Available</span>
+            <span class="badge badge-location"><i class="bi bi-geo-alt"></i> {{ doctor.available_location }}</span>
+            <div class="mt-2">
+              {% for lang in doctor.language_list %}
+
+                <span class="badge badge-lang">{{ lang }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="card-footer bg-white border-0 d-flex justify-content-center gap-3 pb-4">
+            <a href="#" class="btn" style="background-color: #00796b; color: white;">View Profile</a>
+            <a href="#" class="btn" style="background-color: #00796b; color: white;">Book Appointment</a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p class="text-center">No doctors found.</p>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    {% if page_obj.has_previous %}
+      <a href="?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}">&laquo; Previous</a>
+    {% endif %}
+
+    <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+    {% if page_obj.has_next %}
+      <a href="?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}">Next &raquo;</a>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
