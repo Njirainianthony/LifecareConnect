@@ -79,7 +79,7 @@
 
       {% if request.user.is_authenticated %}
        <div class="d-flex align-items-center ms-4">
-        Hello {{ request.user.first_name|default:request.user.username }}
+        <a href="{% url 'dashboard' %}">My Dashboard</a>
        <form action="{% url 'logout' %}" method="POST">
         <!-- <a href="{% url 'home' %}" class="appointment-btn scrollto"><span class="d-none d-md-inline">Logout</span> </a> -->
         <button type="submit" class="appointment-btn scrollto border-0">
