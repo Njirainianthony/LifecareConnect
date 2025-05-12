@@ -271,4 +271,82 @@
    */
   new PureCounter();
 
+  /**
+   * Update booking status to pending without a full page reload */ 
+  /**document.querySelectorAll('.btn').forEach(button => {
+    button.addEventListener('click', function() {
+      const doctorId = this.getAttribute('data-doctor-id');
+      fetch(`/book-doctor/${doctorId}/`, {
+        method: 'GET',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'pending') {
+          button.innerText = 'Pending';
+          button.disabled = true;
+        }
+      });
+    });
+  });*/
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.btn').forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.preventDefault(); // Prevent default link behavior
+      
+      const doctorId = this.getAttribute('data-doctor-id');
+      // Get CSRF token from cookie
+      const csrftoken = getCookie('csrftoken');
+      
+      // Create a form data object to send with POST
+      const formData = new FormData();
+      formData.append('doctor_id', doctorId);
+      
+      fetch(`/book-doctor/${doctorId}/`, {
+        method: 'POST', // Changed from GET to POST for state-changing operation
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': csrftoken
+        },
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'pending') {
+          this.innerText = 'Pending';
+          this.disabled = true;
+          this.style.backgroundColor = '#9e9e9e'; // Change button color when pending
+        } else if (data.status === 'already_pending') {
+          alert('You already have a pending appointment with this doctor.');
+        } else if (data.status === 'error') {
+          alert('An error occurred: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while processing your request.');
+      });
+    });
+  });
+  
+  // Function to get CSRF token from cookies
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+});
+
 })()

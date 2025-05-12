@@ -77,5 +77,13 @@ class DoctorProfile(models.Model):
     def __str__(self):
         return f"{self.full_name} - Doctor"
     
-    
+class Booking(models.Model):
+    patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('declined', 'Declined')
+    ], default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
 

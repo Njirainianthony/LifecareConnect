@@ -1,13 +1,15 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-from .models import PatientProfile, DoctorProfile, Profile
+from django.views.decorators.http import require_POST
+from django.http import HttpResponse, JsonResponse
+from .models import PatientProfile, DoctorProfile, Profile, Booking
 from .forms import UserRegistrationForm, PatientProfileForm, DoctorProfileForm, UserEditForm, ProfileEditForm
 from django.contrib import messages
 from django.urls import reverse
 from django.db.models import Q 
 from django.core.paginator import Paginator
+from django.core.mail import send_mail
 
 
 # Create your views here.
@@ -157,14 +159,51 @@ def doctor_form(request):
 def dashboard(request):
     try:
         profile = PatientProfile.objects.get(user=request.user)
+        bookings = Booking.objects.filter(patient=profile)
         return render(request, 'dashboard_patient.html', {'profile': profile})
     except PatientProfile.DoesNotExist:
         try:
             profile = DoctorProfile.objects.get(user=request.user)
+            bookings = Booking.objects.filter(doctor=profile, status='pending')
             return render(request, 'dashboard_doctor.html', {'profile': profile})
         except DoctorProfile.DoesNotExist:
             return redirect('add_profile')
         
+#Update booking status
+'''
+def update_booking_status(request, booking_id, decision):
+    booking = get_object_or_404(Booking, id=booking_id)
+    if decision in ['accepted', 'declined']:
+        booking.status = decision
+        booking.save()
+        notify_patient(booking)
+    return redirect('dashboard')
+'''
+@login_required
+def update_booking_status(request, booking_id, decision):
+    booking = get_object_or_404(Booking, id=booking_id)
+    
+    # Security check: Ensure only the doctor associated with this booking can update it
+    if request.user != booking.doctor.user:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=403)
+    
+    if decision in ['accepted', 'declined']:
+        booking.status = decision
+        booking.save()
+        
+        # Notify the patient
+        try:
+            notify_patient(booking)
+        except Exception as e:
+            print(f"Error sending notification to patient: {str(e)}")
+            # Continue anyway, don't block the status update
+    
+    # Check if this is an AJAX request
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'status': 'success', 'booking_status': booking.status})
+    
+    # If not AJAX, redirect to dashboard
+    return redirect('dashboard')    
 
 @login_required
 def edit_patient_profile(request):
@@ -206,3 +245,133 @@ def edit_doctor_profile(request):
 
     return render(request, 'edit_doctor_profile.html', {'form': form})
 
+#Appointment View
+'''
+def book_doctor_ajax(request, doctor_id):
+    doctor = get_object_or_404(DoctorProfile, id=doctor_id)
+    patient = PatientProfile.object.get(user=request.user)
+
+    booking, created = Booking.objects.get_or_create(
+        patient=patient,
+        doctor=doctor,
+        defaults={'status': 'pending'}
+    )
+
+    if not created and booking.status == 'pending':
+        return JsonResponse({'status': 'already_pending'})
+    
+    notify_doctor(booking)
+
+    return JsonResponse({'status': 'pending'})
+'''
+@login_required
+def book_doctor_ajax(request, doctor_id):
+    doctor = get_object_or_404(DoctorProfile, id=doctor_id)
+    
+    try:
+        patient = PatientProfile.objects.get(user=request.user)  # Fixed typo: object -> objects
+    except PatientProfile.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Patient profile not found'}, status=400)
+
+    # Check if a pending or accepted booking already exists
+    existing_booking = Booking.objects.filter(
+        patient=patient,
+        doctor=doctor,
+        status__in=['pending', 'accepted']
+    ).first()
+    
+    if existing_booking:
+        return JsonResponse({'status': 'already_pending'})
+    
+    # Create new booking
+    booking = Booking.objects.create(
+        patient=patient,
+        doctor=doctor,
+        status='pending'
+    )
+    
+    try:
+        notify_doctor(booking)
+        return JsonResponse({'status': 'pending'})
+    except Exception as e:
+        # Log the error and return a more detailed message
+        print(f"Email notification error: {str(e)}")
+        booking.delete()  # Rollback booking if email fails
+        return JsonResponse({'status': 'error', 'message': 'Could not send notification email'}, status=500)
+
+'''
+def notify_patient(booking):
+    patient_email = booking.patient.user.email
+    status = booking.status
+    send_mail(
+        'Appointment Update',
+        f'Your appointment request to Dr. {booking.doctor.user.last_name} was {status}.',
+        'noreply@lifecareconnect.com',
+        [patient_email]
+    )
+'''
+def notify_patient(booking):
+    patient_email = booking.patient.user.email
+    status = booking.status
+    doctor_name = f"Dr. {booking.doctor.user.get_full_name()}"
+    
+    subject = 'Appointment Update'
+    message = f'Your appointment request to {doctor_name} was {status}.'
+    
+    if booking.status == 'accepted':
+        message += '\n\nPlease contact the doctor for further details.'
+    elif booking.status == 'declined':
+        message += '\n\nYou may try booking with another healthcare provider.'
+    
+    send_mail(
+        subject,
+        message,
+        'noreply@lifecareconnect.com',
+        [patient_email],
+        fail_silently=False
+    )
+
+'''
+def notify_doctor(booking):
+    doctor_email = booking.doctor.user.email
+    patient_name = booking.patient.user.get_full_name()
+    subject = f"New Appointment Request From {patient_name}"
+    message = (
+        f"You have a new appointment request from {patient_name}.\n\n"
+        f"Please log in to your dashboard to view the request and accept or decline it.\n\n"
+        f"Booking ID: {booking.id}\n"
+        f"Patient Profile: https://lifecare.com/patient/{booking.patient.id}/profile/"
+    )
+    send_mail(
+        subject,
+        message,
+        'noreply@lifecareconnect.com',
+        [doctor_email],
+        fail_silently=False
+    )
+'''
+def notify_doctor(booking):
+    doctor_email = booking.doctor.user.email
+    patient_name = booking.patient.user.get_full_name()
+    subject = f"New Appointment Request From {patient_name}"
+    
+    accept_url = f"https://lifecareconnect.com/booking/{booking.id}/accepted/"
+    decline_url = f"https://lifecareconnect.com/booking/{booking.id}/declined/"
+    
+    message = (
+        f"You have a new appointment request from {patient_name}.\n\n"
+        f"Please log in to your dashboard to view the request and accept or decline it.\n\n"
+        f"Booking ID: {booking.id}\n"
+        f"Patient Profile: https://lifecareconnect.com/patient/{booking.patient.id}/profile/\n\n"
+        f"Quick actions:\n"
+        f"Accept: {accept_url}\n"
+        f"Decline: {decline_url}"
+    )
+    
+    send_mail(
+        subject,
+        message,
+        'noreply@lifecareconnect.com',
+        [doctor_email],
+        fail_silently=False
+    )

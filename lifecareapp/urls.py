@@ -43,5 +43,8 @@ urlpatterns = [
     path('doctorform/', views.doctor_form, name='doctorform'),
     path('edit-patient-profile/', views.edit_patient_profile, name='edit_patient_profile'),
     path('edit-doctor-profile/', views.edit_doctor_profile, name='edit_doctor_profile'),
-
+    #path('book-doctor/<int:doctor_id>/', views.book_doctor_ajax, name='book_doctor_ajax'),
+    #path('booking/<int:booking_id>/<str:decision>/', views.update_booking_status, name='update_booking_status'),
+    path('book-doctor/<int:doctor_id>/', views.book_doctor_ajax, name='book_doctor_ajax'),
+    path('booking/<int:booking_id>/<str:decision>/', views.update_booking_status, name='update_booking_status'),
 ]
