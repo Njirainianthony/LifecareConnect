@@ -293,7 +293,7 @@
   });*/
 
 document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.btn').forEach(button => {
+  document.querySelectorAll('.book-btn').forEach(button => {
     button.addEventListener('click', function(e) {
       e.preventDefault(); // Prevent default link behavior
       
