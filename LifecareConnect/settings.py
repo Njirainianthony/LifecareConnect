@@ -88,11 +88,11 @@ WSGI_APPLICATION = 'LifecareConnect.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('LIFECARE_DATABASE_NAME'),
-        'USER': os.getenv('LIFECARE_DATABASE_USER'),
-        'PASSWORD': os.getenv('LIFECARE_DATABASE_PASSWORD'),
-        'HOST': os.getenv('LIFECARE_DATABASE_HOST'),
-        'PORT': os.getenv('LIFECARE_DATABASE_PORT'),
+        'NAME': os.getenv('LIFECARE_DATABASE_NAME'), #railway
+        'USER': os.getenv('LIFECARE_DATABASE_USER'), #postgres
+        'PASSWORD': os.getenv('LIFECARE_DATABASE_PASSWORD'), #qOqhsmxcgRNtSbHQxSRotjRzGjaUroVX
+        'HOST': os.getenv('LIFECARE_DATABASE_HOST'), #metro.proxy.rlwy.net
+        'PORT': os.getenv('LIFECARE_DATABASE_PORT'), #24387
     }
 }
 
