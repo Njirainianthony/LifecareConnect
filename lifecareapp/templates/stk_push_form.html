@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>STK Push</title>
+</head>
+<body>
+    <h2>Test STK Push</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label>Phone Number (2547...):</label><br>
+        <input type="text" name="phone_number" required><br><br>
+
+        <label>Amount:</label><br>
+        <input type="number" name="amount" required><br><br>
+
+        <button type="submit">Send STK Push</button>
+    </form>
+</body>
+</html>

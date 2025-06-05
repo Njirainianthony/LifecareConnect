@@ -10,6 +10,11 @@ from django.urls import reverse
 from django.db.models import Q 
 from django.core.paginator import Paginator
 from django.core.mail import send_mail
+from django.http import HttpResponse
+from django_daraja.mpesa.core import MpesaClient
+import requests
+import json
+from django.views.decorators.csrf import csrf_exempt
 
 
 # Create your views here.
@@ -337,3 +342,44 @@ def appointments(request):
 def view_doctor_profile(request, doctor_id):
     doctor = get_object_or_404(DoctorProfile, id=doctor_id)
     return render(request, 'doctor_profile.html', {'doctor': doctor})
+
+def initiate_stk_push(request):
+    if request.method == 'POST':
+        phone_number = request.POST.get('phone_number')  # Format: 2547XXXXXXXX
+        amount = int(request.POST.get('amount'))
+
+        cl = MpesaClient()
+        account_reference = 'LifecarePayment'
+        transaction_desc = 'Payment for services'
+
+        # 🔁 IMPORTANT: Replace this with your actual ngrok HTTPS URL
+        callback_url = 'https://<your-ngrok-subdomain>.ngrok.io/mpesa/callback/'
+
+        response = cl.stk_push(
+            phone_number=phone_number,
+            amount=amount,
+            account_reference=account_reference,
+            transaction_desc=transaction_desc,
+            callback_url=callback_url
+        )
+
+        return HttpResponse(f"STK Push Sent: {response.text}")
+    
+    return render(request, 'stk_push_form.html')
+
+@csrf_exempt
+def mpesa_callback(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        print("M-Pesa Callback received:", data)  # Optional: for testing
+
+        # Here you can extract info like amount, phone number, result code, etc.
+        result_code = data['Body']['stkCallback']['ResultCode']
+        if result_code == 0:
+            # Payment successful
+            amount = data['Body']['stkCallback']['CallbackMetadata']['Item'][0]['Value']
+            phone = data['Body']['stkCallback']['CallbackMetadata']['Item'][4]['Value']
+            print(f"Payment received: {amount} from {phone}")
+            # You can save this info to your database
+
+        return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})

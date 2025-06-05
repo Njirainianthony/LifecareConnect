@@ -40,4 +40,7 @@ urlpatterns = [
     path('delete-account/', views.delete_account, name='delete_account'),
     path('appointments/', views.appointments, name='appointments'),
     path('doctor_profile/<int:doctor_id>', views.view_doctor_profile, name='doctor-profile'),
+    path('mpesa/stk/', views.initiate_stk_push, name='stk_push'),
+    path('mpesa/callback/', views.mpesa_callback, name='mpesa_callback'),
+
 ]
