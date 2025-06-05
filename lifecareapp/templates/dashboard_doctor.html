@@ -66,8 +66,8 @@
   <a href="{% url 'dashboard' %}">Dashboard</a>
   <a href="#">Tasks</a>
   <a href="{% url 'edit_doctor_profile' %}">Edit Profile</a>
-  <a href="{% url 'logout' %}" class="text-danger">Logout</a>
-  <a href="#" class="text-danger">Delete Profile</a>
+  <a href="javascript:void(0);" onclick="document.getElementById('logoutForm').submit();" class="text-danger">Logout</a>
+  <a href="#" class="text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete Profile</a>
 </div>
 
 <!-- Main Content -->
@@ -99,6 +99,33 @@
   <h5 class="text-muted text-center">Upcoming Tasks</h5>
   <p class="text-center">Coming soon...</p>
 </div>
+
+<form id="logoutForm" action="{% url 'logout' %}" method="POST" style="display: none;">
+  {% csrf_token %}
+</form>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="deleteModalLabel">Confirm Account Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <form method="POST" action="{% url 'delete_account' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Yes, Delete</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 </body>

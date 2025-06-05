@@ -78,12 +78,49 @@ class DoctorProfile(models.Model):
         return f"{self.full_name} - Doctor"
     
 class Booking(models.Model):
-    patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE)
-    status = models.CharField(max_length=20, choices=[
+    APPOINTMENT_TYPE_CHOICES = [
+        ('consultation', 'Consultation'),
+        ('checkup', 'General Checkup'),
+        ('follow_up', 'Follow-up'),
+        ('emergency', 'Emergency'),
+        ('specialist', 'Specialist Visit'),
+        ('lab_test', 'Laboratory Test'),
+        ('vaccination', 'Vaccination'),
+        ('physical_therapy', 'Physical Therapy'),
+    ]
+    
+    STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('accepted', 'Accepted'),
-        ('declined', 'Declined')
-    ], default='pending')
+        ('declined', 'Declined'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    # Existing fields
+    patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    # New fields to match your table headers
+    appointment_type = models.CharField(
+        max_length=50, 
+        choices=APPOINTMENT_TYPE_CHOICES,
+        default='consultation',
+        help_text="Type of appointment"
+    )
+    date = models.DateField(null=True, blank=True, help_text="Appointment date")
+    cost = models.DecimalField(
+        null=True,
+        blank=True,
+        max_digits=10, 
+        decimal_places=2,
+        help_text="Cost of appointment in KES"
+    )
+    queue_position = models.PositiveIntegerField(
+        null=True, 
+        blank=True,
+        help_text="Position in queue for the appointment"
+    )
 

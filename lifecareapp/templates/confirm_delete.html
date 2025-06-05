@@ -1,0 +1,19 @@
+<!-- delete_account_modal.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+  <button id="deleteAccountBtn">Delete Account</button>
+
+  <!-- The Modal -->
+  <div id="deleteModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close-btn" id="closeModal">&times;</span>
+      <h3>Are you sure you want to delete your account?</h3>
+      <p>This action is irreversible.</p>
+      <button id="confirmDeleteBtn">Yes, delete my account</button>
+      <button id="cancelDeleteBtn">No, cancel</button>
+    </div>
+  </div>
+
+{% endblock %}

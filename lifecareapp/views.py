@@ -170,15 +170,6 @@ def dashboard(request):
             return redirect('add_profile')
         
 #Update booking status
-'''
-def update_booking_status(request, booking_id, decision):
-    booking = get_object_or_404(Booking, id=booking_id)
-    if decision in ['accepted', 'declined']:
-        booking.status = decision
-        booking.save()
-        notify_patient(booking)
-    return redirect('dashboard')
-'''
 @login_required
 def update_booking_status(request, booking_id, decision):
     booking = get_object_or_404(Booking, id=booking_id)
@@ -246,24 +237,6 @@ def edit_doctor_profile(request):
     return render(request, 'edit_doctor_profile.html', {'form': form})
 
 #Appointment View
-'''
-def book_doctor_ajax(request, doctor_id):
-    doctor = get_object_or_404(DoctorProfile, id=doctor_id)
-    patient = PatientProfile.object.get(user=request.user)
-
-    booking, created = Booking.objects.get_or_create(
-        patient=patient,
-        doctor=doctor,
-        defaults={'status': 'pending'}
-    )
-
-    if not created and booking.status == 'pending':
-        return JsonResponse({'status': 'already_pending'})
-    
-    notify_doctor(booking)
-
-    return JsonResponse({'status': 'pending'})
-'''
 @login_required
 def book_doctor_ajax(request, doctor_id):
     doctor = get_object_or_404(DoctorProfile, id=doctor_id)
@@ -299,17 +272,7 @@ def book_doctor_ajax(request, doctor_id):
         booking.delete()  # Rollback booking if email fails
         return JsonResponse({'status': 'error', 'message': 'Could not send notification email'}, status=500)
 
-'''
-def notify_patient(booking):
-    patient_email = booking.patient.user.email
-    status = booking.status
-    send_mail(
-        'Appointment Update',
-        f'Your appointment request to Dr. {booking.doctor.user.last_name} was {status}.',
-        'noreply@lifecareconnect.com',
-        [patient_email]
-    )
-'''
+
 def notify_patient(booking):
     patient_email = booking.patient.user.email
     status = booking.status
@@ -331,25 +294,6 @@ def notify_patient(booking):
         fail_silently=False
     )
 
-'''
-def notify_doctor(booking):
-    doctor_email = booking.doctor.user.email
-    patient_name = booking.patient.user.get_full_name()
-    subject = f"New Appointment Request From {patient_name}"
-    message = (
-        f"You have a new appointment request from {patient_name}.\n\n"
-        f"Please log in to your dashboard to view the request and accept or decline it.\n\n"
-        f"Booking ID: {booking.id}\n"
-        f"Patient Profile: https://lifecare.com/patient/{booking.patient.id}/profile/"
-    )
-    send_mail(
-        subject,
-        message,
-        'noreply@lifecareconnect.com',
-        [doctor_email],
-        fail_silently=False
-    )
-'''
 def notify_doctor(booking):
     doctor_email = booking.doctor.user.email
     patient_name = booking.patient.user.get_full_name()
@@ -375,3 +319,21 @@ def notify_doctor(booking):
         [doctor_email],
         fail_silently=False
     )
+
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        user = request.user
+        logout(request)
+        user.delete()
+        return redirect('home')
+    return redirect('dashboard')
+
+def appointments(request):
+    patient_profile = PatientProfile.objects.get(user=request.user)
+    appointments = Booking.objects.filter(patient=patient_profile)
+    return render(request, 'appointments.html', {'appointments': appointments})
+
+def view_doctor_profile(request, doctor_id):
+    doctor = get_object_or_404(DoctorProfile, id=doctor_id)
+    return render(request, 'doctor_profile.html', {'doctor': doctor})

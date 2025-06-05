@@ -271,27 +271,6 @@
    */
   new PureCounter();
 
-  /**
-   * Update booking status to pending without a full page reload */ 
-  /**document.querySelectorAll('.btn').forEach(button => {
-    button.addEventListener('click', function() {
-      const doctorId = this.getAttribute('data-doctor-id');
-      fetch(`/book-doctor/${doctorId}/`, {
-        method: 'GET',
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === 'pending') {
-          button.innerText = 'Pending';
-          button.disabled = true;
-        }
-      });
-    });
-  });*/
-
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.book-btn').forEach(button => {
     button.addEventListener('click', function(e) {
@@ -348,5 +327,26 @@ document.addEventListener('DOMContentLoaded', function() {
     return cookieValue;
   }
 });
+
+/** Pop up modal */
+document.addEventListener("DOMContentLoaded", function () {
+    const deleteLink = document.getElementById("deleteAccountLink");
+    const modal = document.getElementById("deleteModal");
+    const closeModal = document.getElementById("closeModalBtn");
+    const cancelBtn = document.getElementById("cancelDeleteBtn");
+
+    deleteLink.onclick = function (e) {
+      e.preventDefault();
+      modal.style.display = "block";
+    };
+    closeModal.onclick = () => modal.style.display = "none";
+    cancelBtn.onclick = () => modal.style.display = "none";
+    window.onclick = (event) => {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    };
+  });
+
 
 })()
