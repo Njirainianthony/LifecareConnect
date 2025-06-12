@@ -552,55 +552,62 @@
             });
 
             // Pay button action: make STK push call to Django backend
-            payBtn.addEventListener('click', async () => {
-                const phone = phoneInput.value.trim();
+            // Pay button action: make STK push call to Django backend
+        payBtn.addEventListener('click', async () => {
+            let phone = phoneInput.value.trim();
 
-                if (!phone.match(/^07\d{8}$/)) {
-                    alert("Please enter a valid Safaricom phone number.");
-                    return;
-                }
+            // Accepts 07XXXXXXXX, 2547XXXXXXXX, or +2547XXXXXXXX
+            if (!phone.match(/^(?:\+254|254|0)7\d{8}$/)) {
+                alert("Please enter a valid Safaricom phone number.");
+                return;
+            }
 
-                payBtn.textContent = "Processing...";
-                payBtn.disabled = true;
+            // Normalize to 2547XXXXXXXX
+            if (phone.startsWith("0")) {
+                phone = "254" + phone.slice(1);
+            } else if (phone.startsWith("+254")) {
+                phone = phone.replace("+", "");
+            }
 
-                try {
-                    const response = await fetch("{% url 'stk_push' %}", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': '{{ csrf_token }}',
-                        },
-                        body: JSON.stringify({
-                            phone: phone,
-                            amount: {{ total_fee }},
-                            appointment_date: selectedDate,
-                            appointment_time: selectedTime,
-                            doctor_id: {{ doctor.id }},
-                        })
-                    });
+            payBtn.textContent = "Processing...";
+            payBtn.disabled = true;
 
-                    const data = await response.json();
+            try {
+                const response = await fetch("{% url 'stk_push' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({
+                        phone: phone,
+                        amount: {{ total_fee }},
+                        appointment_date: selectedDate,
+                        appointment_time: selectedTime,
+                        doctor_id: {{ doctor.id }},
+                    })
+                });
 
-                    if (data.status === "success") {
-                        document.getElementById('phoneModal').style.display = 'none';
-                        document.getElementById('successMessage').classList.add('show');
-                        document.getElementById('confirmBtn').style.display = 'none';
-                        document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
-                    } else {
-                        alert(data.message || "Payment failed. Try again.");
-                        payBtn.textContent = "Pay Now";
-                        payBtn.disabled = false;
-                    }
-                } 
-                
-                catch (error) {
-                    console.error(error);
-                    alert("An error occurred. Try again.");
+                const data = await response.json();
+
+                if (data.status === "success") {
+                    document.getElementById('phoneModal').style.display = 'none';
+                    document.getElementById('successMessage').classList.add('show');
+                    document.getElementById('confirmBtn').style.display = 'none';
+                    document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert(data.message || "Payment failed. Try again.");
                     payBtn.textContent = "Pay Now";
                     payBtn.disabled = false;
                 }
-            });
+            } catch (error) {
+                console.error(error);
+                alert("An error occurred. Try again.");
+                payBtn.textContent = "Pay Now";
+                payBtn.disabled = false;
+            }
         });
+    });
     </script>
 
     <!-- Phone Number Modal -->
@@ -608,7 +615,7 @@
   <div class="modal-content">
     <span class="close" id="closeModal">&times;</span>
     <h3>Enter Your Phone Number</h3>
-    <input type="tel" id="phoneInput" placeholder="07XXXXXXXX" />
+    <input type="tel" id="phoneInput" placeholder="254XXXXXXXX" />
     <button id="payBtn">Pay Now</button>
   </div>
 </div>

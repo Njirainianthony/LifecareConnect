@@ -339,6 +339,7 @@ def appointments(request):
     appointments = Booking.objects.filter(patient=patient_profile)
     return render(request, 'appointments.html', {'appointments': appointments})
 
+@login_required
 def view_doctor_profile(request, doctor_id):
     doctor = get_object_or_404(DoctorProfile, id=doctor_id)
     charge_rate = float(doctor.charge_rates)
@@ -350,20 +351,31 @@ def view_doctor_profile(request, doctor_id):
         'charge_rate': charge_rate,
         'total_fee': total_fee,})
 
+@csrf_exempt
 def initiate_stk_push(request):
     if request.method == 'POST':
-        phone_number = request.POST.get('phone_number')  # Format: 2547XXXXXXXX
-        amount = int(request.POST.get('amount'))
+        try:
+            data = json.loads(request.body)
+            phone_number = data.get('phone')  # key must match JS
+            amount = int(data.get('amount'))
 
-        cl = MpesaClient()
-        account_reference = 'LifecarePayment'
-        transaction_desc = 'Payment for services'
-        callback_url = 'https://mydomain.com/path'  # Replace with your real callback or ngrok URL
+            # DEBUG: print to terminal/log
+            print(f"STK Request received: {phone_number}, amount={amount}")
 
-        response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
-        return HttpResponse(f"STK Push Sent: {response.text}")
-    
-    return render(request, 'stk_push_form.html')
+            cl = MpesaClient()
+            account_reference = 'LifecarePayment'
+            transaction_desc = 'Payment for services'
+            callback_url = 'https://mydomain.com/path'  # Replace with actual callback or Ngrok
+
+            response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
+
+            return JsonResponse({'status': 'success', 'response': response.text})
+        
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 '''
 @csrf_exempt
 def mpesa_callback(request):
@@ -382,4 +394,6 @@ def mpesa_callback(request):
 
         return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
 '''
+
+
 
