@@ -328,25 +328,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-/** Pop up modal */
-document.addEventListener("DOMContentLoaded", function () {
-    const deleteLink = document.getElementById("deleteAccountLink");
-    const modal = document.getElementById("deleteModal");
-    const closeModal = document.getElementById("closeModalBtn");
-    const cancelBtn = document.getElementById("cancelDeleteBtn");
-
-    deleteLink.onclick = function (e) {
-      e.preventDefault();
-      modal.style.display = "block";
-    };
-    closeModal.onclick = () => modal.style.display = "none";
-    cancelBtn.onclick = () => modal.style.display = "none";
-    window.onclick = (event) => {
-      if (event.target == modal) {
-        modal.style.display = "none";
-      }
-    };
-  });
 
 
 })()

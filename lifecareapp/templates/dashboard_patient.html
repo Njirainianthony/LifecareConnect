@@ -67,7 +67,7 @@
   <a href="{% url 'appointments' %}">Appointments</a>
   <a href="{% url 'edit_patient_profile' %}">Edit Profile</a>
   <a href="javascript:void(0);" onclick="document.getElementById('logoutForm').submit();" class="text-danger">Logout</a>
-  <a href="#" class="text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete Profile</a>
+  <a href="#" class="text-danger" id="deleteAccountLink">Delete Profile</a>
 </div>
 
 <!-- Main Content -->
@@ -122,12 +122,12 @@
 </form>
 
 <!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+<div id="deleteModal" class="modal" tabindex="-1" style="display:none;">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title" id="deleteModalLabel">Confirm Account Deletion</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title">Confirm Account Deletion</h5>
+        <button type="button" class="btn-close" aria-label="Close" id="closeModalBtn"></button>
       </div>
       <div class="modal-body">
         <p>Are you sure you want to delete your account? This action cannot be undone.</p>
@@ -136,13 +136,34 @@
         <form method="POST" action="{% url 'delete_account' %}">
           {% csrf_token %}
           <button type="submit" class="btn btn-danger">Yes, Delete</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Cancel</button>
         </form>
       </div>
     </div>
   </div>
 </div>
 
-<script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const deleteLink = document.getElementById("deleteAccountLink");
+    const modal = document.getElementById("deleteModal");
+    const closeModal = document.getElementById("closeModalBtn");
+    const cancelBtn = document.getElementById("cancelDeleteBtn");
+
+    deleteLink.onclick = function (e) {
+      e.preventDefault();
+      modal.style.display = "block";
+    };
+    closeModal.onclick = () => modal.style.display = "none";
+    cancelBtn.onclick = () => modal.style.display = "none";
+    window.onclick = (event) => {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    };
+  });
+</script>
+
 </body>
 </html>

@@ -334,6 +334,7 @@ def delete_account(request):
         return redirect('home')
     return redirect('dashboard')
 
+@login_required
 def appointments(request):
     patient_profile = PatientProfile.objects.get(user=request.user)
     appointments = Booking.objects.filter(patient=patient_profile)
