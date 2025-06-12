@@ -358,22 +358,13 @@ def initiate_stk_push(request):
         cl = MpesaClient()
         account_reference = 'LifecarePayment'
         transaction_desc = 'Payment for services'
+        callback_url = 'https://mydomain.com/path'  # Replace with your real callback or ngrok URL
 
-        # 🔁 IMPORTANT: Replace this with your actual ngrok HTTPS URL
-        callback_url = 'https://<your-ngrok-subdomain>.ngrok.io/mpesa/callback/'
-
-        response = cl.stk_push(
-            phone_number=phone_number,
-            amount=amount,
-            account_reference=account_reference,
-            transaction_desc=transaction_desc,
-            callback_url=callback_url
-        )
-
+        response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
         return HttpResponse(f"STK Push Sent: {response.text}")
     
     return render(request, 'stk_push_form.html')
-
+'''
 @csrf_exempt
 def mpesa_callback(request):
     if request.method == 'POST':
@@ -390,3 +381,5 @@ def mpesa_callback(request):
             # You can save this info to your database
 
         return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
+'''
+
