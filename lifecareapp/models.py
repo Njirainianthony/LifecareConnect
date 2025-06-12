@@ -71,7 +71,7 @@ class DoctorProfile(models.Model):
     available_location = models.CharField(max_length=100)
     contact = models.CharField(max_length=20)
     email = models.EmailField()
-    charge_rates = models.CharField(max_length=50)
+    charge_rates = models.FloatField(max_length=50)
     profile_pic = models.ImageField(upload_to='doctor_profiles/', blank=True, null=True)
 
     def __str__(self):

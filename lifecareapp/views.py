@@ -341,7 +341,14 @@ def appointments(request):
 
 def view_doctor_profile(request, doctor_id):
     doctor = get_object_or_404(DoctorProfile, id=doctor_id)
-    return render(request, 'doctor_profile.html', {'doctor': doctor})
+    charge_rate = float(doctor.charge_rates)
+    commission = float(doctor.charge_rates) * 0.2
+    total_fee = charge_rate + commission
+    return render(request, 'doctor_profile.html', {
+        'doctor': doctor, 
+        'commission': commission, 
+        'charge_rate': charge_rate,
+        'total_fee': total_fee,})
 
 def initiate_stk_push(request):
     if request.method == 'POST':
