@@ -76,7 +76,8 @@ class DoctorProfile(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - Doctor"
-    
+
+
 class Booking(models.Model):
     APPOINTMENT_TYPE_CHOICES = [
         ('consultation', 'Consultation'),
@@ -124,3 +125,19 @@ class Booking(models.Model):
         help_text="Position in queue for the appointment"
     )
 
+
+# models.py
+class Payment(models.Model):
+    user = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
+    status = models.CharField(max_length=20)  # 'PAID' or 'FAILED'
+
+"""    
+class Booking(models.Model):
+    patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE, null=True)
+    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE)
+    date = models.DateField(default='2025-06-22')
+    time = models.CharField(max_length=20, default='10:00 AM')
+    status = models.CharField(max_length=20)  # 'BOOKED', 'CANCELLED'
+"""

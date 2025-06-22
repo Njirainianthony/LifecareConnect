@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse, JsonResponse
-from .models import PatientProfile, DoctorProfile, Profile, Booking
+from .models import PatientProfile, DoctorProfile, Profile, Booking, Payment
 from .forms import UserRegistrationForm, PatientProfileForm, DoctorProfileForm, UserEditForm, ProfileEditForm
 from django.contrib import messages
 from django.urls import reverse
@@ -15,6 +15,7 @@ from django_daraja.mpesa.core import MpesaClient
 import requests
 import json
 from django.views.decorators.csrf import csrf_exempt
+from .payment_service import PaymentEventHandler
 
 
 # Create your views here.
@@ -357,26 +358,85 @@ def initiate_stk_push(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            phone_number = data.get('phone')  # key must match JS
+            phone_number = data.get('phone')
             amount = int(data.get('amount'))
+            doctor_id = data.get('doctor_id')
 
-            # DEBUG: print to terminal/log
+            # Get user and doctor
+            user = request.user
+            doctor = DoctorProfile.objects.get(id=doctor_id)
+
             print(f"STK Request received: {phone_number}, amount={amount}")
 
             cl = MpesaClient()
             account_reference = 'LifecarePayment'
             transaction_desc = 'Payment for services'
-            callback_url = 'https://mydomain.com/path'  # Replace with actual callback or Ngrok
+            callback_url = 'https://mydomain.com/path'
 
             response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
 
+            # === Booking: either get from request or create here ===
+            from lifecareapp.models import Booking  # if not already imported
+            booking = Booking.objects.create(
+                doctor=doctor,
+                patient=user.patientprofile,  # adjust if your PatientProfile is accessed differently
+                status='pending'
+            )
+
+            # === Email Notification Functions ===
+            def notify_patient(booking):
+                patient_email = booking.patient.user.email
+                doctor_name = f"Dr. {booking.doctor.user.get_full_name()}"
+
+                subject = 'Appointment Request Sent'
+                message = f'Your appointment request to {doctor_name} has been received and is pending review.\n\nYou will be notified once the doctor responds.'
+
+                send_mail(
+                    subject,
+                    message,
+                    'noreply@lifecareconnect.com',
+                    [patient_email],
+                    fail_silently=False
+                )
+
+            def notify_doctor(booking):
+                doctor_email = booking.doctor.user.email
+                patient_name = booking.patient.user.get_full_name()
+                subject = f"New Appointment Request from {patient_name}"
+
+                accept_url = f"https://lifecareconnect.com/booking/{booking.id}/accepted/"
+                decline_url = f"https://lifecareconnect.com/booking/{booking.id}/declined/"
+
+                message = (
+                    f"You have a new appointment request from {patient_name}.\n\n"
+                    f"Please log in to your dashboard to respond.\n\n"
+                    f"Booking ID: {booking.id}\n"
+                    f"Patient Profile: https://lifecareconnect.com/patient/{booking.patient.id}/profile/\n\n"
+                    f"Quick actions:\n"
+                    f"Accept: {accept_url}\n"
+                    f"Decline: {decline_url}"
+                )
+
+                send_mail(
+                    subject,
+                    message,
+                    'noreply@lifecareconnect.com',
+                    [doctor_email],
+                    fail_silently=False
+                )
+
+            # === Actually send the emails ===
+            notify_patient(booking)
+            notify_doctor(booking)
+
             return JsonResponse({'status': 'success', 'response': response.text})
-        
+
         except Exception as e:
             print(f"Error: {e}")
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
 '''
 @csrf_exempt
 def mpesa_callback(request):
@@ -396,5 +456,44 @@ def mpesa_callback(request):
         return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
 '''
 
+@csrf_exempt
+def stk_push(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        phone = data.get("phone")
+        amount = data.get("amount")
+        doctor_id = data.get("doctor_id")
+        date = data.get("appointment_date")
+        time = data.get("appointment_time")
 
+        #Call STK push logic
+        success = initiate_stk_push(request)
 
+        if success:
+            #Save payment and appointment details
+            doctor = DoctorProfile.objects.get(id=doctor_id)
+            patient_profile = PatientProfile.objects.get(user=request.user)
+            user = request.user  # Or however you're managing logged-in users
+
+            payment = Payment.objects.create(
+                user=patient_profile,
+                doctor=doctor,
+                amount=amount,
+                status="PAID"
+            )
+
+            appointment = Booking.objects.create(
+                user=user,
+                doctor=doctor,
+                date=date,
+                time=time,
+                status="BOOKED"
+            )
+
+            # 3. Trigger post-payment logic
+            handler = PaymentEventHandler(payment, appointment)
+            handler.handle_success()
+
+            return JsonResponse({"status": "success"})
+
+        return JsonResponse({"status": "fail", "message": "STK Push failed"})
