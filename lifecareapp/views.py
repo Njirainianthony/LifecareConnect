@@ -15,7 +15,7 @@ from django_daraja.mpesa.core import MpesaClient
 import requests
 import json
 from django.views.decorators.csrf import csrf_exempt
-from .payment_service import PaymentEventHandler
+
 
 
 # Create your views here.
