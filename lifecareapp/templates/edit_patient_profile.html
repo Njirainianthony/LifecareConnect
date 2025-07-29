@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Patient Profile</title>
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to right, #e0f7fa, #e8f5e9);
+      margin-top: 100px;
+      font-family: 'Poppins', sans-serif;
+    }
+    .form-card {
+      max-width: 1400px;
+      margin: auto;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+    }
+    .form-image {
+      height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    .btn-blue-green {
+      background-color: #00796b;
+      color: white;
+    }
+    .btn-blue-green:hover {
+      background-color: #004d40;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="row form-card g-4">
+    <div class="col-md-6">
+      {% if form.instance.profile_pic %}
+        <img src="{{ form.instance.profile_pic.url }}" class="img-fluid form-image" alt="Profile Image">
+      {% else %}
+        <img src="{% static 'assets/img/patientprofile.jpg' %}" class="img-fluid form-image" alt="Default">
+      {% endif %}
+    </div>
+    <div class="col-md-6">
+      <h4 class="text-primary mb-3">Edit Patient Profile</h4>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      {% if form.instance.medical_history_pdf %}
+      <p>
+        <a href="{{ form.instance.medical_history_pdf.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+          <i class="fas fa-file-pdf"></i> View Current Medical History
+        </a>
+        <small class="text-muted">
+          (Uploaded: {{ form.instance.medical_history_uploaded_at|date:"F j, Y" }})
+        </small>
+      </p>
+      {% else %}
+      <p class="text-muted">No medical history document uploaded.</p>
+      {% endif %}
+
+      {{ form.medical_history_pdf }}
+      {% if form.medical_history_pdf.errors %}
+      <div class="invalid-feedback d-block">
+        {{ form.medical_history_pdf.errors }}
+      </div>
+      {% endif %}
+      <small class="form-text text-muted">Upload your medical history as a PDF (max 5MB).</small>
+
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="mb-3">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.errors %}
+              <div class="text-danger small">{{ field.errors|striptags }}</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-blue-green mt-2">Save Changes</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

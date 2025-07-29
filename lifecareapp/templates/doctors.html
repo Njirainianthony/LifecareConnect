@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Doctors{% endblock %}
+
+{% block body %}
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: url("{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}") no-repeat center top;
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+  }
+
+  .overlay-wrapper {
+  background: rgba(255, 255, 255, 0.85);
+  padding-top: 0px;  /* Reduced padding */
+  padding-bottom: 60px;
+  margin-top: 0;
+}
+
+
+  .section-heading {
+    background-color: #00796b;
+    padding: 40px 0 20px;
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+  }
+
+  .section-heading h2 {
+    font-weight: 700;
+  }
+
+  .section-heading p {
+    max-width: 700px;
+    margin: 0 auto;
+    font-size: 16px;
+  }
+
+  .search-bar {
+    max-width: 700px;
+    margin: 20px auto 0;
+    position: relative;
+  }
+
+  .search-bar input[type="text"] {
+    padding-right: 40px;
+    height: 48px;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .search-bar .search-icon {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    color: #00796b;
+    font-size: 18px;
+  }
+
+  .card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 121, 107, 0.2);
+  }
+
+  .card-img-top {
+    height: 220px;
+    object-fit: cover;
+  }
+
+  .card-title {
+    font-weight: 600;
+    color: #00796b;
+  }
+
+  .card-footer {
+    background-color: #fff;
+    border-top: none;
+  }
+
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.6em;
+    border-radius: 12px;
+    margin-top: 5px;
+    display: inline-block;
+  }
+
+  .badge-available {
+    background-color: #c8e6c9;
+    color: #256029;
+  }
+
+  .badge-location {
+    background-color: #e1f5fe;
+    color: #0277bd;
+    margin-top: 10px;
+  }
+
+  .badge-lang {
+    background-color: #f1f8e9;
+    color: #33691e;
+    margin-right: 5px;
+  }
+
+  .book-btn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 5px;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+  }
+
+  .pagination a,
+  .pagination span {
+    margin: 0 5px;
+    padding: 8px 16px;
+    background-color: #00796b;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+  }
+
+  .pagination .current {
+    background-color: #004d40;
+  }
+
+  @media (max-width: 768px) {
+    .col-md-4 {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .col-md-4 {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+</style>
+
+<section class="overlay-wrapper">
+  <div class="section-heading">
+    <h2 class="fw-bold"><i class="bi bi-person-circle me-2"></i>Doctors & Nurses</h2>
+    <p>
+      Search through our wide range of doctors and nurses by name, location, or specialization to find the best professional for your needs.
+    </p>
+
+    <!-- Search Bar INSIDE the green background -->
+    <div class="search-bar mt-4">
+      <form method="GET" action="" class="position-relative">
+        <input type="text" name="q" value="{{ request.GET.q }}" class="form-control shadow-sm" placeholder="Search by name, specialization, or location">
+        <i class="bi bi-search search-icon"></i>
+      </form>
+    </div>
+  </div>
+
+  <!-- Doctor Cards -->
+  <div class="container">
+    <div class="row justify-content-center gx-5 gy-4">
+      {% for doctor in page_obj %}
+        <div class="col-md-4 d-flex">
+          <div class="card w-100 text-center border-0 shadow-sm">
+            <img src="{{ doctor.profile_pic.url }}" class="card-img-top" alt="{{ doctor.full_name }}">
+            <div class="card-body d-flex flex-column justify-content-between">
+              <h5 class="card-title">{{ doctor.full_name }}</h5>
+              <p class="text-muted">
+                <i class="bi bi-star specialization-icon"></i> {{ doctor.specialization }}
+              </p>
+              <span class="badge badge-available">Available</span>
+              <span class="badge badge-location"><i class="bi bi-geo-alt"></i> {{ doctor.available_location }}</span>
+              <div class="mt-2">
+                {% for lang in doctor.language_list %}
+                  <span class="badge badge-lang">{{ lang }}</span>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="card-footer bg-white border-0 d-flex justify-content-center gap-3 pb-4">
+              <a href="{% url 'doctor-profile' doctor.id %}" class="btn" style="background-color: #00796b; color: white;">View Profile</a>
+              <button class="book-btn" data-doctor-id="{{ doctor.id }}" id="book-btn-{{ doctor.id }}" 
+                style="background-color: {% if doctor in pending_doctors %} #9e9e9e {% else %} #00796b {% endif %}; color: white;">
+                {% if doctor in pending_doctors %}Pending{% else %}Book Appointment{% endif %}
+              </button>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-center">No doctors found.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    {% if page_obj.has_previous %}
+      <a href="?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}">&laquo; Previous</a>
+    {% endif %}
+    <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+      <a href="?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}">Next &raquo;</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

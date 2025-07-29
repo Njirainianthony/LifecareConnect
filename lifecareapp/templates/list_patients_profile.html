@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Patient Profiles{% endblock %}
+
+{% block body %}
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: url("{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}") no-repeat center top;
+    background-size: cover;
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  .overlay-wrapper {
+    background: rgba(255, 255, 255, 0.78);
+    padding-bottom: 60px;
+  }
+
+  .header-banner {
+    background-color: #00796b;
+    color: white;
+    padding: 60px 0 40px;
+    text-align: center;
+  }
+
+  .header-banner h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+  }
+
+  .header-banner .user-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+  }
+
+  .add-btn {
+    background-color: #004d40;
+    color: white;
+    font-weight: 500;
+    border: none;
+  }
+
+  .add-btn:hover {
+    background-color: #00332e;
+  }
+
+  .profile-card {
+    border-radius: 12px;
+    background: #f5f5f5;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+  }
+
+  .profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 121, 107, 0.25);
+  }
+
+  .profile-img {
+    height: 250px;
+    object-fit: cover;
+    width: 100%;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+
+  .card-title {
+    font-weight: 600;
+    color: #00796b;
+  }
+
+  @media (max-width: 768px) {
+    .header-banner h2 {
+      font-size: 2rem;
+    }
+
+    .header-banner .user-icon {
+      font-size: 2.5rem;
+    }
+  }
+</style>
+
+<section class="header-banner">
+  <div class="container">
+    <div class="user-icon">
+      <i class="fas fa-user-circle"></i>
+    </div>
+    <h2>My Patient Profiles</h2>
+    <a href="{% url 'patientform' %}" class="btn add-btn mt-2">+ Add New Profile</a>
+  </div>
+</section>
+
+<section class="overlay-wrapper pt-5">
+  <div class="container">
+    <div class="row">
+      {% for profile in profiles %}
+        <div class="col-md-4 mb-4">
+          <a href="{% url 'dashboard_patient' profile.id %}" class="text-decoration-none">
+            <div class="card profile-card text-center h-100">
+              {% if profile.profile_pic %}
+                <img src="{{ profile.profile_pic.url }}" class="profile-img" alt="Profile Photo">
+              {% else %}
+                <img src="{% static 'assets/img/default-profile.png' %}" class="profile-img" alt="No Photo">
+              {% endif %}
+              <div class="card-body">
+                <h5 class="card-title">{{ profile.full_name|cut:" "|title }}</h5>
+              </div>
+            </div>
+          </a>
+        </div>
+      {% empty %}
+        <div class="col-12 text-center">
+          <p class="text-muted">You have not created any patient profiles yet.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

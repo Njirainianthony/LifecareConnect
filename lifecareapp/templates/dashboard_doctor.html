@@ -1,0 +1,153 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Doctor Dashboard | Lifecare Connect</title>
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Poppins', sans-serif;
+      margin-top: 0;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 240px;
+      background-color: #00796b;
+      padding-top: 60px;
+      color: white;
+    }
+    .sidebar a {
+      color: white;
+      padding: 15px 20px;
+      display: block;
+      text-decoration: none;
+    }
+    .sidebar a:hover {
+      background-color: #004d40;
+    }
+    .content {
+      margin-left: 240px;
+      padding: 40px;
+    }
+    .profile-card {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .profile-img {
+      width: 100%;
+      max-width: 250px;
+      border-radius: 10px;
+      object-fit: cover;
+      margin-bottom: 20px;
+    }
+    .profile-title {
+      color: #00796b;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <h4 class="text-center mb-4"> <b>Lifecare Connect</b></h4>
+  <a href="{% url 'home' %}">Home</a>
+  <a href="{% url 'dashboard' %}">Dashboard</a>
+  <a href="#">Tasks</a>
+  <a href="{% url 'edit_doctor_profile' %}">Edit Profile</a>
+  <a href="javascript:void(0);" onclick="document.getElementById('logoutForm').submit();" class="text-danger">Logout</a>
+  <a href="#" class="text-danger" id="deleteAccountLink">Delete Profile</a>
+  
+
+</div>
+
+<!-- Main Content -->
+<div class="content">
+  <div class="profile-card row g-4">
+    <div class="col-md-4">
+      {% if profile.profile_pic %}
+        <img src="{{ profile.profile_pic.url }}" class="profile-img" alt="Profile Photo">
+      {% else %}
+        <img src="{% static 'assets/img/default-profile.png' %}" class="profile-img" alt="No Photo">
+      {% endif %}
+    </div>
+    <div class="col-md-8">
+      <h3 class="profile-title">{{ profile.full_name }}</h3>
+      <p>Welcome to your dashboard. You can <a href="{% url 'edit' %}">edit your profile</a> or <a href="{% url 'password_change' %}">change your password</a>.</p>
+      <p><strong>Professional Title:</strong> {{ profile.professional_title }}</p>
+      <p><strong>License Number:</strong> {{ profile.license_number }}</p>
+      <p><strong>Email:</strong> {{ profile.email }}</p>
+      <p><strong>Contact:</strong> {{ profile.contact }}</p>
+      <p><strong>Available Location:</strong> {{ profile.available_location }}</p>
+      <p><strong>Charge Rates:</strong> {{ profile.charge_rates }}</p>
+      <p><strong>Languages:</strong> {{ profile.languages }}</p>
+      <p><strong>Expertise:</strong> {{ profile.expertise }}</p>
+      <p><strong>Qualifications:</strong> {{ profile.qualifications }}</p>
+    </div>
+  </div>
+
+  <hr class="my-5">
+  <h5 class="text-muted text-center">Upcoming Tasks</h5>
+  <p class="text-center">Coming soon...</p>
+</div>
+
+<form id="logoutForm" action="{% url 'logout' %}" method="POST" style="display: none;">
+  {% csrf_token %}
+</form>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal" tabindex="-1" style="display:none;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Confirm Account Deletion</h5>
+        <button type="button" class="btn-close" aria-label="Close" id="closeModalBtn"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <form method="POST" action="{% url 'delete_account' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Yes, Delete</button>
+          <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Cancel</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const deleteLink = document.getElementById("deleteAccountLink");
+    const modal = document.getElementById("deleteModal");
+    const closeModal = document.getElementById("closeModalBtn");
+    const cancelBtn = document.getElementById("cancelDeleteBtn");
+
+    deleteLink.onclick = function (e) {
+      e.preventDefault();
+      modal.style.display = "block";
+    };
+    closeModal.onclick = () => modal.style.display = "none";
+    cancelBtn.onclick = () => modal.style.display = "none";
+    window.onclick = (event) => {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    };
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Appointments</title>
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Poppins', sans-serif;
+      margin-top: 0;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 240px;
+      background-color: #00796b;
+      padding-top: 60px;
+      color: white;
+    }
+    .sidebar a {
+      color: white;
+      padding: 15px 20px;
+      display: block;
+      text-decoration: none;
+    }
+    .sidebar a:hover {
+      background-color: #004d40;
+    }
+    .content {
+      margin-left: 240px;
+      padding: 40px;
+    }
+    .profile-card {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .profile-img {
+      width: 100%;
+      max-width: 250px;
+      border-radius: 10px;
+      object-fit: cover;
+      margin-bottom: 20px;
+    }
+    .profile-title {
+      color: #00796b;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <h4 class="text-center mb-4"> <b>Lifecare Connect</b></h4>
+  <a href="{% url 'home' %}">Home</a>
+  <a href="{% url 'dashboard' %}">Dashboard</a>
+  <a href="#">Bookings</a>
+  <a href="{% url 'edit_patient_profile' %}">Edit Profile</a>
+  <a href="javascript:void(0);" onclick="document.getElementById('logoutForm').submit();" class="text-danger">Logout</a>
+  <a href="#" class="text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete Profile</a>
+</div>
+
+<div class="content">
+<h3 class="mb-4">Appointments</h3>
+
+<div class="card">
+  <div class="card-body">
+    <ul class="nav nav-tabs mb-3">
+      <li class="nav-item"><a class="nav-link active" href="#">Upcoming</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Ongoing</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Previous</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Expired</a></li>
+    </ul>
+
+    <input type="text" class="form-control mb-3" placeholder="Search table">
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover text-center align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Doctor</th>
+            <th>Appointment Type</th>
+            <th>Date</th>
+            <th>From</th>
+            <th>Cost</th>
+            <th>Queue Position</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if appointments %}
+            {% for appointment in appointments %}
+              <tr>
+                <td>{{ appointment.doctor_name }}</td>
+                <td>{{ appointment.type }}</td>
+                <td>{{ appointment.date }}</td>
+                <td>{{ appointment.start_time }}</td>
+                <td>KES {{ appointment.cost }}</td>
+                <td>{{ appointment.queue_position }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr><td colspan="7" class="text-muted">No Upcoming appointments</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+
+<script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

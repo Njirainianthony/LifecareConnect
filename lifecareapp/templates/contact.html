@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block body %}
+
+<!-- ======= Frequently Asked Questioins Section ======= -->
+<section id="faq" class="faq section-bg">
+    <div class="container" data-aos="fade-up">
+
+      <div class="section-title">
+        <h2>Frequently Asked Questioins</h2>
+        <p>Here are some of the frequently asked questions on Lifecare Connect with their answers.</p>
+      </div>
+
+      <ul class="faq-list">
+
+        <li>
+          <div data-bs-toggle="collapse" class="collapsed question" href="#faq1">What is a Healthcare Management System? <i class="bi bi-chevron-down icon-show"></i><i class="bi bi-chevron-up icon-close"></i></div>
+          <div id="faq1" class="collapse" data-bs-parent=".faq-list">
+            <p>
+              A Healthcare Management System is a digital solution designed to streamline hospital operations, patient records, appointment scheduling, billing, and other healthcare-related activities. It enhances efficiency, reduces errors, and improves patient care by automating administrative and clinical processes.
+            </p>
+          </div>
+        </li>
+
+        <li>
+          <div data-bs-toggle="collapse" href="#faq2" class="collapsed question">Who can use Lifecare Connect? <i class="bi bi-chevron-down icon-show"></i><i class="bi bi-chevron-up icon-close"></i></div>
+          <div id="faq2" class="collapse" data-bs-parent=".faq-list">
+            <p>
+              Lifecare Connect can be used by hospitals, clinics, doctors, nurses, administrative staff, and even patients. Healthcare providers use it to manage patient records and appointments, while patients can use it to schedule visits, access medical history, and receive prescriptions.
+            </p>
+          </div>
+        </li>
+
+        <li>
+          <div data-bs-toggle="collapse" href="#faq3" class="collapsed question">How does Lifecare Connect improve patient care? <i class="bi bi-chevron-down icon-show"></i><i class="bi bi-chevron-up icon-close"></i></div>
+          <div id="faq3" class="collapse" data-bs-parent=".faq-list">
+            <p>
+              Lifecare Connect enhances patient care by ensuring accurate and timely access to medical records, reducing paperwork, minimizing medical errors, and enabling faster decision-making. It also facilitates better communication between doctors, nurses, and patients.
+            </p>
+          </div>
+        </li>
+
+        <li>
+          <div data-bs-toggle="collapse" href="#faq4" class="collapsed question">Is patient data secure in Lifecare Connect? <i class="bi bi-chevron-down icon-show"></i><i class="bi bi-chevron-up icon-close"></i></div>
+          <div id="faq4" class="collapse" data-bs-parent=".faq-list">
+            <p>
+              Yes, Lifecare Connect follows strict data security protocols, including encryption, access control, and compliance with data healthcare regulations such as Kenya Data Protection Act. These measures ensure patient data remains confidential and protected from unauthorized access
+            </p>
+          </div>
+        </li>
+
+        <li>
+          <div data-bs-toggle="collapse" href="#faq5" class="collapsed question">Can Lifecare Connect integrate with other healthcare systems?<i class="bi bi-chevron-down icon-show"></i><i class="bi bi-chevron-up icon-close"></i></div>
+          <div id="faq5" class="collapse" data-bs-parent=".faq-list">
+            <p>
+              Yes, Lifecare Connect can integrate with Electronic Health Records (EHR), Laboratory Information Systems (LIS), pharmacy systems, and insurance platforms. This interoperability improves data sharing and reduces redundancy.
+            </p>
+          </div>
+        </li>
+
+        <li>
+          <div data-bs-toggle="collapse" href="#faq6" class="collapsed question">How can Lifecare Connect reduce costs for healthcare facilities? <i class="bi bi-chevron-down icon-show"></i><i class="bi bi-chevron-up icon-close"></i></div>
+          <div id="faq6" class="collapse" data-bs-parent=".faq-list">
+            <p>
+              By automating administrative tasks, reducing paperwork, minimizing billing errors, and optimizing resource allocation, an HMS helps healthcare facilities save time and reduce operational costs. It also improves patient flow and reduces wait times, leading to better resource utilization.
+            </p>
+          </div>
+        </li>
+
+      </ul>
+
+    </div>
+  </section><!-- End Frequently Asked Questioins Section -->
+
+  <!-- ======= Contact Section ======= -->
+  <section id="contact" class="contact">
+    <div class="container">
+
+      <div class="section-title">
+        <h2>Contact</h2>
+        <p>For more information, you can reach us through our contacts below. You can also fill a form expressing your challenge and a professional will reach out to you.</p>
+      </div>
+
+    </div>
+
+    <div class="container">
+
+      <div class="row mt-5">
+
+        <div class="col-lg-6">
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="info-box">
+                <i class="bx bx-map"></i>
+                <h3>Our Address</h3>
+                <p>Nairobi, Kenya, KE 00100</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-box mt-4">
+                <i class="bx bx-envelope"></i>
+                <h3>Email Us</h3>
+                <p>info@lifecareconnect.com</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-box mt-4">
+                <i class="bx bx-phone-call"></i>
+                <h3>Call Us</h3>
+                <p>+254 706572440</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-lg-6">
+          <form action="forms/contact.php" method="post" role="form" class="php-email-form">
+            <div class="row">
+              <div class="col-md-6 form-group">
+                <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" required="">
+              </div>
+              <div class="col-md-6 form-group mt-3 mt-md-0">
+                <input type="email" class="form-control" name="email" id="email" placeholder="Your Email" required="">
+              </div>
+            </div>
+            <div class="form-group mt-3">
+              <input type="text" class="form-control" name="subject" id="subject" placeholder="Subject" required="">
+            </div>
+            <div class="form-group mt-3">
+              <textarea class="form-control" name="message" rows="7" placeholder="Message" required=""></textarea>
+            </div>
+            <div class="my-3">
+              <div class="loading">Loading</div>
+              <div class="error-message"></div>
+              <div class="sent-message">Your message has been sent. Thank you!</div>
+            </div>
+            <div class="text-center"><button type="submit">Send Message</button></div>
+          </form>
+        </div>
+
+      </div>
+
+    </div>
+  </section><!-- End Contact Section -->
+
+  {% endblock %}

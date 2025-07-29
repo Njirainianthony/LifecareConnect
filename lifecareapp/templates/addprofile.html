@@ -1,0 +1,154 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Profile | Lifecare Connect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Bootstrap & Icons -->
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: url("{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}") no-repeat center top;
+      background-size: cover;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.78); /* Soft white overlay */
+      z-index: 0;
+    }
+
+    #topbar {
+      background-color: #00796b;
+      color: white;
+      font-size: 14px;
+      padding: 10px 0;
+      z-index: 1000;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+    }
+
+    #topbar i {
+      margin-right: 5px;
+      color: white;
+    }
+
+    .profile-select-wrapper {
+      margin-top: 120px;
+      display: flex;
+      justify-content: center;
+      padding-bottom: 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-select-card {
+      width: 100%;
+      max-width: 1400px;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      padding: 40px 30px;
+    }
+
+    .option-card {
+      border: none;
+      border-radius: 10px;
+      background: #f5f5f5;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .option-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 25px rgba(0, 121, 107, 0.3);
+    }
+
+    .option-card img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      margin-bottom: 20px;
+    }
+
+    .btn-blue-green {
+      background-color: #00796b;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-blue-green:hover {
+      background-color: #004d40;
+    }
+
+    @media (max-width: 768px) {
+      .option-card img {
+        width: 80px;
+        height: 80px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ======= Top Bar ======= -->
+<div id="topbar" class="d-flex align-items-center">
+  <div class="container d-flex align-items-center justify-content-center justify-content-md-between">
+    <div class="align-items-center d-none d-md-flex">
+      <i class="bi bi-clock"></i> Monday - Saturday, 8AM to 11PM
+    </div>
+    <div class="d-flex align-items-center">
+      <i class="bi bi-phone"></i> Call us now +254 706572440
+    </div>
+  </div>
+</div>
+
+<!-- ======= Main Section ======= -->
+<div class="container profile-select-wrapper">
+  <div class="profile-select-card">
+    <h3 class="text-center mb-5 text-dark">Choose Your Profile Type</h3>
+    <div class="row g-4 justify-content-center">
+      <!-- Patient Profile -->
+      <div class="col-md-6 col-lg-5">
+        <div class="card option-card text-center p-4">
+          <img src="{% static 'assets/img/patientprofile.jpg' %}" class="mx-auto" alt="Patient">
+          <h5 class="mb-2">Patient Profile</h5>
+          <p>Create a profile to receive homecare support and book services.</p>
+          <a href="{% url 'patientform' %}" class="btn btn-blue-green mt-2">Continue as Patient</a>
+        </div>
+      </div>
+
+      <!-- Doctor Profile -->
+      <div class="col-md-6 col-lg-5">
+        <div class="card option-card text-center p-4">
+          <img src="{% static 'assets/img/doctorprofile.jpg' %}" class="mx-auto" alt="Doctor">
+          <h5 class="mb-2">Doctor/Nurse Profile</h5>
+          <p>Create a profile to offer care services and receive patient requests.</p>
+          <a href="{% url 'doctorform' %}" class="btn btn-blue-green mt-2">Continue as Doctor/Nurse</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

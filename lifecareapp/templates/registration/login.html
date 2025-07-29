@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Login{% endblock %}
+
+{% block body %}
+<style>
+  body {
+    background: url("{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}") no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    position: relative;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(255, 255, 255, 0.7);
+    z-index: 0;
+  }
+
+  .login-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding-top: 80px;
+    z-index: 1;
+    position: relative;
+  }
+
+  .logo {
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  .logo img {
+    max-height: 80px;
+  }
+
+  .logo-text {
+    font-size: 30px;
+    font-weight: 700;
+    color: #00796b;
+  }
+
+  .login-card {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 50px 50px;
+    max-width: 520px;
+    width: 100%;
+    min-height: 500px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    z-index: 2;
+  }
+
+  .form-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    color: #00796b;
+    margin-bottom: 20px;
+  }
+
+  label {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 6px;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+
+  .btn-blue-green {
+    background-color: #00796b;
+    color: white;
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+  }
+
+  .btn-blue-green:hover {
+    background-color: #004d40;
+  }
+
+  .text-danger {
+    font-size: 14px;
+    color: #dc3545;
+    margin-bottom: 15px;
+  }
+
+  .text-end a {
+    font-size: 14px;
+    color: #00796b;
+    text-decoration: none;
+  }
+
+  .text-end a:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<div class="container login-wrapper">
+  <div class="logo">
+    <img src="{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}" alt="Lifecare Connect Logo">
+    <div class="logo-text">Lifecare Connect</div>
+  </div>
+
+  <div class="login-card">
+    <h2 class="form-title">Welcome Back</h2>
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+<!-- Rest of your login form -->
+
+    {% if form.errors %}
+      <p class="text-danger text-center">
+        Your username and password didn't match. Please try again.
+      </p>
+    {% else %}
+      <p class="text-center text-muted">
+        Please use the form below to log in.
+      </p>
+    {% endif %}
+
+    <form method="POST" action="{% url 'login' %}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+
+      <div class="mb-3">
+        <label for="id_username">Username</label>
+        {{ form.username|add_class:"form-control" }}
+        {% for error in form.username.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="mb-3">
+        <label for="id_password">Password</label>
+        {{ form.password|add_class:"form-control" }}
+        {% for error in form.password.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <button type="submit" class="btn btn-blue-green">Login</button>
+    </form>
+
+    <div class="text-end mt-3">
+      <a href="{% url 'password_reset' %}">Forgot password?</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
