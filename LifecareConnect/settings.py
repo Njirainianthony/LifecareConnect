@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 from dotenv import load_dotenv
-
 import os
 
 load_dotenv()
@@ -140,9 +139,10 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#LOGIN_REDIRECT_URL = 'add_profile'
-#LOGIN_URL = 'login'
-#LOGOUT_REDIRECT_URL = 'home'
+#LOGIN_REDIRECT_URL = 'custom_login_view'
+LOGIN_URL = 'custom_login_view'
+LOGIN_REDIRECT_URL = '/profiles/'  # if you want all unmatched logins to go there
+LOGOUT_REDIRECT_URL = 'home'
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR / 'media')

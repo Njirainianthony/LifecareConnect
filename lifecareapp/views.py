@@ -34,6 +34,7 @@ def services(request):
 def departments(request):
     return render(request, 'departments.html')
 
+@login_required
 def add_profile(request):
     return render(request,'addprofile.html')
 
@@ -88,39 +89,25 @@ def signup(request):
 
 def custom_login_view(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get('username')
+        password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
             login(request, user)
 
-            # Get the user type
-            try:
-                profile = user.profile  # Assuming you have a OneToOneField from Profile to User
-            except Profile.DoesNotExist:
-                messages.error(request, 'Profile not found.')
-                return redirect('login')
-
-            if profile.user_type == 'patient':
-                if PatientProfile.objects.filter(user=user).exists():
-                    return redirect('list_profiles')  # Redirect to the list of patient profiles
-                else:
-                    return redirect('add_profile')  # Add profile page for patients
-
-            elif profile.user_type == 'doctor':
-                if DoctorProfile.objects.filter(user=user).exists():
-                    return redirect('dashboard_doctor')  # Doctor dashboard
-                else:
-                    return redirect('add_profile')  # Add profile page for doctors
-
+            # Check if the user has a PatientProfile
+            if PatientProfile.objects.filter(user=user).exists():
+                return redirect('list_patient_profiles')  # correct redirect for patient
+            # Check if the user has a DoctorProfile
+            elif DoctorProfile.objects.filter(user=user).exists():
+                return redirect('dashboard_doctor')
+            # If neither profile exists, send them to create one
             else:
-                messages.error(request, 'Invalid user type.')
-                return redirect('login')
+                return redirect('addprofile')
 
         else:
             messages.error(request, 'Invalid username or password.')
-            return redirect('login')
 
     return render(request, 'login.html')
     
