@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse, JsonResponse
 from .models import PatientProfile, DoctorProfile, Profile, Booking, Payment
@@ -210,7 +210,7 @@ def dashboard_doctor(request):
             'bookings': bookings,
         })
     except DoctorProfile.DoesNotExist:
-        return redirect('add_profile')  # fallback in case no doctor profile yet
+        return redirect('addprofile')  # fallback in case no doctor profile yet
 
         
 #Update booking status
@@ -535,3 +535,86 @@ def stk_push(request):
             return JsonResponse({"status": "success"})
 
         return JsonResponse({"status": "fail", "message": "STK Push failed"})
+
+
+#ADMIN STUUUUFFF!!!!!!!!!🤖🤖🤖
+
+# Check if user is admin (superuser)
+def is_admin(user):
+    return user.is_superuser
+
+@login_required
+@user_passes_test(is_admin)
+def dashboard_admin(request):
+    return render(request, 'admin/base_admin.html')
+
+@login_required
+def patient_profiles(request):
+    query = request.GET.get('search')
+    if query:
+        patients = PatientProfile.objects.filter(
+            Q(full_name__icontains=query) |
+            Q(email__icontains=query) |
+            Q(phone__icontains=query) |
+            Q(county__icontains=query)
+        )
+    else:
+        patients = PatientProfile.objects.all()
+
+    return render(request, 'admin/patient_profiles.html', {'patients': patients, 'search_query': query})
+
+@login_required
+def doctor_profiles_list(request):
+    query = request.GET.get('q')
+    doctors = DoctorProfile.objects.all()
+
+    if query:
+        doctors = doctors.filter(
+            Q(full_name__icontains=query) |
+            Q(professional_title__icontains=query)
+        )
+
+    context = {
+        'doctors': doctors,
+        'query': query,
+    }
+    return render(request, 'admin/doctor_cards.html', context)
+
+@login_required
+def booking_list(request):
+    query = request.GET.get('q')
+    bookings = Booking.objects.select_related('patient', 'doctor')
+
+    if query:
+        bookings = bookings.filter(
+            Q(patient__full_name__icontains=query) |
+            Q(doctor__full_name__icontains=query)
+        )
+
+    context = {
+        'bookings': bookings,
+        'query': query
+    }
+    return render(request, 'admin/booking_cards.html', context)
+
+@login_required
+def mpesa_transactions(request):
+    status_filter = request.GET.get('status')
+    search_query = request.GET.get('search', '')
+
+    transactions = Payment.objects.select_related('user', 'doctor').order_by('-id')
+
+    if status_filter:
+        transactions = transactions.filter(status=status_filter)
+
+    if search_query:
+        transactions = transactions.filter(
+            Q(user__full_name__icontains=search_query) |
+            Q(doctor__full_name__icontains=search_query)
+        )
+
+    return render(request, 'admin/mpesa_cards.html', {
+        'transactions': transactions,
+        'selected_status': status_filter,
+        'search_query': search_query
+    })

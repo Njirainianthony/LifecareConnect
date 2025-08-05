@@ -1,0 +1,94 @@
+{% extends "admin/base_admin.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    thead th {
+        background-color: #00796b !important;
+        color: white !important;
+    }
+</style>
+
+<div class="container-fluid px-4">
+  <div class="d-flex justify-content-between align-items-center my-4">
+    <h2 class="fw-bold text-teal">🧑‍⚕️ Patient Profiles</h2>
+  </div>
+
+  <!-- Search -->
+  <form method="GET" class="mb-4">
+    <div class="input-group w-50">
+      <input type="text" name="search" class="form-control rounded-start" placeholder="🔍 Search patients..." value="{{ search_query|default:'' }}">
+      <button class="btn text-white" type="submit" style="background-color: #00796b;">Search</button>
+    </div>
+  </form>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered mb-0">
+          <thead>
+            <tr class="align-middle text-center">
+              <th>#</th>
+              <th>Photo</th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Gender</th>
+              <th>County</th>
+              <th>Address</th>
+              <th>DOB</th>
+              <th>Emergency Contact</th>
+              <th>Allergies</th>
+              <th>Conditions</th>
+              <th>Care Type</th>
+              <th>Medical History</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for patient in patients %}
+            <tr class="align-middle text-center">
+              <td>{{ forloop.counter }}</td>
+              <td>
+                {% if patient.profile_pic %}
+                  <img src="{{ patient.profile_pic.url }}" alt="Profile Pic" class="rounded-circle border" style="width: 45px; height: 45px; object-fit: cover;">
+                {% else %}
+                  <span class="text-muted">No Image</span>
+                {% endif %}
+              </td>
+              <td>{{ patient.full_name }}</td>
+              <td>{{ patient.email }}</td>
+              <td>{{ patient.phone }}</td>
+              <td>{{ patient.gender }}</td>
+              <td>{{ patient.county }}</td>
+              <td>{{ patient.address }}</td>
+              <td>{{ patient.dob|date:"M d, Y" }}</td>
+              <td>{{ patient.emergency_contact }}</td>
+              <td>{{ patient.allergies|default:"—" }}</td>
+              <td>{{ patient.medical_conditions|default:"—" }}</td>
+              <td>{{ patient.preferred_care_type|default:"—" }}</td>
+              <td>
+                {% if patient.medical_history_pdf %}
+                  <a href="{{ patient.medical_history_pdf.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
+                {% else %}
+                  <span class="text-muted">Not Uploaded</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="#" class="btn btn-sm btn-outline-success mb-1">Edit</a><br>
+                <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="15" class="text-center text-muted py-4">No matching patients found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -91,7 +91,7 @@
 <div class="container profile-wrapper">
   <div class="profile-card">
     <h2 class="form-title">Doctor Profile Form</h2>
-    <form method="POST" enctype="multipart/form-data" action="{% url 'doctorform' %}">
+    <form method="POST" enctype="multipart/form-data" action="{% url 'dashboard_doctor' %}">
       {% csrf_token %}
       <div class="row">
         <div class="mb-3 col-md-6">

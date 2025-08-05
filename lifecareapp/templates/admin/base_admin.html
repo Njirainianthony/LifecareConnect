@@ -1,0 +1,113 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lifecare Admin | Lifecare Connect</title>
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Inter', sans-serif;
+      margin-top: 0;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 240px;
+      background-color: #00796b;
+      padding-top: 60px;
+      color: white;
+      z-index: 1000;
+    }
+
+    .sidebar .logo {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .sidebar .logo img {
+      width: 130px;
+      height: auto;
+      border-radius: 6px;
+    }
+
+    .sidebar h4 {
+      font-weight: 700;
+      font-size: 18px;
+      text-align: center;
+      color: white;
+      margin-bottom: 25px;
+    }
+
+    .sidebar a {
+      color: white;
+      padding: 14px 20px;
+      display: block;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .sidebar a:hover,
+    .sidebar a.active {
+      background-color: #004d40;
+      border-left: 4px solid #ffffff;
+    }
+
+    .content {
+      margin-left: 240px;
+      padding: 40px;
+    }
+
+    .main-card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+
+    .btn-logout {
+      background-color: #e53935;
+      color: white;
+      margin-top: 20px;
+    }
+
+    .btn-logout:hover {
+      background-color: #c62828;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="logo">
+    <img src="{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}" alt="Lifecare Logo">
+  </div>
+  <h4>Lifecare Admin</h4>
+  <a href="{% url 'patient_profiles' %}" class="{% if request.path == '/admin/patient-profiles/' %}active{% endif %}">👩‍⚕️ Patient Profiles</a>
+  <a href="{% url 'doctor_profiles' %}" class="{% if request.path == '/admin/doctor-profiles/' %}active{% endif %}">👨‍⚕️ Doctor Profiles</a>
+  <a href="{% url 'booking_list' %}" class="{% if request.path == '/admin/bookings/' %}active{% endif %}">📋 Bookings</a>
+  <a href="#" class="">📆 Appointments</a>
+  <a href="{% url 'mpesa_transactions' %}" class="{% if request.path == '/admin/mpesa/' %}active{% endif %}">💰 MPESA</a>
+  <a href="{% url 'logout' %}" class="btn btn-logout w-75 mx-auto">Logout</a>
+</div>
+
+<!-- Main Content -->
+<div class="content">
+  <div class="main-card">
+    {% block content %}
+    {% endblock %}
+  </div>
+</div>
+
+<script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

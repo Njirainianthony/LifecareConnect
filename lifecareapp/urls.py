@@ -47,4 +47,12 @@ urlpatterns = [
     path('stk-push', views.stk_push, name='process_stk_push'),
     #path('mpesa/callback/', views.mpesa_callback, name='mpesa_callback'),
 
+    #ADMIN URLS!!!!!
+    path('admin-dashboard/', views.dashboard_admin, name='admin_dashboard'),
+    path('admin-dashboard/patient-profiles/', views.patient_profiles, name='patient_profiles'),
+    path('admin-dashboard/doctor-profiles/', views.doctor_profiles_list, name='doctor_profiles'),
+    path('admin-dashboard/bookings/', views.booking_list, name='booking_list'),
+    path('admin-dashboard/mpesa/', views.mpesa_transactions, name='mpesa_transactions'),
+
+
 ]
