@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
+from django.core.validators import FileExtensionValidator
 
 
 # Create your models here.
@@ -61,7 +62,7 @@ class PatientProfile(models.Model):
     allergies = models.TextField(blank=True)
     preferred_care_type = models.CharField(max_length=100, blank=True)
     profile_pic = models.ImageField(upload_to='dashboard_patient/', blank=True, null=True)
-    medical_history_pdf = models.FileField(upload_to='patient_medical_history/', blank=True, null=True)
+    medical_history_pdf = models.FileField(upload_to='patient_medical_history/', blank=True, null=True, validators=[FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'])])
     medical_history_uploaded_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
@@ -148,3 +149,29 @@ class Booking(models.Model):
     time = models.CharField(max_length=20, default='10:00 AM')
     status = models.CharField(max_length=20)  # 'BOOKED', 'CANCELLED'
 """
+
+#Doctor Availability
+class DoctorAvailability(models.Model):
+    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE, related_name='availabilities')
+    date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+class Meta:
+    unique_together = ('doctor', 'date', 'start_time', 'end_time')
+    ordering = ('date', 'start_time')
+
+def __str__(self):
+    return f"{self.doctor.full_name} - {self.date} {self.start_time}-{self.end_time}"
+
+#Equipment Leasing
+class Equipment(models.Model):
+    name = models.CharField(max_length=120)
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to='equipment/', blank=True, null=True)
+    daily_rate = models.DecimalField(max_digits=10, decimal_places=2)
+    available = models.BooleanField(default=True)
+
+
+def __str__(self):
+    return self.name

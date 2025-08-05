@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Lease {{ equipment.name }}
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-md-6">
+      {% if equipment.image %}
+        <img src="{{ equipment.image.url }}" class="img-fluid rounded" alt="{{ equipment.name }}">
+      {% endif %}
+    </div>
+    
+    <div class="col-md-6">
+      <h3>{{ equipment.name }}</h3>
+      <p>{{ equipment.description }}</p>
+      <p><strong>Daily rate:</strong> {{ equipment.daily_rate }}</p>
+      <p>Status: 
+        {% if equipment.available %}
+          <span class="text-success">Available</span>
+        {% else %}
+          <span class="text-danger">Unavailable</span>
+        {% endif %}
+      </p>
+      
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary" {% if not equipment.available %}disabled{% endif %}>
+          Request Lease
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

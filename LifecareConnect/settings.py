@@ -14,13 +14,14 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
-print("Loaded DB password:", os.getenv("LIFECARE_DATABASE_PASSWORD"))
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+print("Loaded DB password:", os.getenv("LIFECARE_DATABASE_PASSWORD"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -39,8 +40,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'grappelli',
     'lifecareapp',
+    'grappelli',
     'rest_framework', 
     'django.contrib.admin',
     'django.contrib.auth',

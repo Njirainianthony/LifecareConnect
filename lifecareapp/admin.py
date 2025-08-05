@@ -5,7 +5,7 @@ from django.urls import path
 from django.template.response import TemplateResponse
 from django.contrib.auth.admin import UserAdmin
 
-from .models import Profile,PatientProfile,DoctorProfile,BaseUserManager,UserManager,Booking
+from .models import Profile,PatientProfile,DoctorProfile,BaseUserManager,UserManager,Booking, Equipment
 from django.utils.translation import gettext_lazy as _
 
 admin.site.site_header = _("Lifecare Management Admin")
@@ -63,3 +63,9 @@ class BookingAdmin(admin.ModelAdmin):
 admin.site.register(Profile, ProfileAdmin)
 
 
+#Equipment
+@admin.register(Equipment)
+class EquipmentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'daily_rate', 'available')
+    list_filter = ('available',)
+    search_fields = ('name',)
