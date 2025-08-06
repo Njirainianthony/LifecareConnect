@@ -42,10 +42,11 @@ urlpatterns = [
     path('booking/<int:booking_id>/<str:decision>/', views.update_booking_status, name='update_booking_status'),
     path('delete-account/', views.delete_account, name='delete_account'),
     path('appointments/', views.appointments, name='appointments'),
-    #path('doctor_profile/<int:doctor_id>', views.view_doctor_profile, name='doctor-profile'),
+    path('doctor_profile/<int:doctor_id>', views.view_doctor_profile, name='doctor-profile'),
     path('mpesa/stk/', views.initiate_stk_push, name='stk_push'),
     path('stk-push', views.stk_push, name='process_stk_push'),
     #path('mpesa/callback/', views.mpesa_callback, name='mpesa_callback'),
+
 
     #ADMIN URLS!!!!!
     path('admin-dashboard/', views.dashboard_admin, name='admin_dashboard'),
@@ -53,6 +54,11 @@ urlpatterns = [
     path('admin-dashboard/doctor-profiles/', views.doctor_profiles_list, name='doctor_profiles'),
     path('admin-dashboard/bookings/', views.booking_list, name='booking_list'),
     path('admin-dashboard/mpesa/', views.mpesa_transactions, name='mpesa_transactions'),
-
+    path('doctor/availability/', views.manage_availability, name='manage_availability'),
+    
+    path('doctor/availability/int:availability_id/delete/', views.delete_availability, name='delete_availability'),
+    path('equipment/', views.equipment_list, name='equipment_list'),
+    path('equipment/add/', views.equipment_create, name='equipment_create'),
+    path('equipment/int:pk/', views.equipment_detail, name='equipment_detail'),
 
 ]

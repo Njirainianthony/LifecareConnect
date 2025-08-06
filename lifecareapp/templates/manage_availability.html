@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Manage Availability{% endblock %}
+{% block body %}
+<div class="container mt-5"> <h2 class="mb-4">Manage Availability</h2>
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }}">{{ message }}</div>
+{% endfor %}
+{% endif %}
+
+<div class="row"> <div class="col-md-5"> <div class="card mb-4"> <div class="card-body"> <h5 class="card-title">Add New Slot</h5> <form method="post"> {% csrf_token %} <div class="mb-3"> {{ form.date.label_tag }} {{ form.date }} </div> <div class="mb-3"> {{ form.start_time.label_tag }} {{ form.start_time }} </div> <div class="mb-3"> {{ form.end_time.label_tag }} {{ form.end_time }} </div> <button class="btn btn-primary" type="submit">Add Slot</button> <a class="btn btn-secondary ms-2" href="{% url 'dashboard_doctor' %}">Back to Dashboard</a> </form> </div> </div> </div>
+
+<div class="col-md-7">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Your Availability</h5>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Start</th>
+              <th>End</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in slots %}
+              <tr>
+                <td>{{ s.date }}</td>
+                <td>{{ s.start_time }}</td>
+                <td>{{ s.end_time }}</td>
+                <td>
+                  <a href="{% url 'delete_availability'  %}" class="btn btn-sm btn-danger"
+                     onclick="return confirm('Delete this slot?');">Delete</a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4" class="text-muted">No availability added yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div> </div> 
+{% endblock %}

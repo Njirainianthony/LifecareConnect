@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Equipment{% endblock %}
+
+{% block body %}
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: url("{% static 'assets/img/Lifecare-Connect-Homecare-Logo-1.jpg' %}") no-repeat center top;
+    background-size: cover;
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  .overlay-wrapper {
+    background: rgba(255, 255, 255, 0.85);
+    padding-bottom: 60px;
+  }
+
+  .section-heading {
+    background: #00796b;
+    padding: 40px 0 20px;
+    text-align: center;
+    color: #fff;
+    margin-bottom: 30px;
+  }
+
+  .section-heading h2 {
+    font-weight: 700;
+  }
+
+  .search-bar {
+    max-width: 700px;
+    margin: 20px auto 0;
+    position: relative;
+  }
+
+  .search-bar input {
+    height: 48px;
+    padding-right: 40px;
+  }
+
+  .search-icon {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    color: #00796b;
+  }
+
+  .card {
+    transition: transform .3s, box-shadow .3s;
+    height: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 121, 107, .2);
+  }
+
+  .card-img-top {
+    height: 200px;
+    object-fit: cover;
+  }
+
+  .card-title {
+    font-weight: 600;
+    color: #00796b;
+  }
+
+  .badge-available {
+    background: #c8e6c9;
+    color: #256029;
+    font-size: .75rem;
+    padding: .35em .6em;
+    border-radius: 12px;
+  }
+
+  .card-footer {
+    background: #fff;
+    border-top: none;
+  }
+
+  .lease-btn {
+    background: #00796b;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 14px;
+    text-decoration: none;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+  }
+
+  .pagination a,
+  .pagination span {
+    margin: 0 5px;
+    padding: 8px 16px;
+    background: #00796b;
+    color: #fff;
+    border-radius: 5px;
+    text-decoration: none;
+  }
+
+  .pagination .current {
+    background: #004d40;
+  }
+
+  @media (max-width: 768px) {
+    .col-md-4 {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .col-md-4 {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+</style>
+
+<section class="overlay-wrapper">
+  <div class="section-heading">
+    <h2 class="fw-bold">
+      <i class="bi bi-tools me-2"></i>Medical Equipment for Lease
+    </h2>
+    <p>Browse and lease medical equipment quickly and easily.</p>
+    <div class="search-bar mt-4">
+      <form method="GET" action="" class="position-relative">
+        <input type="text" name="q" value="{{ q }}" class="form-control shadow-sm" placeholder="Search equipment...">
+        <i class="bi bi-search search-icon"></i>
+      </form>
+    </div>
+  </div>
+
+  {% if request.user.is_staff %}
+  <div class="container mt-4"> <a href="{% url 'equipment_create' %}" class="btn btn-success">Add Equipment</a> </div> 
+  {% endif %}
+
+  <div class="container">
+    <div class="row justify-content-center gx-5 gy-4">
+      {% for item in page_obj %}
+        <div class="col-md-4 d-flex">
+          <div class="card w-100 text-center border-0 shadow-sm">
+            {% if item.image %}
+              <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.name }}">
+            {% else %}
+              <img src="{% static 'assets/img/placeholder-equipment.jpg' %}" class="card-img-top" alt="{{ item.name }}">
+            {% endif %}
+
+            <div class="card-body d-flex flex-column justify-content-between">
+              <h5 class="card-title">{{ item.name }}</h5>
+              <p class="text-muted mb-2">{{ item.description|truncatechars:100 }}</p>
+              <div>
+                <span class="badge-available">
+                  {% if item.available %}Available{% else %}Unavailable{% endif %}
+                </span>
+              </div>
+              <p class="mt-2 mb-0">
+                <strong>Daily rate:</strong> {{ item.daily_rate }}
+              </p>
+            </div>
+
+            <div class="card-footer d-flex justify-content-center gap-3 pb-4">
+              <a href="{% url 'equipment_detail' item.id %}" class="lease-btn">Lease</a>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-center">No equipment found.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="pagination">
+    {% if page_obj.has_previous %}
+      <a href="?q={{ q }}&page={{ page_obj.previous_page_number }}">&laquo; Previous</a>
+    {% endif %}
+
+    <span class="current">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+      <a href="?q={{ q }}&page={{ page_obj.next_page_number }}">Next &raquo;</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

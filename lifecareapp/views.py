@@ -3,8 +3,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse, JsonResponse
-from .models import PatientProfile, DoctorProfile, Profile, Booking, Payment
-from .forms import UserRegistrationForm, PatientProfileForm, DoctorProfileForm, UserEditForm, ProfileEditForm
+from .models import PatientProfile, DoctorProfile, Profile, Booking, Payment, DoctorAvailability, Equipment
+from .forms import UserRegistrationForm, PatientProfileForm, DoctorProfileForm, UserEditForm, ProfileEditForm, DoctorAvailabilityForm, EquipmentForm
 from django.contrib import messages
 from django.urls import reverse
 from django.db.models import Q 
@@ -15,6 +15,7 @@ from django_daraja.mpesa.core import MpesaClient
 import requests
 import json
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.timezone import now
 
 
 
@@ -149,7 +150,6 @@ def add_profile(request):
 
 # --- Patient Form View ---
 @login_required
-@login_required
 def create_patient_profile(request):
     if request.method == 'POST':
         form = PatientProfileForm(request.POST, request.FILES)
@@ -175,7 +175,7 @@ def list_patient_profiles(request):
 @login_required
 def doctor_form(request):
     if DoctorProfile.objects.filter(user=request.user).exists():
-        return redirect('dashboard')
+        return redirect('dashboard_doctor')
 
     if request.method == 'POST':
         form = DoctorProfileForm(request.POST, request.FILES)
@@ -183,7 +183,7 @@ def doctor_form(request):
             profile = form.save(commit=False)
             profile.user = request.user
             profile.save()
-            return redirect('dashboard')
+            return redirect('dashboard_doctor')
     else:
         form = DoctorProfileForm()
 
@@ -252,7 +252,7 @@ def edit_patient_profile(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Patient profile updated successfully.")
-            return redirect('dashboard')
+            return redirect('dashboard_patient')
         else:
             messages.error(request, "Please correct the errors below.")
     else:
@@ -272,7 +272,7 @@ def edit_doctor_profile(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Doctor profile updated successfully.")
-            return redirect('dashboard')
+            return redirect('dashboard_doctor')
         else:
             messages.error(request, "Please correct the errors below.")
     else:
@@ -537,6 +537,7 @@ def stk_push(request):
         return JsonResponse({"status": "fail", "message": "STK Push failed"})
 
 
+
 #ADMIN STUUUUFFF!!!!!!!!!🤖🤖🤖
 
 # Check if user is admin (superuser)
@@ -618,3 +619,91 @@ def mpesa_transactions(request):
         'selected_status': status_filter,
         'search_query': search_query
     })
+    
+
+#Doctor Availability
+@login_required
+def manage_availability(request):
+    # Ensure this user has a doctor profile
+    try:
+        doctor = DoctorProfile.objects.get(user=request.user)
+    except DoctorProfile.DoesNotExist:
+        messages.error(request, "Only doctors can manage availability.")
+        return redirect('addprofile')
+    
+    if request.method == 'POST':
+        form = DoctorAvailabilityForm(request.POST)
+        if form.is_valid():
+            slot = form.save(commit=False)
+            slot.doctor = doctor
+
+        # Optional: prevent past dates
+        if slot.date < now().date():
+            messages.error(request, "You cannot add availability in the past.")
+        else:
+            # Optional: prevent overlaps for the same date
+            overlap = DoctorAvailability.objects.filter(
+                doctor=doctor,
+                date=slot.date
+            ).filter(
+                # (start < new_end) and (end > new_start) means overlap
+                start_time__lt=slot.end_time,
+                end_time__gt=slot.start_time
+            ).exists()
+            if overlap:
+                messages.error(request, "This time range overlaps with an existing slot.")
+            else:
+                slot.save()
+                messages.success(request, "Availability added.")
+                return redirect('manage_availability')
+    else:
+        form = DoctorAvailabilityForm()
+
+    # Show future slots first
+    slots = DoctorAvailability.objects.filter(doctor=doctor).order_by('date', 'start_time')
+    return render(request, 'manage_availability.html', {'form': form, 'slots': slots})
+
+@login_required
+def delete_availability(request, availability_id):
+    try:
+        doctor = DoctorProfile.objects.get(user=request.user)
+    except DoctorProfile.DoesNotExist:
+        return redirect('addprofile')
+    slot = get_object_or_404(DoctorAvailability, id=availability_id, doctor=doctor)
+    slot.delete()
+    messages.success(request, "Availability removed.")
+    return redirect('manage_availability')
+
+#Equipment Leasing
+def equipment_list(request):
+    q = (request.GET.get('q') or '').strip()
+    qs = Equipment.objects.all()
+    if q:
+        qs = qs.filter(name__icontains=q)
+        qs = qs.order_by('name')
+
+    paginator = Paginator(qs, 9)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'q': q,
+    }
+    return render(request, 'equipment_list.html', context)
+
+def equipment_detail(request, pk):
+    equipment = get_object_or_404(Equipment, pk=pk)
+    return render(request, 'equipment_detail.html', {'equipment': equipment})
+
+#Equipmentform
+@login_required
+def equipment_create(request):
+    if request.method == 'POST':
+        form = EquipmentForm(request.POST, request.FILES)
+    if form.is_valid():
+        form.save()
+        return redirect('equipment_list')
+    else:
+        form = EquipmentForm()
+    return render(request, 'equipment_form.html', {'form': form})
