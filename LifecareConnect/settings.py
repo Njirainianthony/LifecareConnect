@@ -40,7 +40,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'lifecareapp',
     'grappelli',
     'rest_framework', 
     'django.contrib.admin',
@@ -49,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'lifecareapp',
     'widget_tweaks',
     'django_daraja',
 ]

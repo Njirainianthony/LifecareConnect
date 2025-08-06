@@ -91,8 +91,26 @@
 <div class="container profile-wrapper">
   <div class="profile-card">
     <h2 class="form-title">Doctor Profile Form</h2>
-    <form method="POST" enctype="multipart/form-data" action="{% url 'dashboard_doctor' %}">
+    <form method="POST" enctype="multipart/form-data" action="{% url 'doctorform' %}">
       {% csrf_token %}
+
+      {% if form.errors %}
+  <div class="alert alert-danger">
+    <ul>
+      {% for field in form %}
+        {% for error in field.errors %}
+          <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+        {% endfor %}
+      {% endfor %}
+      {% for error in form.non_field_errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
+
+
       <div class="row">
         <div class="mb-3 col-md-6">
           <label for="full_name" class="form-label">Full Name</label>

@@ -690,13 +690,14 @@ def equipment_list(request):
         'page_obj': page_obj,
         'q': q,
     }
-    return render(request, 'equipment_list.html', context)
+    return render(request, 'equipment_list.html')
 
 def equipment_detail(request, pk):
     equipment = get_object_or_404(Equipment, pk=pk)
     return render(request, 'equipment_detail.html', {'equipment': equipment})
 
 #Equipmentform
+
 @login_required
 def equipment_create(request):
     if request.method == 'POST':
@@ -707,3 +708,5 @@ def equipment_create(request):
     else:
         form = EquipmentForm()
     return render(request, 'equipment_form.html', {'form': form})
+
+

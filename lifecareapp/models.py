@@ -157,12 +157,12 @@ class DoctorAvailability(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
 
-class Meta:
-    unique_together = ('doctor', 'date', 'start_time', 'end_time')
-    ordering = ('date', 'start_time')
+    class Meta:
+        unique_together = ('doctor', 'date', 'start_time', 'end_time')
+        ordering = ('date', 'start_time')
 
-def __str__(self):
-    return f"{self.doctor.full_name} - {self.date} {self.start_time}-{self.end_time}"
+    def __str__(self):
+        return f"{self.doctor.full_name} - {self.date} {self.start_time}-{self.end_time}"
 
 #Equipment Leasing
 class Equipment(models.Model):
@@ -173,5 +173,5 @@ class Equipment(models.Model):
     available = models.BooleanField(default=True)
 
 
-def __str__(self):
-    return self.name
+    def __str__(self):
+        return self.name
