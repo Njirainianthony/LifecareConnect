@@ -1,6 +1,7 @@
 {% load static %}
 {% load widget_tweaks %}
 {% load user_extras %}
+{% load dashboard_tags %}
 
 
 <!DOCTYPE html>
@@ -83,19 +84,25 @@
       </nav><!-- .navbar -->
 
       {% if request.user.is_authenticated %}
-       <div class="d-flex align-items-center ms-4">
-        <a href="{% get_dashboard_url request.user %}">My Dashboard</a>
-       <form action="{% url 'logout' %}" method="POST">
-        <button type="submit" class="appointment-btn scrollto border-0">
-            <span class="d-none d-md-inline">Logout</span>
-        </button>
-        {% csrf_token %}
-       </form>
-       </div>
-      {% else %}
-       <a href="{% url 'login' %}" class="appointment-btn scrollto"><span class="d-none d-md-inline">Login</span> </a>
-       <a href="{% url 'signup' %}" class="appointment-btn scrollto"><span class="d-none d-md-inline">Sign Up</span></a>
-      {% endif %}
+  <div class="d-flex align-items-center ms-4">
+    <a href="{% get_dashboard_url request.user %}">
+      {% get_dashboard_label request.user %}
+    </a>
+    <form action="{% url 'logout' %}" method="POST">
+      {% csrf_token %}
+      <button type="submit" class="appointment-btn scrollto border-0">
+        <span class="d-none d-md-inline">Logout</span>
+      </button>
+    </form>
+  </div>
+{% else %}
+  <a href="{% url 'custom_login_view' %}" class="appointment-btn scrollto">
+    <span class="d-none d-md-inline">Login</span>
+  </a>
+  <a href="{% url 'signup' %}" class="appointment-btn scrollto">
+    <span class="d-none d-md-inline">Sign Up</span>
+  </a>
+{% endif %}
 
     </div>
   </header><!-- End Header -->

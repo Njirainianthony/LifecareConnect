@@ -140,9 +140,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#LOGIN_REDIRECT_URL = 'custom_login_view'
-LOGIN_URL = 'custom_login_view'
-LOGIN_REDIRECT_URL = '/profiles/'  # if you want all unmatched logins to go there
+LOGIN_URL = 'login'  # this is the name in urls.py → path('login/', ...)
+LOGIN_REDIRECT_URL = 'redirect_after_login'  # optional fallback if someone hits login directly
 LOGOUT_REDIRECT_URL = 'home'
 
 MEDIA_URL = 'media/'

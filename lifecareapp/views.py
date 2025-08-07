@@ -16,6 +16,8 @@ import requests
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
+from django.contrib.auth.forms import AuthenticationForm
+
 
 
 
@@ -97,20 +99,67 @@ def custom_login_view(request):
         if user is not None:
             login(request, user)
 
-            # Check if the user has a PatientProfile
-            if PatientProfile.objects.filter(user=user).exists():
-                return redirect('list_patient_profiles')  # correct redirect for patient
-            # Check if the user has a DoctorProfile
-            elif DoctorProfile.objects.filter(user=user).exists():
-                return redirect('dashboard_doctor')
-            # If neither profile exists, send them to create one
+            if user.is_superuser or user.is_staff:
+                return redirect('admin_dashboard')  # Make sure this URL name exists!
+
+            try:
+                profile = Profile.objects.get(user=user)
+            except Profile.DoesNotExist:
+                messages.error(request, "Profile not found.")
+                return redirect('custom_login_view')
+
+            if profile.user_type == 'doctor':
+                if DoctorProfile.objects.filter(user=user).exists():
+                    return redirect('dashboard_doctor')
+                else:
+                    return redirect('doctorform')
+
+            elif profile.user_type == 'patient':
+                return redirect('list_patient_profiles')
+
             else:
-                return redirect('addprofile')
+                messages.error(request, "User role is invalid.")
+                return redirect('custom_login_view')
 
         else:
             messages.error(request, 'Invalid username or password.')
+            return redirect('custom_login_view')  # Redirect after failed login
 
-    return render(request, 'login.html')
+    # ⚠️ Handle GET separately so we don't accidentally re-render on POST
+    return render(request, 'registration/login.html')
+
+from django.contrib.auth.views import LoginView
+
+class CustomLoginView(LoginView):
+    template_name = 'registration/login.html'
+    redirect_authenticated_user = True
+
+custom_login_view = CustomLoginView.as_view()
+
+
+@login_required
+def redirect_after_login(request):
+    user = request.user
+
+    if user.is_superuser or user.is_staff:
+        return redirect('admin_dashboard')
+
+    try:
+        profile = Profile.objects.get(user=user)
+    except Profile.DoesNotExist:
+        return redirect('custom_login_view')  # or somewhere else like profile setup
+
+    if profile.user_type == 'doctor':
+        if DoctorProfile.objects.filter(user=user).exists():
+            return redirect('dashboard_doctor')
+        else:
+            return redirect('doctorform')
+
+    elif profile.user_type == 'patient':
+        return redirect('list_patient_profiles')
+
+    return redirect('home')
+
     
 @login_required
 def edit(request):

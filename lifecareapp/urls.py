@@ -19,6 +19,8 @@ from django.urls import include, path
 from . import views
 
 urlpatterns = [
+    path('login/', views.custom_login_view, name='custom_login_view'),
+    path('redirect/', views.redirect_after_login, name='redirect_after_login'),
     path('', views.index, name='home'),
     path('inner/', views.inner, name='inner'),
     path('about/', views.about, name='about'),
@@ -27,10 +29,11 @@ urlpatterns = [
     path('doctors/', views.doctors, name='doctors'),
     path('contact/', views.contact, name='contact'),
     path('', include('django.contrib.auth.urls')),
+    
+    
     path('dashboard/patient/<int:profile_id>/', views.dashboard_patient, name='dashboard_patient'),
     path('dashboard/doctor/', views.dashboard_doctor, name='dashboard_doctor'),
     path('signup/', views.signup, name='signup'),
-    path('login/', views.custom_login_view, name='custom_login_view'),
     path('edit/', views.edit, name='edit'),
     path('addprofile/', views.add_profile, name='addprofile'),
     path('patientform/', views.create_patient_profile, name='patientform'),
