@@ -57,8 +57,21 @@ urlpatterns = [
     path('admin-dashboard/doctor-profiles/', views.doctor_profiles_list, name='doctor_profiles'),
     path('admin-dashboard/bookings/', views.booking_list, name='booking_list'),
     path('admin-dashboard/mpesa/', views.mpesa_transactions, name='mpesa_transactions'),
+    path('admin-dashboard/users/', views.user_list, name='user_list'),
+    path('toggle-user-status/<int:user_id>/', views.toggle_user_status, name='toggle_user_status'),
+    # Patient edit/delete
+    path('admin-dashboard/patient/<int:pk>/edit/', views.edit_patient, name='edit_patient'),
+    path('admin-dashboard/patient/<int:pk>/delete/', views.delete_patient, name='delete_patient'),
+
+    # Doctor edit/delete
+    path('admin-dashboard/doctor/<int:pk>/edit/', views.edit_doctor, name='edit_doctor'),
+    path('admin-dashboard/doctor/<int:pk>/delete/', views.delete_doctor, name='delete_doctor'),
+
+    #path('admin-dashboard/bookings/edit/<int:booking_id>/', views.edit_booking, name='edit_booking'),
+    #path('admin-dashboard/bookings/delete/<int:booking_id>/', views.delete_booking, name='delete_booking'),
+
+
     path('doctor/availability/', views.manage_availability, name='manage_availability'),
-    
     path('doctor/availability/int:availability_id/delete/', views.delete_availability, name='delete_availability'),
     path('equipment/', views.equipment_list, name='equipment_list'),
     path('equipment/add/', views.equipment_create, name='equipment_create'),

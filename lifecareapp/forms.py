@@ -134,3 +134,27 @@ class EquipmentForm(forms.ModelForm):
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
         }
+
+
+#Booking form for admin
+'''
+from django import forms
+from .models import Booking
+
+class BookingForm(forms.ModelForm):
+    class Meta:
+        model = Booking
+        fields = [
+            'appointment_type',
+            'date',
+            'cost',
+            'queue_position',
+            'status',
+            'doctor',
+            'patient',
+        ]
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+        }
+'''
+

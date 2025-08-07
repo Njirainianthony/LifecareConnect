@@ -76,8 +76,8 @@
                 {% endif %}
               </td>
               <td>
-                <a href="#" class="btn btn-sm btn-outline-success mb-1">Edit</a><br>
-                <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
+                <a href="{% url 'edit_patient' patient.pk %}" class="btn btn-sm btn-outline-success mb-1">Edit</a><br>
+                <a href="{% url 'delete_patient' patient.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
               </td>
             </tr>
             {% empty %}

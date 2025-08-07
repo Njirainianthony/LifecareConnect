@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse, JsonResponse
 from .models import PatientProfile, DoctorProfile, Profile, Booking, Payment, DoctorAvailability, Equipment
-from .forms import UserRegistrationForm, PatientProfileForm, DoctorProfileForm, UserEditForm, ProfileEditForm, DoctorAvailabilityForm, EquipmentForm
+from .forms import UserRegistrationForm, PatientProfileForm, DoctorProfileForm, UserEditForm, ProfileEditForm, DoctorAvailabilityForm, EquipmentForm #BookingForm
 from django.contrib import messages
 from django.urls import reverse
 from django.db.models import Q 
@@ -553,35 +553,43 @@ def stk_push(request):
         date = data.get("appointment_date")
         time = data.get("appointment_time")
 
-        #Call STK push logic
         success = initiate_stk_push(request)
 
         if success:
-            #Save payment and appointment details
-            doctor = DoctorProfile.objects.get(id=doctor_id)
-            patient_profile = PatientProfile.objects.get(user=request.user)
-            user = request.user  # Or however you're managing logged-in users
+            try:
+                doctor = DoctorProfile.objects.get(id=doctor_id)
 
-            payment = Payment.objects.create(
-                user=patient_profile,
-                doctor=doctor,
-                amount=amount,
-                status="PAID"
-            )
+                # Get one of the user's patient profiles
+                patient_profiles = PatientProfile.objects.filter(user=request.user)
+                if not patient_profiles.exists():
+                    return JsonResponse({"status": "error", "message": "Patient profile not found."})
+                
+                patient_profile = patient_profiles.first()  # 👈 Use logic as needed
 
-            appointment = Booking.objects.create(
-                user=user,
-                doctor=doctor,
-                date=date,
-                time=time,
-                status="BOOKED"
-            )
+                payment = Payment.objects.create(
+                    user=patient_profile,
+                    doctor=doctor,
+                    amount=amount,
+                    status="PAID"
+                )
 
-            # 3. Trigger post-payment logic
-            handler = PaymentEventHandler(payment, appointment)
-            handler.handle_success()
+                booking = Booking.objects.create(
+                    patient=patient_profile,
+                    doctor=doctor,
+                    date=date,
+                    time=time,
+                    status="pending"
+                )
 
-            return JsonResponse({"status": "success"})
+                handler = PaymentEventHandler(payment, booking)
+                handler.handle_success()
+
+                return JsonResponse({"status": "success"})
+
+            except DoctorProfile.DoesNotExist:
+                return JsonResponse({"status": "error", "message": "Doctor not found."})
+            except Exception as e:
+                return JsonResponse({"status": "error", "message": f"Something went wrong: {str(e)}"})
 
         return JsonResponse({"status": "fail", "message": "STK Push failed"})
 
@@ -669,6 +677,98 @@ def mpesa_transactions(request):
         'search_query': search_query
     })
     
+
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
+@login_required
+def user_list(request):
+    filter_type = request.GET.get('type')  # Get the filter from the URL
+    users = User.objects.all()
+
+    if filter_type:
+        users = users.filter(profile__user_type=filter_type)
+
+    return render(request, 'admin/admin_user_list.html', {
+        'users': users,
+        'filter_type': filter_type
+    })
+
+
+
+@user_passes_test(lambda u: u.is_superuser)
+@login_required
+def toggle_user_status(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    user.is_active = not user.is_active  # toggle status
+    user.save()
+    
+    status = "activated" if user.is_active else "deactivated"
+    messages.success(request, f"User '{user.username}' has been {status}.")
+    
+    return redirect('user_list')
+
+
+def edit_patient(request, pk):
+    patient = get_object_or_404(PatientProfile, pk=pk)
+    if request.method == 'POST':
+        form = PatientProfileForm(request.POST, request.FILES, instance=patient)
+        if form.is_valid():
+            form.save()
+            return redirect('patient_profiles')
+    else:
+        form = PatientProfileForm(instance=patient)
+    return render(request, 'admin/edit_patient.html', {'form': form})
+
+def delete_patient(request, pk):
+    patient = get_object_or_404(PatientProfile, pk=pk)
+    patient.delete()
+    return redirect('patient_profiles')
+
+
+# --- Doctors ---
+def edit_doctor(request, pk):
+    doctor = get_object_or_404(DoctorProfile, pk=pk)
+    if request.method == 'POST':
+        form = DoctorProfileForm(request.POST, request.FILES, instance=doctor)
+        if form.is_valid():
+            form.save()
+            return redirect('doctor_profiles')
+    else:
+        form = DoctorProfileForm(instance=doctor)
+    return render(request, 'admin/edit_doctor.html', {'form': form})
+
+def delete_doctor(request, pk):
+    doctor = get_object_or_404(DoctorProfile, pk=pk)
+    doctor.delete()
+    return redirect('doctor_profiles')
+
+'''
+def edit_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+
+    if request.method == 'POST':
+        form = BookingForm(request.POST, instance=booking)
+        if form.is_valid():
+            form.save()
+            return redirect('booking_list')  # adjust to your admin view name
+    else:
+        form = BookingForm(instance=booking)
+
+    return render(request, 'admin/edit_booking.html', {'form': form, 'booking': booking})
+
+def delete_booking(request, booking_id):
+    booking = get_object_or_404(Booking, pk=booking_id)
+    booking.delete()
+    return redirect('booking_list')  # Change to your booking list view name
+'''
+
+
+
+
+
+
+
 
 #Doctor Availability
 @login_required

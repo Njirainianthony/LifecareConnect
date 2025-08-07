@@ -63,8 +63,8 @@
           <td style="white-space: pre-line;">{{ doctor.expertise }}</td>
           <td style="white-space: pre-line;">{{ doctor.qualifications }}</td>
           <td>
-            <a href="#" class="btn btn-sm" style="background-color: #00796b; color: white;">Edit</a><br>
-            <a href="#" class="btn btn-sm btn-danger mt-1">Delete</a>
+            <a href="{% url 'edit_doctor' doctor.pk %}" class="btn btn-sm" style="background-color: #00796b; color: white;">Edit</a><br>
+            <a href="{% url 'delete_doctor' doctor.pk %}" class="btn btn-sm btn-danger mt-1">Delete</a>
           </td>
         </tr>
         {% empty %}
