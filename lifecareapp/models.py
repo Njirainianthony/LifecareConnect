@@ -2,6 +2,10 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.core.validators import FileExtensionValidator
+from django.utils import timezone
+
+created_at = models.DateTimeField(default=timezone.now)  # TEMP
+
 
 
 # Create your models here.
@@ -110,7 +114,7 @@ class Booking(models.Model):
     patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
     doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=timezone.now)
     
     # New fields to match your table headers
     appointment_type = models.CharField(
@@ -140,6 +144,7 @@ class Payment(models.Model):
     doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     status = models.CharField(max_length=20)  # 'PAID' or 'FAILED'
+    created_at = models.DateTimeField(auto_now_add=True)   # <- add this & migrate if you want time-series revenue
 
 """    
 class Booking(models.Model):

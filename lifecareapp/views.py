@@ -17,6 +17,10 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 from django.contrib.auth.forms import AuthenticationForm
+from django.db.models import Count, Sum
+from django.db.models.functions import TruncDay
+from django.utils import timezone
+from datetime import timedelta
 
 
 
@@ -100,7 +104,7 @@ def custom_login_view(request):
             login(request, user)
 
             if user.is_superuser or user.is_staff:
-                return redirect('admin_dashboard')  # Make sure this URL name exists!
+                return redirect('admin_dashboard_home')  # Make sure this URL name exists!
 
             try:
                 profile = Profile.objects.get(user=user)
@@ -142,7 +146,7 @@ def redirect_after_login(request):
     user = request.user
 
     if user.is_superuser or user.is_staff:
-        return redirect('admin_dashboard')
+        return redirect('admin_dashboard_home')
 
     try:
         profile = Profile.objects.get(user=user)
@@ -724,6 +728,89 @@ def delete_patient(request, pk):
     patient = get_object_or_404(PatientProfile, pk=pk)
     patient.delete()
     return redirect('patient_profiles')
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_dashboard(request):
+    # --- Time window for trends (last 30 days) ---
+    today = timezone.now().date()
+    start_date = today - timedelta(days=29)  # inclusive 30 days
+
+    # Bookings per day for last 30 days
+    bookings_qs = Booking.objects.filter(created_at__date__gte=start_date)
+    bookings_by_day = (
+        bookings_qs
+        .annotate(day=TruncDay('created_at'))
+        .values('day')
+        .annotate(count=Count('id'))
+        .order_by('day')
+    )
+    # Map dates to counts for continuous series
+    day_count_map = {item['day'].date(): item['count'] for item in bookings_by_day}
+    bookings_labels = []
+    bookings_counts = []
+    for i in range(30):
+        d = start_date + timedelta(days=i)
+        bookings_labels.append(d.strftime('%b %d'))     # e.g. "Aug 11"
+        bookings_counts.append(day_count_map.get(d, 0))
+
+    # Appointment-type distribution (pie)
+    type_qs = Booking.objects.values('appointment_type').annotate(count=Count('id'))
+    # convert to label/value arrays (use readable labels from choices)
+    type_label_map = dict(Booking.APPOINTMENT_TYPE_CHOICES)
+    types_labels = []
+    types_counts = []
+    for item in type_qs:
+        code = item['appointment_type']
+        types_labels.append(type_label_map.get(code, code))
+        types_counts.append(item['count'])
+
+    # Top doctors by bookings (top 5)
+    top_docs_qs = (
+        Booking.objects
+        .values('doctor__id', 'doctor__full_name')
+        .annotate(bookings_count=Count('id'))
+        .order_by('-bookings_count')[:5]
+    )
+    top_docs_labels = [item['doctor__full_name'] for item in top_docs_qs]
+    top_docs_counts = [item['bookings_count'] for item in top_docs_qs]
+
+    # Payments summary by status (sum amount per status)
+    payments_summary = Payment.objects.values('status').annotate(total=Sum('amount'))
+    payments_labels = [p['status'] for p in payments_summary]
+    payments_values = [float(p['total'] or 0) for p in payments_summary]
+
+    # Quick stat cards
+    total_bookings = Booking.objects.count()
+    total_patients = PatientProfile.objects.count()
+    total_doctors = DoctorProfile.objects.count()
+    total_revenue = Payment.objects.aggregate(total=Sum('amount'))['total'] or 0
+
+    context = {
+        'bookings_labels': bookings_labels,
+        'bookings_counts': bookings_counts,
+        'types_labels': types_labels,
+        'types_counts': types_counts,
+        'top_docs_labels': top_docs_labels,
+        'top_docs_counts': top_docs_counts,
+        'payments_labels': payments_labels,
+        'payments_values': payments_values,
+        'total_bookings': total_bookings,
+        'total_patients': total_patients,
+        'total_doctors': total_doctors,
+        'total_revenue': float(total_revenue),
+    }
+    return render(request, 'admin/admin_dashboard.html', context)
+
+
+
+
+
+
+
+
+
 
 
 # --- Doctors ---
