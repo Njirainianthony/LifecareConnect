@@ -99,32 +99,35 @@ TIME_CHOICES = generate_time_choices(start_hour=8, end_hour=17, interval_minutes
 class DateInput(forms.DateInput):
     input_type = 'date'
 
-class DoctorAvailabilityForm(forms.ModelForm):
-    start_time = forms.ChoiceField(choices=TIME_CHOICES)
-    end_time = forms.ChoiceField(choices=TIME_CHOICES)
 
+class DoctorAvailabilityForm(forms.ModelForm):
     class Meta:
         model = DoctorAvailability
         fields = ['date', 'start_time', 'end_time']
         widgets = {
-            'date': DateInput(attrs={'min': datetime.today().date().isoformat()}),
+            'date': forms.DateInput(
+                attrs={'type': 'date', 'class': 'form-control'}
+            ),
+            'start_time': forms.TimeInput(
+                attrs={'type': 'time', 'class': 'form-control'}
+            ),
+            'end_time': forms.TimeInput(
+                attrs={'type': 'time', 'class': 'form-control'}
+            ),
         }
 
     def clean(self):
-        cleaned = super().clean()
-        # Convert selected strings to time objects
-        start_str = cleaned.get('start_time')
-        end_str = cleaned.get('end_time')
-        if start_str:
-            cleaned['start_time'] = datetime.strptime(start_str, '%H:%M').time()
-        if end_str:
-            cleaned['end_time'] = datetime.strptime(end_str, '%H:%M').time()
+        """
+        Custom validation to ensure end_time is after start_time.
+        """
+        cleaned_data = super().clean()
+        start_time = cleaned_data.get("start_time")
+        end_time = cleaned_data.get("end_time")
 
-        start = cleaned.get('start_time')
-        end = cleaned.get('end_time')
-        if start and end and end <= start:
-            raise forms.ValidationError("End time must be after start time.")
-        return cleaned
+        if start_time and end_time and end_time <= start_time:
+            raise forms.ValidationError("End time must be after the start time.")
+
+        return cleaned_data
 
 #Equipment
 class EquipmentForm(forms.ModelForm):

@@ -81,11 +81,61 @@ class DoctorProfile(models.Model):
     email = models.EmailField()
     charge_rates = models.FloatField(max_length=50)
     profile_pic = models.ImageField(upload_to='doctors/', blank=True, null=True)
+    # Time slot fields
+    start_time = models.TimeField(default='08:00')
+    end_time = models.TimeField(default='17:00')
+    slot_duration = models.IntegerField(default=30, help_text="Duration in minutes")
+
+    def get_formatted_time_slots(self):
+        """
+        Generate time slots based on start_time, end_time, and slot_duration
+        Returns a list of formatted time strings
+        """
+        from datetime import datetime, timedelta
+        
+        if not self.start_time or not self.end_time:
+            return []
+        
+        slots = []
+        current_time = datetime.combine(datetime.today(), self.start_time)
+        end_time = datetime.combine(datetime.today(), self.end_time)
+        
+        while current_time < end_time:
+            # Format time as HH:MM (24-hour) or use strftime('%I:%M %p') for 12-hour with AM/PM
+            slots.append(current_time.strftime('%H:%M'))
+            current_time += timedelta(minutes=self.slot_duration)
+        
+        return slots
+
+    def get_available_slots_for_date(self, date):
+        """
+        Get available time slots for a specific date
+        Returns slots that are not booked
+        """
+        from datetime import datetime
+        
+        all_slots = self.get_formatted_time_slots()
+        
+        # Get booked slots for this date
+        booked_slots = Booking.objects.filter(
+            doctor=self,
+            date=date,
+            status__in=['accepted', 'pending']
+        ).values_list('time', flat=True)
+        
+        # Convert booked times to same format
+        booked_times = [slot for slot in booked_slots if slot]
+        
+        # Return available slots
+        available_slots = [slot for slot in all_slots if slot not in booked_times]
+        
+        return available_slots
 
     def __str__(self):
         return f"{self.full_name} - Doctor"
 
 
+# models.py
 class Booking(models.Model):
     APPOINTMENT_TYPE_CHOICES = [
         ('consultation', 'Consultation'),
@@ -106,13 +156,13 @@ class Booking(models.Model):
         ('cancelled', 'Cancelled'),
     ]
     
-    # Existing fields
+    # Core fields
     patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
     doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     
-    # New fields to match your table headers
+    # Appointment details
     appointment_type = models.CharField(
         max_length=50, 
         choices=APPOINTMENT_TYPE_CHOICES,
@@ -120,6 +170,7 @@ class Booking(models.Model):
         help_text="Type of appointment"
     )
     date = models.DateField(null=True, blank=True, help_text="Appointment date")
+    time = models.CharField(max_length=10, null=True, blank=True, help_text="Appointment time (HH:MM format)")
     cost = models.DecimalField(
         null=True,
         blank=True,
@@ -132,6 +183,20 @@ class Booking(models.Model):
         blank=True,
         help_text="Position in queue for the appointment"
     )
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = [['doctor', 'date', 'time']]  # Prevent double booking
+
+    def __str__(self):
+        return f"{self.patient.full_name} -> {self.doctor.full_name} ({self.date} at {self.time})"
+    
+    @property
+    def formatted_date_time(self):
+        """Return formatted date and time string"""
+        if self.date and self.time:
+            return f"{self.date.strftime('%B %d, %Y')} at {self.time}"
+        return "Date/Time not set"
 
 
 # models.py
@@ -152,17 +217,19 @@ class Booking(models.Model):
 
 #Doctor Availability
 class DoctorAvailability(models.Model):
-    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE, related_name='availabilities')
+    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE, related_name='availability_slots')
     date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        # Prevent a doctor from creating the exact same slot twice
         unique_together = ('doctor', 'date', 'start_time', 'end_time')
-        ordering = ('date', 'start_time')
+        ordering = ['date', 'start_time']
 
     def __str__(self):
-        return f"{self.doctor.full_name} - {self.date} {self.start_time}-{self.end_time}"
+        return f"Dr. {self.doctor.full_name} - {self.date} ({self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')})"
 
 #Equipment Leasing
 class Equipment(models.Model):

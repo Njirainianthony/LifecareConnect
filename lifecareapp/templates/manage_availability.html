@@ -1,48 +1,351 @@
 {% extends 'base.html' %}
-{% block title %}Manage Availability{% endblock %}
+
+{% load static %}
+
+{% block title %}Set Working Hours{% endblock %}
+
 {% block body %}
-<div class="container mt-5"> <h2 class="mb-4">Manage Availability</h2>
-{% if messages %}
-{% for message in messages %}
-<div class="alert alert-{{ message.tags }}">{{ message }}</div>
-{% endfor %}
-{% endif %}
+<style>
+    .timeslots-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
 
-<div class="row"> <div class="col-md-5"> <div class="card mb-4"> <div class="card-body"> <h5 class="card-title">Add New Slot</h5> <form method="post"> {% csrf_token %} <div class="mb-3"> {{ form.date.label_tag }} {{ form.date }} </div> <div class="mb-3"> {{ form.start_time.label_tag }} {{ form.start_time }} </div> <div class="mb-3"> {{ form.end_time.label_tag }} {{ form.end_time }} </div> <button class="btn btn-primary" type="submit">Add Slot</button> <a class="btn btn-secondary ms-2" href="{% url 'dashboard_doctor' %}">Back to Dashboard</a> </form> </div> </div> </div>
+    .timeslots-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
 
-<div class="col-md-7">
-  <div class="card">
-    <div class="card-body">
-      <h5 class="card-title">Your Availability</h5>
-      <div class="table-responsive">
-        <table class="table align-middle">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Start</th>
-              <th>End</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for s in slots %}
-              <tr>
-                <td>{{ s.date }}</td>
-                <td>{{ s.start_time }}</td>
-                <td>{{ s.end_time }}</td>
-                <td>
-                  <a href="{% url 'delete_availability'  %}" class="btn btn-sm btn-danger"
-                     onclick="return confirm('Delete this slot?');">Delete</a>
-                </td>
-              </tr>
-            {% empty %}
-              <tr><td colspan="4" class="text-muted">No availability added yet.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+    .card-header {
+        background: #00796b;
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .card-header h4 {
+        font-size: 2em;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+
+    .card-header p {
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .card-body {
+        padding: 40px;
+    }
+
+    .current-slots {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+
+    .current-slots h5 {
+        color: #00796b;
+        margin-bottom: 15px;
+    }
+
+    .current-slots .slot-tag {
+        display: inline-block;
+        background: #00796b;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 15px;
+        margin: 3px;
+        font-size: 0.9em;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 8px;
+        font-size: 1.1em;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e1e8ed;
+        border-radius: 10px;
+        font-size: 1em;
+        transition: all 0.3s ease;
+        background: #fff;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #00796b;
+        box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .form-control:hover {
+        border-color: #00796b;
+    }
+
+    .form-help-text {
+        color: #666;
+        font-size: 0.95em;
+        margin-top: 5px;
+    }
+
+    .error-message {
+        color: #dc3545;
+        font-size: 0.9em;
+        margin-top: 5px;
+    }
+
+    .form-actions {
+        margin-top: 40px;
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    .btn {
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1.1em;
+    }
+
+    .btn-primary {
+        background: #00796b;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #005d56;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 121, 107, 0.3);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    .preview-slots {
+        background: #e8f5e8;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 20px;
+    }
+
+    .preview-slots h6 {
+        color: #00796b;
+        margin-bottom: 10px;
+    }
+
+    .preview-slot {
+        display: inline-block;
+        background: #00796b;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        margin: 2px;
+        font-size: 0.8em;
+    }
+
+    @media (max-width: 600px) {
+        .form-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .btn {
+            width: 200px;
+        }
+        
+        .card-body {
+            padding: 30px 20px;
+        }
+    }
+</style>
+
+<div class="timeslots-container">
+    <div class="timeslots-card">
+        <div class="card-header">
+            <h4>Set Your Working Hours</h4>
+            <p>Configure when you're available for appointments</p>
+        </div>
+        <div class="card-body">
+            <!-- Show current working hours if they exist -->
+            {% if doctor.start_time and doctor.end_time %}
+            <div class="current-slots">
+                <h5>Current Working Hours:</h5>
+                <span class="slot-tag">{{ doctor.start_time|time:"g:i A" }} - {{ doctor.end_time|time:"g:i A" }}</span>
+                <span class="slot-tag">{{ doctor.slot_duration }} minute appointments</span>
+                
+                <!-- Show generated time slots preview -->
+                {% if doctor.get_formatted_time_slots %}
+                    <div style="margin-top: 15px;">
+                        <strong>Generated Time Slots:</strong><br>
+                        {% for slot in doctor.get_formatted_time_slots %}
+                            <span class="preview-slot">{{ slot }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Start Time Field -->
+                <div class="form-group">
+                    <label class="form-label" for="id_start_time">
+                        <strong>Working Hours Start</strong>
+                    </label>
+                    <input type="time" 
+                           id="id_start_time" 
+                           name="start_time" 
+                           class="form-control"
+                           value="{% if form.start_time.value %}{{ form.start_time.value|time:'H:i' }}{% else %}08:00{% endif %}"
+                           step="900">
+                    <p class="form-help-text">When do you start seeing patients?</p>
+                    {% if form.start_time.errors %}
+                        <div class="error-message">{{ form.start_time.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- End Time Field -->
+                <div class="form-group">
+                    <label class="form-label" for="id_end_time">
+                        <strong>Working Hours End</strong>
+                    </label>
+                    <input type="time" 
+                           id="id_end_time" 
+                           name="end_time" 
+                           class="form-control"
+                           value="{% if form.end_time.value %}{{ form.end_time.value|time:'H:i' }}{% else %}17:00{% endif %}"
+                           step="900">
+                    <p class="form-help-text">When do you stop seeing patients?</p>
+                    {% if form.end_time.errors %}
+                        <div class="error-message">{{ form.end_time.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Slot Duration Field -->
+                <div class="form-group">
+                    <label class="form-label" for="id_slot_duration">
+                        <strong>Appointment Duration</strong>
+                    </label>
+                    <select id="id_slot_duration" name="slot_duration" class="form-control">
+                        <option value="15" {% if form.slot_duration.value == 15 %}selected{% endif %}>15 minutes</option>
+                        <option value="30" {% if form.slot_duration.value == 30 or not form.slot_duration.value %}selected{% endif %}>30 minutes</option>
+                        <option value="45" {% if form.slot_duration.value == 45 %}selected{% endif %}>45 minutes</option>
+                        <option value="60" {% if form.slot_duration.value == 60 %}selected{% endif %}>1 hour</option>
+                        <option value="90" {% if form.slot_duration.value == 90 %}selected{% endif %}>1.5 hours</option>
+                        <option value="120" {% if form.slot_duration.value == 120 %}selected{% endif %}>2 hours</option>
+                    </select>
+                    <p class="form-help-text">How long should each appointment slot be?</p>
+                    {% if form.slot_duration.errors %}
+                        <div class="error-message">{{ form.slot_duration.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <!-- Display any form-wide errors -->
+                {% if form.non_field_errors %}
+                    <div class="error-message">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Preview area for generated time slots -->
+                <div id="previewSlots" class="preview-slots" style="display: none;">
+                    <h6>Preview Time Slots:</h6>
+                    <div id="slotsPreview"></div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Working Hours</button>
+                    <a href="{% url 'dashboard_doctor' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
 </div>
-</div> </div> 
+
+<script>
+// Generate time slots preview
+function generateTimeSlots(startTime, endTime, duration) {
+    if (!startTime || !endTime || !duration) return [];
+    
+    const slots = [];
+    const start = new Date(`2000-01-01T${startTime}:00`);
+    const end = new Date(`2000-01-01T${endTime}:00`);
+    const durationMs = duration * 60 * 1000;
+    
+    let current = new Date(start);
+    while (current < end) {
+        const timeStr = current.toTimeString().slice(0, 5);
+        slots.push(timeStr);
+        current = new Date(current.getTime() + durationMs);
+    }
+    
+    return slots;
+}
+
+function updatePreview() {
+    const startTime = document.getElementById('id_start_time').value;
+    const endTime = document.getElementById('id_end_time').value;
+    const duration = parseInt(document.getElementById('id_slot_duration').value);
+    
+    if (startTime && endTime && duration) {
+        const slots = generateTimeSlots(startTime, endTime, duration);
+        const previewDiv = document.getElementById('previewSlots');
+        const slotsDiv = document.getElementById('slotsPreview');
+        
+        if (slots.length > 0) {
+            slotsDiv.innerHTML = slots.map(slot => 
+                `<span class="preview-slot">${slot}</span>`
+            ).join('');
+            previewDiv.style.display = 'block';
+        } else {
+            previewDiv.style.display = 'none';
+        }
+    }
+}
+
+// Add event listeners when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    const startTimeInput = document.getElementById('id_start_time');
+    const endTimeInput = document.getElementById('id_end_time');
+    const durationInput = document.getElementById('id_slot_duration');
+
+    if (startTimeInput) startTimeInput.addEventListener('change', updatePreview);
+    if (endTimeInput) endTimeInput.addEventListener('change', updatePreview);
+    if (durationInput) durationInput.addEventListener('change', updatePreview);
+    
+    // Initial preview if values exist
+    updatePreview();
+});
+</script>
+
 {% endblock %}

@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse, JsonResponse
 from .models import PatientProfile, DoctorProfile, Profile, Booking, Payment, DoctorAvailability, Equipment
-from .forms import UserRegistrationForm, PatientProfileForm, DoctorProfileForm, UserEditForm, ProfileEditForm, DoctorAvailabilityForm, EquipmentForm #BookingForm
+from .forms import UserRegistrationForm, PatientProfileForm, DoctorProfileForm, UserEditForm, ProfileEditForm, EquipmentForm, DoctorAvailabilityForm
 from django.contrib import messages
 from django.urls import reverse
 from django.db.models import Q 
@@ -330,6 +330,7 @@ def edit_doctor_profile(request):
     return render(request, 'edit_doctor_profile.html', {'form': form})
 
 #Appointment View
+"""
 @login_required
 def book_doctor_ajax(request, doctor_id):
     doctor = get_object_or_404(DoctorProfile, id=doctor_id)
@@ -364,28 +365,7 @@ def book_doctor_ajax(request, doctor_id):
         print(f"Email notification error: {str(e)}")
         booking.delete()  # Rollback booking if email fails
         return JsonResponse({'status': 'error', 'message': 'Could not send notification email'}, status=500)
-
-
-def notify_patient(booking):
-    patient_email = booking.patient.user.email
-    status = booking.status
-    doctor_name = f"Dr. {booking.doctor.user.get_full_name()}"
-    
-    subject = 'Appointment Update'
-    message = f'Your appointment request to {doctor_name} was {status}.'
-    
-    if booking.status == 'accepted':
-        message += '\n\nPlease contact the doctor for further details.'
-    elif booking.status == 'declined':
-        message += '\n\nYou may try booking with another healthcare provider.'
-    
-    send_mail(
-        subject,
-        message,
-        'noreply@lifecareconnect.com',
-        [patient_email],
-        fail_silently=False
-    )
+"""
 
 def notify_doctor(booking):
     doctor_email = booking.doctor.user.email
@@ -400,9 +380,6 @@ def notify_doctor(booking):
         f"Please log in to your dashboard to view the request and accept or decline it.\n\n"
         f"Booking ID: {booking.id}\n"
         f"Patient Profile: https://lifecareconnect.com/patient/{booking.patient.id}/profile/\n\n"
-        f"Quick actions:\n"
-        f"Accept: {accept_url}\n"
-        f"Decline: {decline_url}"
     )
     
     send_mail(
@@ -428,18 +405,18 @@ def appointments(request):
     appointments = Booking.objects.filter(patient=patient_profile)
     return render(request, 'appointments.html', {'appointments': appointments})
 
-@login_required
-def view_doctor_profile(request, doctor_id):
-    doctor = get_object_or_404(DoctorProfile, id=doctor_id)
-    charge_rate = float(doctor.charge_rates)
-    commission = float(doctor.charge_rates) * 0.2
-    total_fee = charge_rate + commission
-    return render(request, 'doctor_profile.html', {
-        'doctor': doctor, 
-        'commission': commission, 
-        'charge_rate': charge_rate,
-        'total_fee': total_fee,})
+#def view_doctor_profile(request, doctor_id):
+#    doctor = get_object_or_404(DoctorProfile, id=doctor_id)
+#   charge_rate = float(doctor.charge_rates)
+#    commission = float(doctor.charge_rates) * 0.2
+#    total_fee = charge_rate + commission
+#    return render(request, 'doctor_profile.html', {
+#        'doctor': doctor, 
+#        'commission': commission, 
+#        'charge_rate': charge_rate,
+#        'total_fee': total_fee,})
 
+        
 @csrf_exempt
 def initiate_stk_push(request):
     if request.method == 'POST':
@@ -763,55 +740,46 @@ def delete_booking(request, booking_id):
     return redirect('booking_list')  # Change to your booking list view name
 '''
 
-
-
-
-
-
-
-
 #Doctor Availability
 @login_required
 def manage_availability(request):
-    # Ensure this user has a doctor profile
     try:
         doctor = DoctorProfile.objects.get(user=request.user)
     except DoctorProfile.DoesNotExist:
         messages.error(request, "Only doctors can manage availability.")
         return redirect('addprofile')
-    
+
     if request.method == 'POST':
+        # Use the new form
         form = DoctorAvailabilityForm(request.POST)
         if form.is_valid():
+            # The form now correctly creates a DoctorAvailability instance
             slot = form.save(commit=False)
             slot.doctor = doctor
 
-        # Optional: prevent past dates
-        if slot.date < now().date():
-            messages.error(request, "You cannot add availability in the past.")
-        else:
-            # Optional: prevent overlaps for the same date
+            # Check for overlaps using the attributes from the 'slot' instance
             overlap = DoctorAvailability.objects.filter(
                 doctor=doctor,
-                date=slot.date
-            ).filter(
-                # (start < new_end) and (end > new_start) means overlap
-                start_time__lt=slot.end_time,
-                end_time__gt=slot.start_time
+                date=slot.date,
+                start_time__lt=slot.end_time, # (start < new_end)
+                end_time__gt=slot.start_time   # (end > new_start)
             ).exists()
+
             if overlap:
-                messages.error(request, "This time range overlaps with an existing slot.")
+                messages.error(request, "This time slot overlaps with an existing one.")
             else:
                 slot.save()
-                messages.success(request, "Availability added.")
+                messages.success(request, "New availability slot has been added.")
                 return redirect('manage_availability')
+        # If form is not valid, it will fall through and re-render with errors
     else:
+        # Use the new form for GET requests too
         form = DoctorAvailabilityForm()
 
-    # Show future slots first
+    # Show all of the doctor's availability slots
     slots = DoctorAvailability.objects.filter(doctor=doctor).order_by('date', 'start_time')
+    
     return render(request, 'manage_availability.html', {'form': form, 'slots': slots})
-
 @login_required
 def delete_availability(request, availability_id):
     try:
@@ -859,3 +827,152 @@ def equipment_create(request):
     return render(request, 'equipment_form.html', {'form': form})
 
 
+
+
+
+
+
+# views.py - Update your view_doctor_profile function
+
+@login_required
+def view_doctor_profile(request, doctor_id):
+    doctor = get_object_or_404(DoctorProfile, id=doctor_id)
+    
+    # Get doctor's available time slots
+    doctor_time_slots = doctor.get_formatted_time_slots()
+    
+    # Convert to JSON for JavaScript
+    import json
+    doctor_time_slots_json = json.dumps(doctor_time_slots)
+    
+    context = {
+        'doctor': doctor,
+        'doctor_time_slots': doctor_time_slots_json,
+        'commission': 50,  # Your commission
+        'total_fee': int(doctor.charge_rates) + 50,  # Ensure integer for calculations
+    }
+    
+    return render(request, 'doctor_profile.html', context)
+
+# Add this new view to get available slots for a specific date
+@login_required
+def get_doctor_available_slots(request, doctor_id):
+    """
+    AJAX endpoint to get available slots for a specific date
+    """
+    if request.method == 'GET':
+        date_str = request.GET.get('date')
+        if not date_str:
+            return JsonResponse({'error': 'Date parameter required'}, status=400)
+        
+        try:
+            from datetime import datetime
+            date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            doctor = get_object_or_404(DoctorProfile, id=doctor_id)
+            
+            available_slots = doctor.get_available_slots_for_date(date)
+            
+            return JsonResponse({
+                'status': 'success',
+                'available_slots': available_slots
+            })
+            
+        except ValueError:
+            return JsonResponse({'error': 'Invalid date format'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+# Update your book_doctor_ajax function to handle date/time
+@login_required  
+def book_doctor_ajax(request, doctor_id):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'POST method required'}, status=405)
+    
+    doctor = get_object_or_404(DoctorProfile, id=doctor_id)
+    
+    try:
+        patient = PatientProfile.objects.get(user=request.user)
+    except PatientProfile.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Patient profile not found'}, status=400)
+
+    # Get data from request
+    try:
+        import json
+        data = json.loads(request.body)
+        appointment_date = data.get('appointment_date')
+        appointment_time = data.get('appointment_time')
+        
+        if not appointment_date or not appointment_time:
+            return JsonResponse({'status': 'error', 'message': 'Date and time are required'}, status=400)
+            
+        # Convert date string to date object
+        from datetime import datetime
+        date_obj = datetime.strptime(appointment_date, '%Y-%m-%d').date()
+        
+    except (json.JSONDecodeError, ValueError) as e:
+        return JsonResponse({'status': 'error', 'message': 'Invalid data format'}, status=400)
+
+    # Check if slot is still available
+    existing_booking = Booking.objects.filter(
+        doctor=doctor,
+        date=date_obj,
+        time=appointment_time,
+        status__in=['pending', 'accepted']
+    ).first()
+    
+    if existing_booking:
+        return JsonResponse({'status': 'error', 'message': 'This time slot is no longer available'})
+
+    # Check if patient already has a pending/accepted booking with this doctor
+    patient_booking = Booking.objects.filter(
+        patient=patient,
+        doctor=doctor,
+        status__in=['pending', 'accepted']
+    ).first()
+    
+    if patient_booking:
+        return JsonResponse({'status': 'error', 'message': 'You already have a pending appointment with this doctor'})
+    
+    # Create new booking
+    booking = Booking.objects.create(
+        patient=patient,
+        doctor=doctor,
+        date=date_obj,
+        time=appointment_time,
+        status='pending',
+        cost=doctor.charge_rates + 50  # Include commission
+    )
+    
+    try:
+        # Send notifications
+        notify_doctor(booking)
+        notify_patient(booking)
+        return JsonResponse({'status': 'success', 'message': 'Appointment request sent successfully'})
+    except Exception as e:
+        print(f"Email notification error: {str(e)}")
+        # Don't delete booking if email fails, just return success
+        return JsonResponse({'status': 'success', 'message': 'Appointment request sent successfully'})
+
+# Add notification function for booking creation
+def notify_patient(booking):
+    patient_email = booking.patient.user.email
+    status = booking.status
+    doctor_name = f"Dr. {booking.doctor.user.get_full_name()}"
+    
+    subject = 'Appointment Update'
+    message = f'Your appointment request to {doctor_name} was {status}.'
+    
+    if booking.status == 'accepted':
+        message += '\n\nPlease contact the doctor for further details.'
+    elif booking.status == 'declined':
+        message += '\n\nYou may try booking with another healthcare provider.'
+    
+    send_mail(
+        subject,
+        message,
+        'noreply@lifecareconnect.com',
+        [patient_email],
+        fail_silently=False
+    )

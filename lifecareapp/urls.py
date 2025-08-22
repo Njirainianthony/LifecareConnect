@@ -29,8 +29,6 @@ urlpatterns = [
     path('doctors/', views.doctors, name='doctors'),
     path('contact/', views.contact, name='contact'),
     path('', include('django.contrib.auth.urls')),
-    
-    
     path('dashboard/patient/<int:profile_id>/', views.dashboard_patient, name='dashboard_patient'),
     path('dashboard/doctor/', views.dashboard_doctor, name='dashboard_doctor'),
     path('signup/', views.signup, name='signup'),
@@ -49,8 +47,6 @@ urlpatterns = [
     path('mpesa/stk/', views.initiate_stk_push, name='stk_push'),
     path('stk-push', views.stk_push, name='process_stk_push'),
     #path('mpesa/callback/', views.mpesa_callback, name='mpesa_callback'),
-
-
     #ADMIN URLS!!!!!
     path('admin-dashboard/', views.dashboard_admin, name='admin_dashboard'),
     path('admin-dashboard/patient-profiles/', views.patient_profiles, name='patient_profiles'),
@@ -62,15 +58,11 @@ urlpatterns = [
     # Patient edit/delete
     path('admin-dashboard/patient/<int:pk>/edit/', views.edit_patient, name='edit_patient'),
     path('admin-dashboard/patient/<int:pk>/delete/', views.delete_patient, name='delete_patient'),
-
     # Doctor edit/delete
     path('admin-dashboard/doctor/<int:pk>/edit/', views.edit_doctor, name='edit_doctor'),
     path('admin-dashboard/doctor/<int:pk>/delete/', views.delete_doctor, name='delete_doctor'),
-
     #path('admin-dashboard/bookings/edit/<int:booking_id>/', views.edit_booking, name='edit_booking'),
     #path('admin-dashboard/bookings/delete/<int:booking_id>/', views.delete_booking, name='delete_booking'),
-
-
     path('doctor/availability/', views.manage_availability, name='manage_availability'),
     path('doctor/availability/int:availability_id/delete/', views.delete_availability, name='delete_availability'),
     path('equipment/', views.equipment_list, name='equipment_list'),
