@@ -567,9 +567,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Pay button action
-    payBtn.addEventListener('click', async () => {
-        let phone = phoneInput.value.trim();
+            // Pay button action: make STK push call to Django backend
+            // Pay button action: make STK push call to Django backend
+        payBtn.addEventListener('click', async () => {
+            let phone = phoneInput.value.trim();
 
         // Phone validation
         if (!phone.match(/^(?:\+254|254|0)7\d{8}$/)) {
@@ -587,6 +588,22 @@ document.addEventListener('DOMContentLoaded', function () {
         payBtn.textContent = "Processing...";
         payBtn.disabled = true;
 
+            try {
+                const response = await fetch("{% url 'stk_push' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({
+                        phone: phone,
+                        amount: {{ total_fee }},
+                        appointment_date: selectedDate,
+                        appointment_time: selectedTime,
+                        doctor_id: {{ doctor.id }},
+                        
+                    })
+                });
         try {
             const response = await fetch("{% url 'stk_push' %}", {
                 method: 'POST',
@@ -605,25 +622,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const data = await response.json();
 
-            if (data.status === "success") {
-                document.getElementById('phoneModal').style.display = 'none';
-                document.getElementById('successMessage').classList.add('show');
-                document.getElementById('confirmBtn').style.display = 'none';
-                document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
-            } else {
-                alert(data.message || "Payment failed. Try again.");
+                if (data.status === "success") {
+                    document.getElementById('phoneModal').style.display = 'none';
+                    document.getElementById('successMessage').classList.add('show');
+                    document.getElementById('confirmBtn').style.display = 'none';
+                    document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert(data.message || "Payment failed. Try again.");
+                    payBtn.textContent = "Pay Now";
+                    payBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error(error);
+                alert("An error occurred. Try again.");
                 payBtn.textContent = "Pay Now";
                 payBtn.disabled = false;
             }
-        } catch (error) {
-            console.error(error);
-            alert("An error occurred. Try again.");
-            payBtn.textContent = "Pay Now";
-            payBtn.disabled = false;
-        }
+        });
     });
-});
-</script>
+    </script>
 
     <!-- Phone Number Modal -->
 <div id="phoneModal" class="modal">

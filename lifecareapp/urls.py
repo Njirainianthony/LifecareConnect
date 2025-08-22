@@ -55,6 +55,12 @@ urlpatterns = [
     path('admin-dashboard/mpesa/', views.mpesa_transactions, name='mpesa_transactions'),
     path('admin-dashboard/users/', views.user_list, name='user_list'),
     path('toggle-user-status/<int:user_id>/', views.toggle_user_status, name='toggle_user_status'),
+    #ADMIN GRAPHS/CHARTS
+    path('admin-dashboard/home/', views.admin_dashboard, name='admin_dashboard_home'),
+    # (you may already have admin-dashboard root; pick a URL that makes sense)
+
+
+
     # Patient edit/delete
     path('admin-dashboard/patient/<int:pk>/edit/', views.edit_patient, name='edit_patient'),
     path('admin-dashboard/patient/<int:pk>/delete/', views.delete_patient, name='delete_patient'),

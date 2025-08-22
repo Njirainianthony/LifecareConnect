@@ -93,12 +93,15 @@
   </div>
   <h4>Lifecare Admin</h4>
   <a href="{% url 'home' %}">🏠 Home</a>
+  <a href="{% url 'admin_dashboard_home' %}" class="{% if request.path == '/admin-dashboard/home/' %}active{% endif %}">📊 Dashboard</a>
+  
   <a href="{% url 'user_list' %}" class="{% if request.path == '/admin/users/' %}active{% endif %}">👥 Users</a>
   <a href="{% url 'patient_profiles' %}" class="{% if request.path == '/admin/patient-profiles/' %}active{% endif %}">👩‍⚕️ Patient Profiles</a>
   <a href="{% url 'doctor_profiles' %}" class="{% if request.path == '/admin/doctor-profiles/' %}active{% endif %}">👨‍⚕️ Doctor Profiles</a>
   <a href="{% url 'booking_list' %}" class="{% if request.path == '/admin/bookings/' %}active{% endif %}">📋 Bookings</a>
   <a href="#" class="">📆 Appointments</a>
   <a href="{% url 'mpesa_transactions' %}" class="{% if request.path == '/admin/mpesa/' %}active{% endif %}">💰 MPESA</a>
+
   <form action="{% url 'logout' %}" method="POST">
       {% csrf_token %}
       <button type="submit" class="appointment-btn scrollto border-0">
@@ -111,14 +114,17 @@
 <div class="content">
   <div class="main-card">
     {% block content %}
+      <p class="text-center text-dark"><b>WELCOME ADMIN!!!</b></p>
 
-    <p class="text-center text-dark"><b>WELCOME ADMIN!!!</b></p>
-
-
+      <!-- Chart placeholder -->
+      <div class="mt-5">
+        <canvas id="activityChart" height="100"></canvas>
+      </div>
     {% endblock %}
   </div>
 </div>
 
 <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
