@@ -99,7 +99,7 @@
   <a href="{% url 'patient_profiles' %}" class="{% if request.path == '/admin/patient-profiles/' %}active{% endif %}">👩‍⚕️ Patient Profiles</a>
   <a href="{% url 'doctor_profiles' %}" class="{% if request.path == '/admin/doctor-profiles/' %}active{% endif %}">👨‍⚕️ Doctor Profiles</a>
   <a href="{% url 'booking_list' %}" class="{% if request.path == '/admin/bookings/' %}active{% endif %}">📋 Bookings</a>
-  <a href="#" class="">📆 Appointments</a>
+  <a class="nav-link scrollto" href="{% url 'equipment_list' %}">Equipment</a>
   <a href="{% url 'mpesa_transactions' %}" class="{% if request.path == '/admin/mpesa/' %}active{% endif %}">💰 MPESA</a>
 
   <form action="{% url 'logout' %}" method="POST">
