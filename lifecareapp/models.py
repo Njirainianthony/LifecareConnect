@@ -86,54 +86,9 @@ class DoctorProfile(models.Model):
     charge_rates = models.FloatField(max_length=50)
     profile_pic = models.ImageField(upload_to='doctors/', blank=True, null=True)
     # Time slot fields
-    start_time = models.TimeField(default='08:00')
-    end_time = models.TimeField(default='17:00')
-    slot_duration = models.IntegerField(default=30, help_text="Duration in minutes")
-
-    def get_formatted_time_slots(self):
-        """
-        Generate time slots based on start_time, end_time, and slot_duration
-        Returns a list of formatted time strings
-        """
-        from datetime import datetime, timedelta
-        
-        if not self.start_time or not self.end_time:
-            return []
-        
-        slots = []
-        current_time = datetime.combine(datetime.today(), self.start_time)
-        end_time = datetime.combine(datetime.today(), self.end_time)
-        
-        while current_time < end_time:
-            # Format time as HH:MM (24-hour) or use strftime('%I:%M %p') for 12-hour with AM/PM
-            slots.append(current_time.strftime('%H:%M'))
-            current_time += timedelta(minutes=self.slot_duration)
-        
-        return slots
-
-    def get_available_slots_for_date(self, date):
-        """
-        Get available time slots for a specific date
-        Returns slots that are not booked
-        """
-        from datetime import datetime
-        
-        all_slots = self.get_formatted_time_slots()
-        
-        # Get booked slots for this date
-        booked_slots = Booking.objects.filter(
-            doctor=self,
-            date=date,
-            status__in=['accepted', 'pending']
-        ).values_list('time', flat=True)
-        
-        # Convert booked times to same format
-        booked_times = [slot for slot in booked_slots if slot]
-        
-        # Return available slots
-        available_slots = [slot for slot in all_slots if slot not in booked_times]
-        
-        return available_slots
+    #start_time = models.TimeField(default='08:00')
+    #end_time = models.TimeField(default='17:00')
+    #slot_duration = models.IntegerField(default=30, help_text="Duration in minutes")
 
     def __str__(self):
         return f"{self.full_name} - Doctor"
@@ -191,6 +146,52 @@ class Booking(models.Model):
     class Meta:
         ordering = ['-created_at']
         unique_together = [['doctor', 'date', 'time']]  # Prevent double booking
+
+    def get_formatted_time_slots(self):
+        """
+        Generate time slots based on start_time, end_time, and slot_duration
+        Returns a list of formatted time strings
+        """
+        from datetime import datetime, timedelta
+        
+        if not self.start_time or not self.end_time:
+            return []
+        
+        slots = []
+        current_time = datetime.combine(datetime.today(), self.start_time)
+        end_time = datetime.combine(datetime.today(), self.end_time)
+        
+        while current_time < end_time:
+            # Format time as HH:MM (24-hour) or use strftime('%I:%M %p') for 12-hour with AM/PM
+            slots.append(current_time.strftime('%H:%M'))
+            current_time += timedelta(minutes=self.slot_duration)
+        
+        return slots
+    
+    def get_available_slots_for_date(self, date):
+        """
+        Get available time slots for a specific date
+        Returns slots that are not booked
+        """
+
+        from datetime import datetime
+        
+        all_slots = self.get_formatted_time_slots()
+        
+        # Get booked slots for this date
+        booked_slots = Booking.objects.filter(
+            doctor=self,
+            date=date,
+            status__in=['accepted', 'pending']
+        ).values_list('time', flat=True)
+        
+        # Convert booked times to same format
+        booked_times = [slot for slot in booked_slots if slot]
+        
+        # Return available slots
+        available_slots = [slot for slot in all_slots if slot not in booked_times]
+        
+        return available_slots
 
     def __str__(self):
         return f"{self.patient.full_name} -> {self.doctor.full_name} ({self.date} at {self.time})"
