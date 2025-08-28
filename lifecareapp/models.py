@@ -181,12 +181,8 @@ class DoctorAvailability(models.Model):
     date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()
+    slot_duration = models.IntegerField(default=30, help_text="Duration in minutes")
     created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        # Prevent a doctor from creating the exact same slot twice
-        unique_together = ('doctor', 'date', 'start_time', 'end_time')
-        ordering = ['date', 'start_time']
 
     def get_formatted_time_slots(self):
         """
@@ -221,18 +217,23 @@ class DoctorAvailability(models.Model):
         
         # Get booked slots for this date
         booked_slots = Booking.objects.filter(
-            doctor=self,
+            doctor=self.doctor,
             date=date,
             status__in=['accepted', 'pending']
         ).values_list('time', flat=True)
         
         # Convert booked times to same format
-        booked_times = [slot for slot in booked_slots if slot]
+        booked_times = [slot.strftime('%H:%M') for slot in booked_slots if slot]
         
         # Return available slots
         available_slots = [slot for slot in all_slots if slot not in booked_times]
         
         return available_slots
+
+    class Meta:
+        # Prevent a doctor from creating the exact same slot twice
+        unique_together = ('doctor', 'date', 'start_time', 'end_time')
+        ordering = ['date', 'start_time']
 
     def __str__(self):
         return f"Dr. {self.doctor.full_name} - {self.date} ({self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')})"
