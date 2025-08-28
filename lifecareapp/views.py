@@ -21,7 +21,6 @@ from django.db.models import Count, Sum
 from django.db.models.functions import TruncDay
 from django.utils import timezone
 from datetime import timedelta
-from collections import defaultdict
 
 
 
@@ -868,7 +867,6 @@ def manage_availability(request):
     slots = DoctorAvailability.objects.filter(doctor=doctor).order_by('date', 'start_time')
     
     return render(request, 'manage_availability.html', {'form': form, 'slots': slots})
-
 @login_required
 def delete_availability(request, availability_id):
     try:
@@ -925,52 +923,20 @@ def equipment_create(request):
 
 @login_required
 def view_doctor_profile(request, doctor_id):
-    doctor_profile = get_object_or_404(DoctorProfile, id=doctor_id)
-
-    # 1. Get all future availability blocks for the doctor
-    availabilities = DoctorAvailability.objects.filter(
-        doctor=doctor_profile,
-        date__gte=timezone.now().date()
-    )
-
-    # 2. Get ALL future booked slots for this doctor in a single query
-    booked_slots_qs = Booking.objects.filter(
-        doctor=doctor_profile,
-        date__gte=timezone.now().date(),
-        status__in=['accepted', 'pending']
-    ).values('date', 'time')
-
-    # 3. Group booked slots by date for easy lookup, formatting the time as a string
-    booked_slots_by_date = defaultdict(list)
-    for slot in booked_slots_qs:
-        date_str = slot['date'].strftime('%Y-%m-%d')
-        time_str = slot['time'].strftime('%H:%M')
-        booked_slots_by_date[date_str].append(time_str)
-
-    # 4. Generate all possible slots and filter out the booked ones
-    available_slots_by_date = defaultdict(list)
-    for block in availabilities:
-        date_str = block.date.strftime('%Y-%m-%d')
-        
-        # Get all potential slots from the doctor's schedule (e.g., 9:00, 9:30, 10:00...)
-        all_possible_slots = block.get_formatted_time_slots()
-        
-        # Get the times that are already booked for that specific day
-        booked_for_this_date = booked_slots_by_date.get(date_str, [])
-        
-        # Create the final list of available slots by removing booked ones
-        for slot_time in all_possible_slots:
-            if slot_time not in booked_for_this_date:
-                available_slots_by_date[date_str].append(slot_time)
-
-    # Convert to JSON for the template
-    doctor_time_slots_json = json.dumps(dict(available_slots_by_date))
-
+    doctor = get_object_or_404(DoctorProfile, id=doctor_id)
+    
+    # Get doctor's available time slots
+    doctor_time_slots = doctor.get_formatted_time_slots()
+    
+    # Convert to JSON for JavaScript
+    import json
+    doctor_time_slots_json = json.dumps(doctor_time_slots)
+    
     context = {
-        'doctor': doctor_profile,
+        'doctor': doctor,
         'doctor_time_slots': doctor_time_slots_json,
-        'commission': 50,
-        'total_fee': int(doctor_profile.charge_rates) + 50,
+        'commission': 50,  # Your commission
+        'total_fee': int(doctor.charge_rates) + 50,  # Ensure integer for calculations
     }
     
     return render(request, 'doctor_profile.html', context)

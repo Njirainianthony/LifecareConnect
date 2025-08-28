@@ -386,7 +386,7 @@
                 <div class="form-group">
                     <label class="form-label">Available Time Slots</label>
                     <div class="time-slots" id="timeSlots">
-                        <p class="text-muted">Please select a date to see available times.</p>
+                        const timeSlots = {{ doctor_time_slots|safe }};
                     </div>
                 </div>
             </div>
@@ -414,29 +414,23 @@
 const today = new Date().toISOString().split('T')[0];
 document.getElementById('appointmentDate').min = today;
 
-// 1. Get ALL doctor's time slots from Django and parse the JSON string
-// This variable holds an object like: {"2025-08-28": ["09:00 AM", ...], "2025-08-29": [...]}
-const allAvailableSlots = JSON.parse('{{ doctor_time_slots|safe }}');
+// Get doctor's selected time slots from Django template
+const timeSlots = {{ doctor_time_slots|safe }};
 
 let selectedDate = '';
 let selectedTime = '';
 
-// 2. This function displays time slots ONLY for the date the user selects
-function displayTimeSlotsForDate(date) {
+// Generate only the doctor's selected time slots
+function generateTimeSlots() {
     const timeSlotsContainer = document.getElementById('timeSlots');
-    timeSlotsContainer.innerHTML = ''; // Clear previous slots or message
+    timeSlotsContainer.innerHTML = '';
 
-    // Get the slots for the chosen date from our main object
-    const slotsForDate = allAvailableSlots[date];
-
-    // If no slots are defined for that date, show a message
-    if (!slotsForDate || slotsForDate.length === 0) {
-        timeSlotsContainer.innerHTML = '<p class="text-muted">No time slots available for this date. Please select another day.</p>';
+    if (!timeSlots || timeSlots.length === 0) {
+        timeSlotsContainer.innerHTML = '<p class="text-muted">No time slots available. Please contact the doctor directly.</p>';
         return;
     }
 
-    // Generate the time slot buttons for that date
-    slotsForDate.forEach(time => {
+    timeSlots.forEach(time => {
         const slot = document.createElement('div');
         slot.className = 'time-slot available';
         slot.textContent = time;
@@ -445,25 +439,14 @@ function displayTimeSlotsForDate(date) {
     });
 }
 
-// 3. This is the event handler that runs AFTER the user picks a date
-document.getElementById('appointmentDate').addEventListener('change', function(e) {
-    selectedDate = e.target.value;
-    selectedTime = ''; // Reset time when date changes
-    
-    // Call the function to show slots for the newly selected date
-    displayTimeSlotsForDate(selectedDate); 
-    
-    updateBookingSummary(); // This will hide the summary until a new time is picked
-    checkFormCompletion();
-});
-
-
 // Select time slot
 function selectTimeSlot(element, time) {
+    // Remove previous selection
     document.querySelectorAll('.time-slot').forEach(slot => {
         slot.classList.remove('selected');
     });
     
+    // Select current slot
     element.classList.add('selected');
     selectedTime = time;
     updateBookingSummary();
@@ -495,21 +478,168 @@ function updateBookingSummary() {
         `;
         
         summary.classList.add('show');
+        confirmBtn.disabled = false;
     } else {
         summary.classList.remove('show');
+        confirmBtn.disabled = true;
     }
-    checkFormCompletion(); // Call this here to ensure button state is always correct
 }
 
-// Form validation and button state
+// Date change handler - simplified, no more API calls for unavailable slots
+document.getElementById('appointmentDate').addEventListener('change', function(e) {
+    selectedDate = e.target.value;
+    selectedTime = '';
+    
+    // Reset time slot selections
+    document.querySelectorAll('.time-slot').forEach(slot => {
+        slot.classList.remove('selected');
+    });
+    
+    updateBookingSummary();
+    checkFormCompletion();
+});
+
+// Form validation
 function validateForm() {
     return selectedDate && selectedTime;
 }
 
+// Enable/disable confirm button based on form completion
 function checkFormCompletion() {
     const confirmBtn = document.getElementById('confirmBtn');
     confirmBtn.disabled = !validateForm();
 }
+
+// Confirm Booking
+async function confirmBooking() { 
+    if (!validateForm()) { 
+        alert('Please select a date and time slot.'); 
+        return; 
+    } 
+
+    try {
+        const response = await fetch("{% url 'book_doctor_ajax' doctor.id %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify({
+                appointment_date: selectedDate,
+                appointment_time: selectedTime,
+                doctor_id: {{ doctor.id }},
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.status === "success") {
+            document.getElementById('successMessage').classList.add('show'); 
+            document.getElementById('confirmBtn').style.display = 'none'; 
+            document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' }); 
+        } else {
+            alert(data.message || "Booking failed. Please try again.");
+        }
+    } catch (error) {
+        console.error('Booking error:', error);
+        alert('An error occurred while confirming your booking. Please try again.');
+    }
+}
+
+// Initialize - show doctor's selected time slots
+generateTimeSlots();
+
+document.addEventListener('DOMContentLoaded', function () {
+    const modal = document.getElementById('phoneModal');
+    const closeModal = document.getElementById('closeModal');
+    const payBtn = document.getElementById('payBtn');
+    const phoneInput = document.getElementById('phoneInput');
+
+    // Close on '×'
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    // Close on outside click
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+            // Pay button action: make STK push call to Django backend
+            // Pay button action: make STK push call to Django backend
+        payBtn.addEventListener('click', async () => {
+            let phone = phoneInput.value.trim();
+
+        // Phone validation
+        if (!phone.match(/^(?:\+254|254|0)7\d{8}$/)) {
+            alert("Please enter a valid Safaricom phone number.");
+            return;
+        }
+
+        // Normalize phone number
+        if (phone.startsWith("0")) {
+            phone = "254" + phone.slice(1);
+        } else if (phone.startsWith("+254")) {
+            phone = phone.replace("+", "");
+        }
+
+        payBtn.textContent = "Processing...";
+        payBtn.disabled = true;
+
+            try {
+                const response = await fetch("{% url 'stk_push' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: JSON.stringify({
+                        phone: phone,
+                        amount: {{ total_fee }},
+                        appointment_date: selectedDate,
+                        appointment_time: selectedTime,
+                        doctor_id: {{ doctor.id }},
+                        
+                    })
+                });
+        try {
+            const response = await fetch("{% url 'stk_push' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({
+                    phone: phone,
+                    amount: {{ total_fee }},
+                    appointment_date: selectedDate,
+                    appointment_time: selectedTime,
+                    doctor_id: {{ doctor.id }},
+                })
+            });
+
+            const data = await response.json();
+
+                if (data.status === "success") {
+                    document.getElementById('phoneModal').style.display = 'none';
+                    document.getElementById('successMessage').classList.add('show');
+                    document.getElementById('confirmBtn').style.display = 'none';
+                    document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert(data.message || "Payment failed. Try again.");
+                    payBtn.textContent = "Pay Now";
+                    payBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error(error);
+                alert("An error occurred. Try again.");
+                payBtn.textContent = "Pay Now";
+                payBtn.disabled = false;
+            }
+        });
+    });
     </script>
 
     <!-- Phone Number Modal -->
