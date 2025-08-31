@@ -147,47 +147,6 @@ class Booking(models.Model):
         ordering = ['-created_at']
         unique_together = [['doctor', 'date', 'time']]  # Prevent double booking
 
-    def __str__(self):
-        return f"{self.patient.full_name} -> {self.doctor.full_name} ({self.date} at {self.time})"
-    
-    @property
-    def formatted_date_time(self):
-        """Return formatted date and time string"""
-        if self.date and self.time:
-            return f"{self.date.strftime('%B %d, %Y')} at {self.time}"
-        return "Date/Time not set"
-
-
-# models.py
-class Payment(models.Model):
-    user = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=8, decimal_places=2)
-    status = models.CharField(max_length=20)  # 'PAID' or 'FAILED'
-    created_at = models.DateTimeField(auto_now_add=True)   # <- add this & migrate if you want time-series revenue
-
-"""    
-class Booking(models.Model):
-    patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE, null=True)
-    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE)
-    date = models.DateField(default='2025-06-22')
-    time = models.CharField(max_length=20, default='10:00 AM')
-    status = models.CharField(max_length=20)  # 'BOOKED', 'CANCELLED'
-"""
-
-#Doctor Availability
-class DoctorAvailability(models.Model):
-    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE, related_name='availability_slots')
-    date = models.DateField()
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        # Prevent a doctor from creating the exact same slot twice
-        unique_together = ('doctor', 'date', 'start_time', 'end_time')
-        ordering = ['date', 'start_time']
-
     def get_formatted_time_slots(self):
         """
         Generate time slots based on start_time, end_time, and slot_duration
@@ -233,6 +192,47 @@ class DoctorAvailability(models.Model):
         available_slots = [slot for slot in all_slots if slot not in booked_times]
         
         return available_slots
+
+    def __str__(self):
+        return f"{self.patient.full_name} -> {self.doctor.full_name} ({self.date} at {self.time})"
+    
+    @property
+    def formatted_date_time(self):
+        """Return formatted date and time string"""
+        if self.date and self.time:
+            return f"{self.date.strftime('%B %d, %Y')} at {self.time}"
+        return "Date/Time not set"
+
+
+# models.py
+class Payment(models.Model):
+    user = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
+    status = models.CharField(max_length=20)  # 'PAID' or 'FAILED'
+    created_at = models.DateTimeField(auto_now_add=True)   # <- add this & migrate if you want time-series revenue
+
+"""    
+class Booking(models.Model):
+    patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE, null=True)
+    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE)
+    date = models.DateField(default='2025-06-22')
+    time = models.CharField(max_length=20, default='10:00 AM')
+    status = models.CharField(max_length=20)  # 'BOOKED', 'CANCELLED'
+"""
+
+#Doctor Availability
+class DoctorAvailability(models.Model):
+    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE, related_name='availability_slots')
+    date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # Prevent a doctor from creating the exact same slot twice
+        unique_together = ('doctor', 'date', 'start_time', 'end_time')
+        ordering = ['date', 'start_time']
 
     def __str__(self):
         return f"Dr. {self.doctor.full_name} - {self.date} ({self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')})"
