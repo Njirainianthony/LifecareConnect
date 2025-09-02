@@ -30,35 +30,32 @@ class BookingAdmin(admin.ModelAdmin):
     list_display = (
         'patient_full_name', 
         'doctor_full_name', 
-        'appointment_type', 
-        'status', 
         'date', 
-        'queue_position',
+        'time',  # Use the 'time' field which exists
+        'status', 
         'cost',
         'created_at'
     )
     list_filter = (
         'status', 
-        'appointment_type', 
         'date',
-        'doctor__full_name',
+        'doctor', # Filter by the foreign key relationship directly
     )
     search_fields = (
-        'patient__full_name',
-        'doctor__full_name',
-        'appointment_type',
+        'patient__username', # Search by username on the related User model
+        'doctor__full_name', # Search by full_name on the related DoctorProfile model
         'status',
     )
-    ordering = ('-created_at',)
+    ordering = ('-date', 'time')
 
     def patient_full_name(self, obj):
-        return obj.patient.full_name if obj.patient else "No patient"
+        # Use get_full_name() for the default User model or fallback to username
+        return obj.patient.get_full_name() or obj.patient.username
     patient_full_name.short_description = 'Patient'
 
     def doctor_full_name(self, obj):
         return obj.doctor.full_name if obj.doctor else "No doctor"
     doctor_full_name.short_description = 'Doctor'
-
 
 admin.site.register(Profile, ProfileAdmin)
 

@@ -386,7 +386,6 @@
                 <div class="form-group">
                     <label class="form-label">Available Time Slots</label>
                     <div class="time-slots" id="timeSlots">
-                        const timeSlots = {{ doctor_time_slots|safe }};
                     </div>
                 </div>
             </div>
@@ -485,7 +484,7 @@ function updateBookingSummary() {
     }
 }
 
-// Date change handler - simplified, no more API calls for unavailable slots
+// Date change handler - simplified
 document.getElementById('appointmentDate').addEventListener('change', function(e) {
     selectedDate = e.target.value;
     selectedTime = '';
@@ -510,7 +509,7 @@ function checkFormCompletion() {
     confirmBtn.disabled = !validateForm();
 }
 
-// Confirm Booking
+// Confirm Booking (NO phone, NO payment)
 async function confirmBooking() { 
     if (!validateForm()) { 
         alert('Please select a date and time slot.'); 
@@ -548,99 +547,8 @@ async function confirmBooking() {
 
 // Initialize - show doctor's selected time slots
 generateTimeSlots();
+</script>
 
-document.addEventListener('DOMContentLoaded', function () {
-    const modal = document.getElementById('phoneModal');
-    const closeModal = document.getElementById('closeModal');
-    const payBtn = document.getElementById('payBtn');
-    const phoneInput = document.getElementById('phoneInput');
-
-    // Close on '×'
-    closeModal.addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
-
-    // Close on outside click
-    window.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            modal.style.display = 'none';
-        }
-    });
-
-            // Pay button action: make STK push call to Django backend
-            // Pay button action: make STK push call to Django backend
-        payBtn.addEventListener('click', async () => {
-            let phone = phoneInput.value.trim();
-
-        // Phone validation
-        if (!phone.match(/^(?:\+254|254|0)7\d{8}$/)) {
-            alert("Please enter a valid Safaricom phone number.");
-            return;
-        }
-
-        // Normalize phone number
-        if (phone.startsWith("0")) {
-            phone = "254" + phone.slice(1);
-        } else if (phone.startsWith("+254")) {
-            phone = phone.replace("+", "");
-        }
-
-        payBtn.textContent = "Processing...";
-        payBtn.disabled = true;
-
-            try {
-                const response = await fetch("{% url 'stk_push' %}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}',
-                    },
-                    body: JSON.stringify({
-                        phone: phone,
-                        amount: {{ total_fee }},
-                        appointment_date: selectedDate,
-                        appointment_time: selectedTime,
-                        doctor_id: {{ doctor.id }},
-                        
-                    })
-                });
-        try {
-            const response = await fetch("{% url 'stk_push' %}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-                body: JSON.stringify({
-                    phone: phone,
-                    amount: {{ total_fee }},
-                    appointment_date: selectedDate,
-                    appointment_time: selectedTime,
-                    doctor_id: {{ doctor.id }},
-                })
-            });
-
-            const data = await response.json();
-
-                if (data.status === "success") {
-                    document.getElementById('phoneModal').style.display = 'none';
-                    document.getElementById('successMessage').classList.add('show');
-                    document.getElementById('confirmBtn').style.display = 'none';
-                    document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    alert(data.message || "Payment failed. Try again.");
-                    payBtn.textContent = "Pay Now";
-                    payBtn.disabled = false;
-                }
-            } catch (error) {
-                console.error(error);
-                alert("An error occurred. Try again.");
-                payBtn.textContent = "Pay Now";
-                payBtn.disabled = false;
-            }
-        });
-    });
-    </script>
 
     <!-- Phone Number Modal -->
 <div id="phoneModal" class="modal">

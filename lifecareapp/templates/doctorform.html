@@ -109,8 +109,13 @@
   </div>
 {% endif %}
 
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-blue-green mt-3">Submit Profile</button>
+</form>
 
-
+<!--
       <div class="row">
         <div class="mb-3 col-md-6">
           <label for="full_name" class="form-label">Full Name</label>
@@ -152,6 +157,14 @@
           <label for="charge_rates" class="form-label">Charge Rates</label>
           <input type="text" class="form-control" id="charge_rates" name="charge_rates">
         </div>
+        <div class="mb-3 col-md-6">
+          <label for="start_time" class="form-label">Start Time</label>
+          {{ form.start_time }}
+        </div>
+        <div class="mb-3 col-md-6">
+          <label for="end_time" class="form-label">End Time</label>
+          {{ form.end_time }}
+        </div>
         <div class="mb-4 col-md-6">
           <label for="profile_pic" class="form-label">Upload Profile Picture</label>
           <input class="form-control" type="file" id="profile_pic" name="profile_pic" accept="image/*">
@@ -161,6 +174,7 @@
     </form>
   </div>
 </div>
+-->
 
 <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 </body>
