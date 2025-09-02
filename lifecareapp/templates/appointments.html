@@ -63,55 +63,69 @@
 <div class="sidebar">
   <h4 class="text-center mb-4"> <b>Lifecare Connect</b></h4>
   <a href="{% url 'home' %}">Home</a>
-  <a href="{% url 'dashboard' %}">Dashboard</a>
-  <a href="#">Bookings</a>
   <a href="{% url 'edit_patient_profile' %}">Edit Profile</a>
   <a href="javascript:void(0);" onclick="document.getElementById('logoutForm').submit();" class="text-danger">Logout</a>
   <a href="#" class="text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete Profile</a>
 </div>
 
 <div class="content">
-<h3 class="mb-4">Appointments</h3>
+<h3 class="mb-4">My Appointments</h3>
 
 <div class="card">
   <div class="card-body">
-    <ul class="nav nav-tabs mb-3">
-      <li class="nav-item"><a class="nav-link active" href="#">Upcoming</a></li>
-      <li class="nav-item"><a class="nav-link" href="#">Ongoing</a></li>
-      <li class="nav-item"><a class="nav-link" href="#">Previous</a></li>
-      <li class="nav-item"><a class="nav-link" href="#">Expired</a></li>
-    </ul>
-
-    <input type="text" class="form-control mb-3" placeholder="Search table">
-
     <div class="table-responsive">
       <table class="table table-bordered table-hover text-center align-middle">
         <thead class="table-light">
           <tr>
-            <th>Doctor</th>
-            <th>Appointment Type</th>
-            <th>Date</th>
-            <th>From</th>
+            <th>{% if is_doctor %}Patient{% else %}Doctor{% endif %}</th>
+            <th>Appointment Date & Time</th>
             <th>Cost</th>
-            <th>Queue Position</th>
+            <th>Status</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {% if appointments %}
-            {% for appointment in appointments %}
-              <tr>
-                <td>{{ appointment.doctor_name }}</td>
-                <td>{{ appointment.type }}</td>
-                <td>{{ appointment.date }}</td>
-                <td>{{ appointment.start_time }}</td>
-                <td>KES {{ appointment.cost }}</td>
-                <td>{{ appointment.queue_position }}</td>
-              </tr>
-            {% endfor %}
-          {% else %}
-            <tr><td colspan="7" class="text-muted">No Upcoming appointments</td></tr>
-          {% endif %}
+          {% for appointment in appointments %}
+            <tr>
+              <td>
+                {% if is_doctor %}
+                  {{ appointment.patient.user.get_full_name|default:appointment.patient.user.username }}
+                {% else %}
+                  Dr. {{ appointment.doctor.full_name }}
+                {% endif %}
+              </td>
+              <td>{{ appointment.date }} at {{ appointment.time }}</td>
+              <td>KES {{ appointment.cost }}</td>
+              <td><span class="badge bg-info text-capitalize">{{ appointment.status }}</span></td>
+              <td>
+                {% if is_doctor %}
+                  {% if appointment.status == 'pending' %}
+                    <form action="{% url 'confirm_booking' appointment.id %}" method="POST" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-success">Confirm</button>
+                    </form>
+                  {% elif appointment.status == 'confirmed' %}
+                    <form action="{% url 'complete_booking' appointment.id %}" method="POST" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-primary">Mark as Complete</button>
+                    </form>
+                  {% elif appointment.status == 'completed' %}
+                    <span class="text-muted">Awaiting Payment...</span>
+                  {% elif appointment.status == 'paid' %}
+                    <span class="text-success">Paid</span>
+                  {% endif %}
+                {% else %}
+                  {% if appointment.status == 'pending' or appointment.status == 'confirmed' %}
+                    <a href="#" class="btn btn-sm btn-danger">Cancel</a>
+                  {% else %}
+                    <span class="text-muted">No actions available</span>
+                  {% endif %}
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5" class="text-muted">No appointments found.</td></tr>
+          {% endfor %}
         </tbody>
       </table>
     </div>

@@ -70,30 +70,37 @@ class DoctorProfileForm(forms.ModelForm):
     class Meta:
         model = DoctorProfile
         exclude = ['user']  # user will be set in the view
+        #fields = ['start_time', 'end_time']
         widgets = {
             'qualifications': forms.Textarea(attrs={'rows': 2}),
             'expertise': forms.Textarea(attrs={'rows': 2}),
             'languages': forms.Textarea(attrs={'rows': 2}),
+            'start_time': forms.TimeInput(
+                attrs={'type': 'time', 'class': 'form-control'}
+            ),
+            'end_time': forms.TimeInput(
+                attrs={'type': 'time', 'class': 'form-control'}
+            ),
         }
 
-#Generate Intervals
-def generate_time_choices(start_hour=8, end_hour=18, interval_minutes=60):
-    """
-    Returns a list of tuples for Select choices:
-    [('08:00', '08:00'), ('08:30', '08:30'), ...]
-    From start_hour to end_hour inclusive of start, exclusive of end by default.
-    """
-    choices = []
-    current = datetime(2000, 1, 1, start_hour, 0)
-    end = datetime(2000, 1, 1, end_hour, 0)
-    delta = timedelta(minutes=interval_minutes)
-    while current <= end:
-        label = current.strftime('%H:%M') # use '%I:%M %p' for AM/PM labels
-        choices.append((label, label))
-        current += delta
-    return choices
+    #Generate Intervals
+    def generate_time_choices(start_hour=8, end_hour=18, interval_minutes=60):
+        """
+        Returns a list of tuples for Select choices:
+        [('08:00', '08:00'), ('08:30', '08:30'), ...]
+        From start_hour to end_hour inclusive of start, exclusive of end by default.
+        """
+        choices = []
+        current = datetime(2000, 1, 1, start_hour, 0)
+        end = datetime(2000, 1, 1, end_hour, 0)
+        delta = timedelta(minutes=interval_minutes)
+        while current <= end:
+            label = current.strftime('%H:%M') # use '%I:%M %p' for AM/PM labels
+            choices.append((label, label))
+            current += delta
+        return choices
 
-TIME_CHOICES = generate_time_choices(start_hour=8, end_hour=17, interval_minutes=30)
+    TIME_CHOICES = generate_time_choices(start_hour=8, end_hour=17, interval_minutes=30)
 
 #Doctorforms
 class DateInput(forms.DateInput):

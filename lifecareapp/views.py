@@ -246,8 +246,9 @@ def doctor_form(request):
 # --- Dashboard View ---
 @login_required
 def dashboard_patient(request, profile_id):
-    profile = get_object_or_404(PatientProfile, id=profile_id, user=request.user)
-    bookings = Booking.objects.filter(patient=profile)
+    profile = get_object_or_404(PatientProfile, id=profile_id)
+    user=profile.user
+    bookings = Booking.objects.filter(patient=user).order_by('date', 'time')
     return render(request, 'dashboard_patient.html', {
         'profile': profile,
         'bookings': bookings,
@@ -383,7 +384,6 @@ def notify_doctor(booking):
         f"You have a new appointment request from {patient_name}.\n\n"
         f"Please log in to your dashboard to view the request and accept or decline it.\n\n"
         f"Booking ID: {booking.id}\n"
-        f"Patient Profile: https://lifecareconnect.com/patient/{booking.patient.id}/profile/\n\n"
     )
     
     send_mail(
@@ -405,9 +405,52 @@ def delete_account(request):
 
 @login_required
 def appointments(request):
-    patient_profile = PatientProfile.objects.get(user=request.user)
-    appointments = Booking.objects.filter(patient=patient_profile)
-    return render(request, 'appointments.html', {'appointments': appointments})
+    # Check if the logged-in user has a doctor profile
+    is_doctor = hasattr(request.user, 'doctorprofile')
+    
+    if is_doctor:
+        # Doctor's view: Get all bookings for this doctor
+        appointments = Booking.objects.filter(doctor=request.user.doctorprofile).order_by('date', 'time')
+    else:
+        # Patient's view: Get all appointments for this patient
+        appointments = Booking.objects.filter(patient=request.user).order_by('date', 'time')
+
+    context = {
+        'appointments': appointments,
+        'is_doctor': is_doctor
+    }
+    return render(request, 'appointments.html', context)
+
+@login_required
+def confirm_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+    # Security check: ensure the request is from the correct doctor
+    if request.user == booking.doctor.user and request.method == 'POST':
+        booking.status = Booking.AppointmentStatus.CONFIRMED
+        booking.save()
+        # Send a notification to the patient
+        notify_patient(booking)
+
+    return redirect('appointments') # Redirect back to the appointments page
+
+@login_required
+def complete_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+    # Security check
+    if request.user == booking.doctor.user and request.method == 'POST':
+        booking.status = Booking.AppointmentStatus.COMPLETED
+        booking.save()
+
+        patient_profile = booking.patient   # now this is a PatientProfile
+        doctor = booking.doctor
+        amount = booking.cost
+        
+        success = stk_push(patient_profile, doctor, amount, booking)
+
+        if not success:
+            messages.error(request, "Payment initiation failed.")
+        
+    return redirect('appointments')
 
 #def view_doctor_profile(request, doctor_id):
 #    doctor = get_object_or_404(DoctorProfile, id=doctor_id)
@@ -525,54 +568,32 @@ def mpesa_callback(request):
 '''
 
 @csrf_exempt
-def stk_push(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        phone = data.get("phone")
-        amount = data.get("amount")
-        doctor_id = data.get("doctor_id")
-        date = data.get("appointment_date")
-        time = data.get("appointment_time")
+def stk_push(patient_profile, doctor, amount, booking):
+    success = initiate_stk_push(amount, patient_profile.user.phone_number)  # adjust params
 
-        success = initiate_stk_push(request)
+    if success:
+        try:
+            payment = Payment.objects.create(
+                user=patient_profile,
+                doctor=doctor,
+                amount=amount,
+                status="PAID"
+            )
 
-        if success:
-            try:
-                doctor = DoctorProfile.objects.get(id=doctor_id)
+            # Link payment to the booking instead of creating a new one
+            booking.status = Booking.AppointmentStatus.PAID
+            booking.save()
 
-                # Get one of the user's patient profiles
-                patient_profiles = PatientProfile.objects.filter(user=request.user)
-                if not patient_profiles.exists():
-                    return JsonResponse({"status": "error", "message": "Patient profile not found."})
-                
-                patient_profile = patient_profiles.first()  # 👈 Use logic as needed
+            handler = PaymentEventHandler(payment, booking)
+            handler.handle_success()
 
-                payment = Payment.objects.create(
-                    user=patient_profile,
-                    doctor=doctor,
-                    amount=amount,
-                    status="PAID"
-                )
+            return True
 
-                booking = Booking.objects.create(
-                    patient=patient_profile,
-                    doctor=doctor,
-                    date=date,
-                    time=time,
-                    status="pending"
-                )
+        except Exception as e:
+            print("STK Push error:", str(e))
+            return False
 
-                handler = PaymentEventHandler(payment, booking)
-                handler.handle_success()
-
-                return JsonResponse({"status": "success"})
-
-            except DoctorProfile.DoesNotExist:
-                return JsonResponse({"status": "error", "message": "Doctor not found."})
-            except Exception as e:
-                return JsonResponse({"status": "error", "message": f"Something went wrong: {str(e)}"})
-
-        return JsonResponse({"status": "fail", "message": "STK Push failed"})
+    return False
 
 
 
@@ -1049,12 +1070,15 @@ def notify_patient(booking):
     doctor_name = f"Dr. {booking.doctor.user.get_full_name()}"
     
     subject = 'Appointment Update'
-    message = f'Your appointment request to {doctor_name} was {status}.'
     
-    if booking.status == 'accepted':
-        message += '\n\nPlease contact the doctor for further details.'
-    elif booking.status == 'declined':
-        message += '\n\nYou may try booking with another healthcare provider.'
+    if status == Booking.AppointmentStatus.CONFIRMED:
+        message = f'Your appointment with {doctor_name} has been confirmed.'
+    elif status == Booking.AppointmentStatus.DECLINED:
+        message = f'Unfortunately, your appointment request to {doctor_name} was declined.\n\nYou may try booking with another healthcare provider.'
+    elif status == Booking.AppointmentStatus.COMPLETED:
+        message = f'Your appointment with {doctor_name} has been marked as completed.'
+    else:  # pending or fallback
+        message = f'Your appointment request to {doctor_name} is still pending confirmation.'
     
     send_mail(
         subject,

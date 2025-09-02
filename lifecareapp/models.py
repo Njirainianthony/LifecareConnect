@@ -86,66 +86,9 @@ class DoctorProfile(models.Model):
     charge_rates = models.FloatField(max_length=50)
     profile_pic = models.ImageField(upload_to='doctors/', blank=True, null=True)
     # Time slot fields
-    #start_time = models.TimeField(default='08:00')
-    #end_time = models.TimeField(default='17:00')
-    #slot_duration = models.IntegerField(default=30, help_text="Duration in minutes")
-
-    def __str__(self):
-        return f"{self.full_name} - Doctor"
-
-
-# models.py
-class Booking(models.Model):
-    APPOINTMENT_TYPE_CHOICES = [
-        ('consultation', 'Consultation'),
-        ('checkup', 'General Checkup'),
-        ('follow_up', 'Follow-up'),
-        ('emergency', 'Emergency'),
-        ('specialist', 'Specialist Visit'),
-        ('lab_test', 'Laboratory Test'),
-        ('vaccination', 'Vaccination'),
-        ('physical_therapy', 'Physical Therapy'),
-    ]
-    
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('accepted', 'Accepted'),
-        ('declined', 'Declined'),
-        ('completed', 'Completed'),
-        ('cancelled', 'Cancelled'),
-    ]
-    
-    # Core fields
-    patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    created_at = models.DateTimeField(auto_now_add=timezone.now)
-    
-    # Appointment details
-    appointment_type = models.CharField(
-        max_length=50, 
-        choices=APPOINTMENT_TYPE_CHOICES,
-        default='consultation',
-        help_text="Type of appointment"
-    )
-    date = models.DateField(null=True, blank=True, help_text="Appointment date")
-    time = models.CharField(max_length=10, null=True, blank=True, help_text="Appointment time (HH:MM format)")
-    cost = models.DecimalField(
-        null=True,
-        blank=True,
-        max_digits=10, 
-        decimal_places=2,
-        help_text="Cost of appointment in KES"
-    )
-    queue_position = models.PositiveIntegerField(
-        null=True, 
-        blank=True,
-        help_text="Position in queue for the appointment"
-    )
-
-    class Meta:
-        ordering = ['-created_at']
-        unique_together = [['doctor', 'date', 'time']]  # Prevent double booking
+    start_time = models.TimeField(default='08:00')
+    end_time = models.TimeField(default='17:00')
+    slot_duration = models.IntegerField(default=30, help_text="Duration in minutes")
 
     def get_formatted_time_slots(self):
         """
@@ -193,15 +136,35 @@ class Booking(models.Model):
         
         return available_slots
 
+
     def __str__(self):
-        return f"{self.patient.full_name} -> {self.doctor.full_name} ({self.date} at {self.time})"
-    
-    @property
-    def formatted_date_time(self):
-        """Return formatted date and time string"""
-        if self.date and self.time:
-            return f"{self.date.strftime('%B %d, %Y')} at {self.time}"
-        return "Date/Time not set"
+        return f"{self.full_name} - Doctor"
+
+
+# models.py
+class Booking(models.Model):
+    class AppointmentStatus(models.TextChoices):
+        PENDING = 'pending', 'Pending'
+        CONFIRMED = 'confirmed', 'Confirmed'
+        COMPLETED = 'completed', 'Completed'
+        CANCELLED = 'cancelled', 'Cancelled'
+        PAID = 'paid', 'Paid'
+
+    patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE, related_name='appointments')
+    doctor = models.ForeignKey('DoctorProfile', on_delete=models.CASCADE, related_name='bookings')
+    date = models.DateField(default=timezone.now)
+    time = models.CharField(max_length=10, default='09:00') # Using CharField to match your slot format 'HH:MM'
+    cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    status = models.CharField(
+        max_length=20,
+        choices=AppointmentStatus.choices,
+        default=AppointmentStatus.PENDING
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Appointment with Dr. {self.doctor.full_name} for {self.patient.username} on {self.date} at {self.time}"
+
 
 
 # models.py
