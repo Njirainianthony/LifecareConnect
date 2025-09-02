@@ -731,11 +731,10 @@ def delete_patient(request, pk):
 @login_required
 @user_passes_test(is_admin)
 def admin_dashboard(request):
-    # --- Time window for trends (last 30 days) ---
     today = timezone.now().date()
-    start_date = today - timedelta(days=29)  # inclusive 30 days
+    start_date = today - timedelta(days=29)
 
-    # Bookings per day for last 30 days
+    # Bookings per day
     bookings_qs = Booking.objects.filter(created_at__date__gte=start_date)
     bookings_by_day = (
         bookings_qs
@@ -744,27 +743,25 @@ def admin_dashboard(request):
         .annotate(count=Count('id'))
         .order_by('day')
     )
-    # Map dates to counts for continuous series
     day_count_map = {item['day'].date(): item['count'] for item in bookings_by_day}
     bookings_labels = []
     bookings_counts = []
     for i in range(30):
         d = start_date + timedelta(days=i)
-        bookings_labels.append(d.strftime('%b %d'))     # e.g. "Aug 11"
+        bookings_labels.append(d.strftime('%b %d'))
         bookings_counts.append(day_count_map.get(d, 0))
 
-    # Appointment-type distribution (pie)
-    type_qs = Booking.objects.values('appointment_type').annotate(count=Count('id'))
-    # convert to label/value arrays (use readable labels from choices)
-    type_label_map = dict(Booking.APPOINTMENT_TYPE_CHOICES)
-    types_labels = []
-    types_counts = []
-    for item in type_qs:
-        code = item['appointment_type']
-        types_labels.append(type_label_map.get(code, code))
-        types_counts.append(item['count'])
+    # 📊 Booking Status Breakdown (replacing appointment_type)
+    status_qs = Booking.objects.values('status').annotate(count=Count('id'))
+    status_label_map = dict(Booking.AppointmentStatus.choices)
+    status_labels = []
+    status_counts = []
+    for item in status_qs:
+        code = item['status']
+        status_labels.append(status_label_map.get(code, code))
+        status_counts.append(item['count'])
 
-    # Top doctors by bookings (top 5)
+    # Top doctors by bookings
     top_docs_qs = (
         Booking.objects
         .values('doctor__id', 'doctor__full_name')
@@ -774,12 +771,12 @@ def admin_dashboard(request):
     top_docs_labels = [item['doctor__full_name'] for item in top_docs_qs]
     top_docs_counts = [item['bookings_count'] for item in top_docs_qs]
 
-    # Payments summary by status (sum amount per status)
+    # Payments summary
     payments_summary = Payment.objects.values('status').annotate(total=Sum('amount'))
     payments_labels = [p['status'] for p in payments_summary]
     payments_values = [float(p['total'] or 0) for p in payments_summary]
 
-    # Quick stat cards
+    # Stat cards
     total_bookings = Booking.objects.count()
     total_patients = PatientProfile.objects.count()
     total_doctors = DoctorProfile.objects.count()
@@ -788,8 +785,8 @@ def admin_dashboard(request):
     context = {
         'bookings_labels': bookings_labels,
         'bookings_counts': bookings_counts,
-        'types_labels': types_labels,
-        'types_counts': types_counts,
+        'status_labels': status_labels,   # ✅ updated
+        'status_counts': status_counts,   # ✅ updated
         'top_docs_labels': top_docs_labels,
         'top_docs_counts': top_docs_counts,
         'payments_labels': payments_labels,
@@ -899,6 +896,8 @@ def delete_availability(request, availability_id):
     messages.success(request, "Availability removed.")
     return redirect('manage_availability')
 
+
+
 #Equipment Leasing
 def equipment_list(request):
     q = (request.GET.get('q') or '').strip()
@@ -915,24 +914,26 @@ def equipment_list(request):
         'page_obj': page_obj,
         'q': q,
     }
-    return render(request, 'equipment_list.html')
+    return render(request, 'equipment_list.html', context)  # pass context
+
 
 def equipment_detail(request, pk):
     equipment = get_object_or_404(Equipment, pk=pk)
     return render(request, 'equipment_detail.html', {'equipment': equipment})
 
-#Equipmentform
 
+#Equipment form
 @login_required
 def equipment_create(request):
     if request.method == 'POST':
         form = EquipmentForm(request.POST, request.FILES)
-    if form.is_valid():
-        form.save()
-        return redirect('equipment_list')
+        if form.is_valid():
+            form.save()
+            return redirect('equipment_list')
     else:
         form = EquipmentForm()
-    return render(request, 'equipment_form.html', {'form': form})
+    
+    return render(request, 'add_equipment.html', {'form': form})
 
 
 

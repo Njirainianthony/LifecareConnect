@@ -40,8 +40,8 @@
 
     <div class="col-lg-5">
       <div class="card p-3 mb-3">
-        <h5 style="color:#00796b">Appointment Type Breakdown</h5>
-        <canvas id="typesChart" height="160"></canvas>
+        <h5 style="color:#00796b">Booking Status Breakdown</h5>
+        <canvas id="statusChart" height="160"></canvas>
       </div>
 
       <div class="card p-3">
@@ -63,8 +63,8 @@
 
 {{ bookings_labels|json_script:"bookings-labels" }}
 {{ bookings_counts|json_script:"bookings-counts" }}
-{{ types_labels|json_script:"types-labels" }}
-{{ types_counts|json_script:"types-counts" }}
+{{ status_labels|json_script:"status-labels" }}
+{{ status_counts|json_script:"status-counts" }}
 {{ payments_labels|json_script:"payments-labels" }}
 {{ payments_values|json_script:"payments-values" }}
 {{ top_docs_labels|json_script:"topdocs-labels" }}
@@ -76,8 +76,8 @@
   const bookingsLabels = JSON.parse(document.getElementById('bookings-labels').textContent);
   const bookingsCounts = JSON.parse(document.getElementById('bookings-counts').textContent);
 
-  const typesLabels = JSON.parse(document.getElementById('types-labels').textContent);
-  const typesCounts = JSON.parse(document.getElementById('types-counts').textContent);
+  const statusLabels = JSON.parse(document.getElementById('status-labels').textContent);
+  const statusCounts = JSON.parse(document.getElementById('status-counts').textContent);
 
   const paymentsLabels = JSON.parse(document.getElementById('payments-labels').textContent);
   const paymentsValues = JSON.parse(document.getElementById('payments-values').textContent);
@@ -109,13 +109,13 @@
     }
   });
 
-  new Chart(document.getElementById('typesChart').getContext('2d'), {
+  new Chart(document.getElementById('statusChart').getContext('2d'), {
     type: 'doughnut',
     data: {
-      labels: typesLabels,
+      labels: statusLabels,
       datasets: [{
-        data: typesCounts,
-        backgroundColor: ['#00796b','#43a047','#29b6f6','#ffb300','#9c27b0','#ef6c00','#8e24aa','#455a64'],
+        data: statusCounts,
+        backgroundColor: ['#00796b','#43a047','#29b6f6','#ffb300','#c62828'],
       }]
     },
     options: {

@@ -75,6 +75,7 @@ urlpatterns = [
     path('doctor/availability/int:availability_id/delete/', views.delete_availability, name='delete_availability'),
     path('equipment/', views.equipment_list, name='equipment_list'),
     path('equipment/add/', views.equipment_create, name='equipment_create'),
-    path('equipment/int:pk/', views.equipment_detail, name='equipment_detail'),
+    path('equipment/<int:pk>/', views.equipment_detail, name='equipment_detail'),
+
 
 ]
