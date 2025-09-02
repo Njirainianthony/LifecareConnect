@@ -247,8 +247,7 @@ def doctor_form(request):
 @login_required
 def dashboard_patient(request, profile_id):
     profile = get_object_or_404(PatientProfile, id=profile_id)
-    user=profile.user
-    bookings = Booking.objects.filter(patient=user).order_by('date', 'time')
+    bookings = Booking.objects.filter(patient=profile).order_by('date', 'time')
     return render(request, 'dashboard_patient.html', {
         'profile': profile,
         'bookings': bookings,
