@@ -175,6 +175,8 @@ class Payment(models.Model):
     status = models.CharField(max_length=20)  # 'PAID' or 'FAILED'
     created_at = models.DateTimeField(auto_now_add=True)   # <- add this & migrate if you want time-series revenue
 
+    booking = models.ForeignKey(Booking, on_delete=models.SET_NULL, null=True, blank=True, related_name='payments')
+
 """    
 class Booking(models.Model):
     patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE, null=True)
