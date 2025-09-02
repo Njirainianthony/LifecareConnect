@@ -247,8 +247,7 @@ def doctor_form(request):
 @login_required
 def dashboard_patient(request, profile_id):
     profile = get_object_or_404(PatientProfile, id=profile_id)
-    user=profile.user
-    bookings = Booking.objects.filter(patient=user).order_by('date', 'time')
+    bookings = Booking.objects.filter(patient=profile).order_by('date', 'time')
     return render(request, 'dashboard_patient.html', {
         'profile': profile,
         'bookings': bookings,
@@ -413,7 +412,13 @@ def appointments(request):
         appointments = Booking.objects.filter(doctor=request.user.doctorprofile).order_by('date', 'time')
     else:
         # Patient's view: Get all appointments for this patient
-        appointments = Booking.objects.filter(patient=request.user).order_by('date', 'time')
+        try:
+            patient_profile = PatientProfile.objects.get(user=request.user)
+            appointments = Booking.objects.filter(
+                patient=patient_profile
+            ).order_by('date', 'time')
+        except PatientProfile.DoesNotExist:
+            appointments = []  # or handle gracefully
 
     context = {
         'appointments': appointments,
@@ -436,117 +441,49 @@ def confirm_booking(request, booking_id):
 @login_required
 def complete_booking(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
-    # Security check
-    if request.user == booking.doctor.user and request.method == 'POST':
-        booking.status = Booking.AppointmentStatus.COMPLETED
-        booking.save()
 
-        patient_profile = booking.patient   # now this is a PatientProfile
-        doctor = booking.doctor
-        amount = booking.cost
-        
-        success = stk_push(patient_profile, doctor, amount, booking)
+    # Security check: ensure the request is from the correct doctor and is a POST request
+    if request.user != booking.doctor.user:
+        messages.error(request, "You are not authorized to perform this action.")
+        return redirect('appointments')
 
-        if not success:
-            messages.error(request, "Payment initiation failed.")
+    if request.method == 'POST':
+        # Delegate the entire payment initiation logic to the helper function
+        success = initiate_payment_for_booking(booking)
         
+        # Provide feedback to the doctor based on the outcome
+        if success:
+            messages.success(request, f"Payment request sent successfully to {booking.patient.user.get_full_name()}.")
+        else:
+            messages.error(request, "Failed to initiate payment. Please check the system logs or try again.")
+
     return redirect('appointments')
-
-#def view_doctor_profile(request, doctor_id):
-#    doctor = get_object_or_404(DoctorProfile, id=doctor_id)
-#   charge_rate = float(doctor.charge_rates)
-#    commission = float(doctor.charge_rates) * 0.2
-#    total_fee = charge_rate + commission
-#    return render(request, 'doctor_profile.html', {
-#        'doctor': doctor, 
-#        'commission': commission, 
-#        'charge_rate': charge_rate,
-#        'total_fee': total_fee,})
 
         
 @csrf_exempt
-def initiate_stk_push(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            phone_number = data.get('phone')
-            amount = int(data.get('amount'))
-            doctor_id = data.get('doctor_id')
+def initiate_stk_push(phone_number, amount, doctor, booking):
+    """
+    Function version of STK push you can call from complete_booking
+    """
+    try:
+        cl = MpesaClient()
+        account_reference = 'LifecarePayment'
+        transaction_desc = f'Payment for services with Dr. {doctor.full_name}'
+        callback_url = 'https://mydomain.com/path'
 
-            # Get user and doctor
-            user = request.user
-            doctor = DoctorProfile.objects.get(id=doctor_id)
+        # Actual STK push call
+        response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
 
-            print(f"STK Request received: {phone_number}, amount={amount}")
+        # Send notifications
+        from .utils import notify_patient, notify_doctor
+        notify_patient(booking)
+        notify_doctor(booking)
 
-            cl = MpesaClient()
-            account_reference = 'LifecarePayment'
-            transaction_desc = 'Payment for services'
-            callback_url = 'https://mydomain.com/path'
+        return True, response.text
 
-            response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
-
-            # === Booking: either get from request or create here ===
-            from lifecareapp.models import Booking  # if not already imported
-            booking = Booking.objects.create(
-                doctor=doctor,
-                patient=user.patientprofile,  # adjust if your PatientProfile is accessed differently
-                status='pending'
-            )
-
-            # === Email Notification Functions ===
-            def notify_patient(booking):
-                patient_email = booking.patient.user.email
-                doctor_name = f"Dr. {booking.doctor.user.get_full_name()}"
-
-                subject = 'Appointment Request Sent'
-                message = f'Your appointment request to {doctor_name} has been received and is pending review.\n\nYou will be notified once the doctor responds.'
-
-                send_mail(
-                    subject,
-                    message,
-                    'noreply@lifecareconnect.com',
-                    [patient_email],
-                    fail_silently=False
-                )
-
-            def notify_doctor(booking):
-                doctor_email = booking.doctor.user.email
-                patient_name = booking.patient.user.get_full_name()
-                subject = f"New Appointment Request from {patient_name}"
-
-                accept_url = f"https://lifecareconnect.com/booking/{booking.id}/accepted/"
-                decline_url = f"https://lifecareconnect.com/booking/{booking.id}/declined/"
-
-                message = (
-                    f"You have a new appointment request from {patient_name}.\n\n"
-                    f"Please log in to your dashboard to respond.\n\n"
-                    f"Booking ID: {booking.id}\n"
-                    f"Patient Profile: https://lifecareconnect.com/patient/{booking.patient.id}/profile/\n\n"
-                    f"Quick actions:\n"
-                    f"Accept: {accept_url}\n"
-                    f"Decline: {decline_url}"
-                )
-
-                send_mail(
-                    subject,
-                    message,
-                    'noreply@lifecareconnect.com',
-                    [doctor_email],
-                    fail_silently=False
-                )
-
-            # === Actually send the emails ===
-            notify_patient(booking)
-            notify_doctor(booking)
-
-            return JsonResponse({'status': 'success', 'response': response.text})
-
-        except Exception as e:
-            print(f"Error: {e}")
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+    except Exception as e:
+        print(f"Error in STK Push: {e}")
+        return False, str(e)
 
 '''
 @csrf_exempt
@@ -569,31 +506,46 @@ def mpesa_callback(request):
 
 @csrf_exempt
 def stk_push(patient_profile, doctor, amount, booking):
-    success = initiate_stk_push(amount, patient_profile.user.phone_number)  # adjust params
+    try:
+        # Call Safaricom API client directly
+        cl = MpesaClient()
+        account_reference = 'LifecarePayment'
+        transaction_desc = 'Payment for services'
+        callback_url = 'https://mydomain.com/path'
 
-    if success:
-        try:
+        response = cl.stk_push(
+            phone_number=patient_profile.user.phone,
+            amount=amount,
+            account_reference=account_reference,
+            transaction_desc=transaction_desc,
+            callback_url=callback_url
+        )
+
+        # If API responded successfully
+        if response.ok:
             payment = Payment.objects.create(
                 user=patient_profile,
                 doctor=doctor,
                 amount=amount,
-                status="PAID"
+                status="PENDING"
             )
 
-            # Link payment to the booking instead of creating a new one
-            booking.status = Booking.AppointmentStatus.PAID
+            booking.status = Booking.AppointmentStatus.PENDING_PAYMENT
             booking.save()
 
-            handler = PaymentEventHandler(payment, booking)
-            handler.handle_success()
+            # You can notify both doctor & patient here if needed
+            notify_patient(booking)
+            notify_doctor(booking)
 
             return True
-
-        except Exception as e:
-            print("STK Push error:", str(e))
+        else:
+            print("STK Push failed:", response.text)
             return False
 
-    return False
+    except Exception as e:
+        print("STK Push error:", str(e))
+        return False
+
 
 
 
@@ -1077,6 +1029,8 @@ def notify_patient(booking):
         message = f'Unfortunately, your appointment request to {doctor_name} was declined.\n\nYou may try booking with another healthcare provider.'
     elif status == Booking.AppointmentStatus.COMPLETED:
         message = f'Your appointment with {doctor_name} has been marked as completed.'
+    elif status == Booking.AppointmentStatus.PENDING:
+        message = f'Your appointment request to {doctor_name} has been received and is pending confirmation.'
     else:  # pending or fallback
         message = f'Your appointment request to {doctor_name} is still pending confirmation.'
     
@@ -1087,3 +1041,58 @@ def notify_patient(booking):
         [patient_email],
         fail_silently=False
     )
+
+
+def initiate_payment_for_booking(booking):
+    try:
+        # 1. Extract necessary information directly from the booking
+        patient_profile = booking.patient
+        doctor = booking.doctor
+        amount = int(booking.cost) # Ensure amount is an integer
+        phone_number = patient_profile.phone
+        
+        # 2. Prepare STK Push details
+        cl = MpesaClient()
+        account_reference = 'LifecarePayment'
+        transaction_desc = f'Payment for appointment with Dr. {doctor.user.get_full_name()}'
+        # IMPORTANT: This URL must be publicly accessible (e.g., via ngrok for development)
+        callback_url = 'https://your-domain.com/payments/callback/'
+
+        # 3. Call the Mpesa API
+        response = cl.stk_push(
+            phone_number=phone_number,
+            amount=amount,
+            account_reference=account_reference,
+            transaction_desc=transaction_desc,
+            callback_url=callback_url
+        )
+
+        # 4. Handle the API response
+        if response.ok:
+            # Create a payment record to track the transaction
+            Payment.objects.create(
+                user=patient_profile,
+                doctor=doctor,
+                booking=booking,
+                amount=amount,
+                status="PENDING" # Start as pending
+            )
+            
+            # Update the booking status to show payment is awaited
+            booking.status = Booking.AppointmentStatus.PENDING_PAYMENT
+            booking.save()
+
+            # Notify parties that payment has been requested
+            notify_patient(booking, "Payment for your completed appointment has been initiated.")
+            notify_doctor(booking, "Payment request has been sent to the patient.")
+
+            return True
+        else:
+            # Log the error if the API call itself fails
+            print(f"STK Push API Error for booking {booking.id}: {response.text}")
+            return False
+
+    except Exception as e:
+        # Log any other exceptions during the process
+        print(f"An exception occurred in initiate_payment_for_booking for booking {booking.id}: {e}")
+        return False
