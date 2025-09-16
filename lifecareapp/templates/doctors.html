@@ -191,10 +191,7 @@
             </div>
             <div class="card-footer bg-white border-0 d-flex justify-content-center gap-3 pb-4">
               <a href="{% url 'doctor-profile' doctor.id %}" class="btn" style="background-color: #00796b; color: white;">View Profile</a>
-              <button class="book-btn" data-doctor-id="{{ doctor.id }}" id="book-btn-{{ doctor.id }}" 
-                style="background-color: {% if doctor in pending_doctors %} #9e9e9e {% else %} #00796b {% endif %}; color: white;">
-                {% if doctor in pending_doctors %}Pending{% else %}Book Appointment{% endif %}
-              </button>
+              
             </div>
           </div>
         </div>
