@@ -222,6 +222,15 @@ def list_patient_profiles(request):
     profiles = PatientProfile.objects.filter(user=request.user)
     return render(request, 'list_patients_profile.html', {'profiles': profiles})
 
+@login_required
+def set_active_profile(request, profile_id):
+    try:
+        profile = PatientProfile.objects.get(id=profile_id, user=request.user)
+        request.session["active_profile_id"] = profile.id  # 👈 save profile in session
+    except PatientProfile.DoesNotExist:
+        return redirect("list_patient_profiles")  # fallback if invalid id
+
+    return redirect("dashboard_patient", profile_id=profile.id)  # or wherever you want to send them next
 
 
 # --- Doctor Form View ---
@@ -409,22 +418,32 @@ def appointments(request):
     
     if is_doctor:
         # Doctor's view: Get all bookings for this doctor
-        appointments = Booking.objects.filter(doctor=request.user.doctorprofile).order_by('date', 'time')
+        appointments = Booking.objects.filter(
+            doctor=request.user.doctorprofile
+        ).order_by('date', 'time')
     else:
-        # Patient's view: Get all appointments for this patient
-        try:
-            patient_profile = PatientProfile.objects.get(user=request.user)
-            appointments = Booking.objects.filter(
-                patient=patient_profile
-            ).order_by('date', 'time')
-        except PatientProfile.DoesNotExist:
-            appointments = []  # or handle gracefully
+        # Patient's view: Respect active profile selection
+        profile_id = request.session.get("active_profile_id")
+        if profile_id:
+            try:
+                patient_profile = PatientProfile.objects.get(
+                    id=profile_id,
+                    user=request.user
+                )
+                appointments = Booking.objects.filter(
+                    patient=patient_profile
+                ).order_by('date', 'time')
+            except PatientProfile.DoesNotExist:
+                appointments = []  # Graceful fallback if session invalid
+        else:
+            appointments = []  # No active profile selected
 
     context = {
         'appointments': appointments,
         'is_doctor': is_doctor
     }
     return render(request, 'appointments.html', context)
+
 
 @login_required
 def confirm_booking(request, booking_id):
@@ -953,10 +972,15 @@ def book_doctor_ajax(request, doctor_id):
     
     doctor = get_object_or_404(DoctorProfile, id=doctor_id)
     
+    profile_id = request.session.get("active_profile_id")
+    if not profile_id:
+        return JsonResponse({"status": "error", "message": "No active profile selected"}, status=400)
+
     try:
-        patient = PatientProfile.objects.get(user=request.user)
+        patient = PatientProfile.objects.get(id=profile_id, user=request.user)
     except PatientProfile.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Patient profile not found'}, status=400)
+        return JsonResponse({"status": "error", "message": "Invalid profile"}, status=400)
+
 
     # Get data from request
     try:
@@ -994,8 +1018,7 @@ def book_doctor_ajax(request, doctor_id):
     ).first()
     
     if patient_booking:
-        return JsonResponse({'status': 'error', 'message': 'You already have a pending appointment with this doctor'})
-    
+        return JsonResponse({'status': 'error', 'message': 'You already have a pending appointment with this doctor'})    
     # Create new booking
     booking = Booking.objects.create(
         patient=patient,

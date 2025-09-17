@@ -99,8 +99,8 @@
     <div class="row">
       {% for profile in profiles %}
         <div class="col-md-4 mb-4">
-          <a href="{% url 'dashboard_patient' profile.id %}" class="text-decoration-none">
-            <div class="card profile-card text-center h-100">
+          <a href="{% url 'set_active_profile' profile.id %}" class="text-decoration-none">
+            <div class="card profile-card text-center h-100 {% if profile.id == request.session.active_profile_id %}border-success shadow-lg{% endif %}">
               {% if profile.profile_pic %}
                 <img src="{{ profile.profile_pic.url }}" class="profile-img" alt="Profile Photo">
               {% else %}

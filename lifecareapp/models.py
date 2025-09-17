@@ -151,7 +151,7 @@ class Booking(models.Model):
         PAID = 'paid', 'Paid'
 
     patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE, related_name='appointments')
-    doctor = models.ForeignKey('DoctorProfile', on_delete=models.CASCADE, related_name='bookings')
+    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE, related_name='bookings')
     date = models.DateField(default=timezone.now)
     time = models.CharField(max_length=10, default='09:00') # Using CharField to match your slot format 'HH:MM'
     cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)

@@ -36,6 +36,7 @@ urlpatterns = [
     path('addprofile/', views.add_profile, name='addprofile'),
     path('patientform/', views.create_patient_profile, name='patientform'),
     path('profiles/', views.list_patient_profiles, name='list_patient_profiles'),
+    path('profiles/set/<int:profile_id>/', views.set_active_profile, name='set_active_profile'),
     path('doctorform/', views.doctor_form, name='doctorform'),
     path('edit-patient-profile/', views.edit_patient_profile, name='edit_patient_profile'),
     path('edit-doctor-profile/', views.edit_doctor_profile, name='edit_doctor_profile'),
