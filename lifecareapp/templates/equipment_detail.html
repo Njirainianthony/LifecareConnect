@@ -24,13 +24,31 @@
           <span class="text-danger">Unavailable</span>
         {% endif %}
       </p>
-      
-      <form method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-primary" {% if not equipment.available %}disabled{% endif %}>
-          Request Lease
-        </button>
-      </form>
+
+      {# ✅ Only show the request form if the user is logged in and equipment is available #}
+      {% if request.user.is_authenticated and equipment.available %}
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label for="patient_profile" class="form-label fw-semibold">Select your profile:</label>
+            <select name="patient_profile" id="patient_profile" class="form-select" required>
+              {% for profile in patient_profiles %}
+                <option value="{{ profile.id }}">
+                  {{ profile.full_name }}
+                  {% if profile.county %}– {{ profile.county }}{% endif %}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            Request Lease
+          </button>
+        </form>
+      {% elif not request.user.is_authenticated %}
+        <p class="mt-3 text-muted">Please <a href="{% url 'custom_login_view' %}">log in</a> to request this equipment.</p>
+      {% endif %}
     </div>
   </div>
 </div>

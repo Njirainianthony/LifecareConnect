@@ -1,0 +1,54 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block content %}
+<h2 class="mb-4">Equipment Requests</h2>
+
+{# Flash messages for success / info #}
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+<table class="table table-striped align-middle">
+  <thead>
+    <tr>
+      <th>Patient</th>
+      <th>Equipment</th>
+      <th>Status</th>
+      <th>Date</th>
+      <th>Action</th>   {# --- new column --- #}
+    </tr>
+  </thead>
+  <tbody>
+    {% for req in requests_list %}
+    <tr>
+      <td>{{ req.patient.full_name }}</td>
+      <td>{{ req.equipment.name }}</td>
+      <td>{{ req.get_status_display }}</td>
+      <td>{{ req.created_at|date:"Y-m-d H:i" }}</td>
+
+      <td>
+        {# ----- Inline form to change the status ----- #}
+        <form method="post" action="{% url 'equipment_requests_list' %}" class="d-flex align-items-center gap-2">
+          {% csrf_token %}
+          <input type="hidden" name="req_id" value="{{ req.id }}">
+
+          <select name="status" class="form-select form-select-sm">
+            {% for val, label in req.RequestStatus.choices %}
+              <option value="{{ val }}" {% if req.status == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+
+          <button type="submit" class="btn btn-sm btn-primary">Update</button>
+        </form>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="5" class="text-center text-muted">No requests yet.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -72,11 +72,20 @@ urlpatterns = [
     path('admin-dashboard/doctor/<int:pk>/delete/', views.delete_doctor, name='delete_doctor'),
     #path('admin-dashboard/bookings/edit/<int:booking_id>/', views.edit_booking, name='edit_booking'),
     #path('admin-dashboard/bookings/delete/<int:booking_id>/', views.delete_booking, name='delete_booking'),
+    path('admin-dashboard/equipment-requests/', views.equipment_requests_list, name='equipment_requests_list'),
+    path("admin-dashboard/equipment-requests/<int:req_id>/approve/", views.approve_equipment_request,name="approve_equipment_request",),
+
+
+
     path('doctor/availability/', views.manage_availability, name='manage_availability'),
     path('doctor/availability/int:availability_id/delete/', views.delete_availability, name='delete_availability'),
+
+
     path('equipment/', views.equipment_list, name='equipment_list'),
     path('equipment/add/', views.equipment_create, name='equipment_create'),
     path('equipment/<int:pk>/', views.equipment_detail, name='equipment_detail'),
+    
+
 
 
 ]

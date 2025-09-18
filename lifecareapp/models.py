@@ -213,3 +213,22 @@ class Equipment(models.Model):
 
     def __str__(self):
         return self.name
+    
+
+
+class EquipmentRequest(models.Model):
+    class RequestStatus(models.TextChoices):
+        PENDING = 'pending_admin_approval', 'Pending Admin Approval'
+        APPROVED = 'approved_admin', 'Approved by Admin'
+        DELIVERED = 'delivered', 'Delivered to Patient'
+        PAID = 'paid', 'Paid'
+
+    patient = models.ForeignKey('PatientProfile', on_delete=models.CASCADE, related_name='equipment_requests')
+    equipment = models.ForeignKey('Equipment', on_delete=models.CASCADE, related_name='requests')
+    status = models.CharField(max_length=40, choices=RequestStatus.choices, default=RequestStatus.PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.patient.full_name} → {self.equipment.name} ({self.get_status_display()})"
+    

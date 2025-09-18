@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse, JsonResponse
-from .models import PatientProfile, DoctorProfile, Profile, Booking, Payment, DoctorAvailability, Equipment
+from .models import PatientProfile, DoctorProfile, Profile, Booking, Payment, DoctorAvailability, Equipment, EquipmentRequest
 from .forms import UserRegistrationForm, PatientProfileForm, DoctorProfileForm, UserEditForm, ProfileEditForm, EquipmentForm, DoctorAvailabilityForm
 from django.contrib import messages
 from django.urls import reverse
@@ -21,6 +21,8 @@ from django.db.models import Count, Sum
 from django.db.models.functions import TruncDay
 from django.utils import timezone
 from datetime import timedelta
+from django.conf import settings
+
 
 
 
@@ -888,9 +890,45 @@ def equipment_list(request):
     return render(request, 'equipment_list.html', context)  # pass context
 
 
+from django.db.models import Q
+
+@login_required
 def equipment_detail(request, pk):
     equipment = get_object_or_404(Equipment, pk=pk)
-    return render(request, 'equipment_detail.html', {'equipment': equipment})
+    patient_profiles = PatientProfile.objects.filter(user=request.user)
+
+    # ✅ check if there’s already an approved request for this equipment
+    approved_exists = equipment.requests.filter(
+        status=EquipmentRequest.RequestStatus.APPROVED
+    ).exists()
+
+    if request.method == "POST":
+        if approved_exists:
+            messages.error(request, "This equipment is already approved for someone else.")
+            return redirect("equipment_detail", pk=equipment.pk)
+
+        profile_id = request.POST.get("patient_profile")
+        profile = get_object_or_404(PatientProfile, id=profile_id, user=request.user)
+
+        EquipmentRequest.objects.create(
+            equipment=equipment,
+            patient=profile,   # ✅ use correct field name
+            status=EquipmentRequest.RequestStatus.PENDING
+        )
+        messages.success(request, "Your request has been submitted!")
+        return redirect("equipment_detail", pk=equipment.pk)
+
+    return render(
+        request,
+        "equipment_detail.html",
+        {
+            "equipment": equipment,
+            "patient_profiles": patient_profiles,
+            "approved_exists": approved_exists,
+        }
+    )
+
+
 
 
 #Equipment form
@@ -907,6 +945,63 @@ def equipment_create(request):
     return render(request, 'add_equipment.html', {'form': form})
 
 
+
+@user_passes_test(is_admin)
+def equipment_requests_list(request):
+    if request.method == "POST":
+        req_id = request.POST.get("req_id")
+        new_status = request.POST.get("status")
+
+        request_obj = get_object_or_404(EquipmentRequest, id=req_id)
+        request_obj.status = new_status
+        request_obj.save()
+
+        messages.success(request, f"Status updated to {request_obj.get_status_display()}")
+
+        return redirect("equipment_requests_list")
+
+    requests_list = EquipmentRequest.objects.select_related('patient', 'equipment').order_by('-created_at')
+    return render(request, 'admin/equipment_requests_list.html', {
+        'requests_list': requests_list
+    })
+
+
+@user_passes_test(is_admin)
+def approve_equipment_request(request, req_id):
+    """Admin marks an equipment request as approved
+    and automatically sets the equipment to unavailable.
+    """
+    req = get_object_or_404(EquipmentRequest, id=req_id)
+
+    # Update request status
+    req.status = EquipmentRequest.RequestStatus.APPROVED
+    req.save()
+
+    # Mark the equipment itself as unavailable
+    req.equipment.available = False
+    req.equipment.save()
+
+    # Optional: simple email/console notification
+    from django.core.mail import send_mail
+    from django.conf import settings
+    send_mail(
+        subject="Your Equipment Request was Approved",
+        message=(
+            f"Hi {req.patient.full_name},\n\n"
+            f"Your request for {req.equipment.name} has been approved. "
+            "Please log in to proceed with payment or pickup arrangements.\n\n"
+            "Thank you!"
+        ),
+        from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'no-reply@example.com'),
+        recipient_list=[req.patient.email],   # ensure PatientProfile has email field
+        fail_silently=True,
+    )
+
+    messages.success(
+        request,
+        f"{req.equipment.name} approved and marked unavailable."
+    )
+    return redirect("equipment_requests_list")
 
 
 
