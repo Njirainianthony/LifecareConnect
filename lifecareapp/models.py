@@ -1,0 +1,282 @@
+from django.db import models
+from django.conf import settings
+from django.contrib.auth.base_user import BaseUserManager
+from django.core.validators import FileExtensionValidator
+from django.utils import timezone
+
+created_at = models.DateTimeField(default=timezone.now)  # TEMP
+
+
+
+# Create your models here.
+class Profile(models.Model):
+    USER_TYPE_CHOICES = (
+        ('patient', 'Patient'),
+        ('doctor', 'Doctor'),
+    )
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='patient')
+    date_of_birth = models.DateField(blank=True, null=True)
+    photo = models.ImageField(
+        upload_to='doctors/',  # or generalize it later
+        blank=True
+    )
+
+    def __str__(self):
+        return f'Profile of {self.user.username}'
+
+
+class UserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('Email is required')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self.create_user(email, password, **extra_fields)
+
+class PatientProfile(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='patient_profiles')
+    full_name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20)
+    email = models.EmailField()
+    address = models.CharField(max_length=255)
+    gender = models.CharField(max_length=10)
+    county = models.CharField(max_length=50)
+    dob = models.DateField(null=True, blank=True)
+    emergency_contact = models.CharField(max_length=100, blank=True)
+    medical_conditions = models.TextField(blank=True)
+    allergies = models.TextField(blank=True)
+    preferred_care_type = models.CharField(max_length=100, blank=True)
+    profile_pic = models.ImageField(upload_to='dashboard_patient/', blank=True, null=True)
+    medical_history_pdf = models.FileField(upload_to='patient_medical_history/', blank=True, null=True, validators=[FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'])])
+    medical_history_uploaded_at = models.DateTimeField(auto_now_add=True, null=True)
+
+    def __str__(self):
+        return f"{self.full_name} - Patient"
+
+class DoctorProfile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    full_name = models.CharField(max_length=100)
+    professional_title = models.CharField(max_length=100)
+    license_number = models.CharField(max_length=50)
+    qualifications = models.TextField()
+    expertise = models.TextField()
+    languages = models.TextField()
+    available_location = models.CharField(max_length=100)
+    contact = models.CharField(max_length=20)
+    email = models.EmailField()
+    charge_rates = models.FloatField(max_length=50)
+    profile_pic = models.ImageField(upload_to='doctors/', blank=True, null=True)
+    # Time slot fields
+    start_time = models.TimeField(default='08:00')
+    end_time = models.TimeField(default='17:00')
+    slot_duration = models.IntegerField(default=30, help_text="Duration in minutes")
+    
+    # Availability settings
+    available_days = models.CharField(
+        max_length=100, 
+        default='monday,tuesday,wednesday,thursday,friday',
+        help_text='Comma-separated days: monday,tuesday,wednesday,thursday,friday,saturday,sunday'
+    )
+    is_accepting_appointments = models.BooleanField(default=True)
+
+    def get_formatted_time_slots(self):
+        """
+        Generate time slots based on start_time, end_time, and slot_duration
+        Returns a list of formatted time strings
+        """
+        from datetime import datetime, timedelta
+        
+        if not self.start_time or not self.end_time:
+            return []
+        
+        slots = []
+        current_time = datetime.combine(datetime.today(), self.start_time)
+        end_time = datetime.combine(datetime.today(), self.end_time)
+        
+        while current_time < end_time:
+            # Format time as HH:MM (24-hour) or use strftime('%I:%M %p') for 12-hour with AM/PM
+            slots.append(current_time.strftime('%H:%M'))
+            current_time += timedelta(minutes=self.slot_duration)
+        
+        return slots
+    
+    def get_available_slots_for_date(self, date):
+        """
+        Get available time slots for a specific date
+        Returns slots that are not booked
+        """
+
+        from datetime import datetime
+        
+        all_slots = self.get_formatted_time_slots()
+        
+        # Get booked slots for this date (pending or accepted bookings block the slot)
+        booked_slots = Booking.objects.filter(
+            doctor=self,
+            date=date,
+            status__in=['accepted', 'pending']
+        ).values_list('time', flat=True)
+        
+        # Convert booked times to same format
+        booked_times = [slot for slot in booked_slots if slot]
+        
+        # Return available slots
+        available_slots = [slot for slot in all_slots if slot not in booked_times]
+        
+        return available_slots
+    
+    def get_available_days_list(self):
+        """Return list of available days"""
+        if self.available_days:
+            return [day.strip().lower() for day in self.available_days.split(',')]
+        return []
+    
+    def is_available_on_day(self, date):
+        """Check if doctor is available on a specific day of the week"""
+        day_name = date.strftime('%A').lower()
+        return day_name in self.get_available_days_list()
+
+
+    def __str__(self):
+        return f"{self.full_name} - Doctor"
+
+
+# models.py
+class Booking(models.Model):
+    class AppointmentStatus(models.TextChoices):
+        PENDING = 'pending', 'Pending'
+        ACCEPTED = 'accepted', 'Accepted'
+        DECLINED = 'declined', 'Declined'
+        COMPLETED = 'completed', 'Completed'
+        CANCELLED = 'cancelled', 'Cancelled'
+        PAID = 'paid', 'Paid'
+
+    patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE, related_name='appointments')
+    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE, related_name='bookings')
+    date = models.DateField(default=timezone.now)
+    time = models.CharField(max_length=10, default='09:00') # Using CharField to match your slot format 'HH:MM'
+    cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    status = models.CharField(
+        max_length=20,
+        choices=AppointmentStatus.choices,
+        default=AppointmentStatus.PENDING
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    # Decline reason for rejected bookings
+    decline_reason = models.TextField(blank=True, null=True)
+    
+    # Track if patient has been notified of status change
+    patient_notified = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Appointment with Dr. {self.doctor.full_name} for {self.patient.full_name} on {self.date} at {self.time}"
+
+
+
+# models.py
+class Payment(models.Model):
+    user = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
+    status = models.CharField(max_length=20)  # 'PAID' or 'FAILED'
+    created_at = models.DateTimeField(auto_now_add=True)   # <- add this & migrate if you want time-series revenue
+
+    booking = models.ForeignKey(Booking, on_delete=models.SET_NULL, null=True, blank=True, related_name='payments')
+    equipment_request = models.ForeignKey('EquipmentRequest', on_delete=models.CASCADE, null=True, blank=True)
+
+
+"""    
+class Booking(models.Model):
+    patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE, null=True)
+    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE)
+    date = models.DateField(default='2025-06-22')
+    time = models.CharField(max_length=20, default='10:00 AM')
+    status = models.CharField(max_length=20)  # 'BOOKED', 'CANCELLED'
+"""
+
+#Doctor Availability
+class DoctorAvailability(models.Model):
+    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE, related_name='availability_slots')
+    date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # Prevent a doctor from creating the exact same slot twice
+        unique_together = ('doctor', 'date', 'start_time', 'end_time')
+        ordering = ['date', 'start_time']
+
+    def __str__(self):
+        return f"Dr. {self.doctor.full_name} - {self.date} ({self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')})"
+
+#Equipment Leasing
+class Equipment(models.Model):
+    name = models.CharField(max_length=120)
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to='equipment/', blank=True, null=True)
+    daily_rate = models.DecimalField(max_digits=10, decimal_places=2)
+    available = models.BooleanField(default=True)
+
+
+    def __str__(self):
+        return self.name
+    
+
+
+class EquipmentRequest(models.Model):
+    class RequestStatus(models.TextChoices):
+        PENDING = 'pending_admin_approval', 'Pending Admin Approval'
+        APPROVED = 'approved_admin', 'Approved by Admin'
+        DECLINED = 'declined', 'Declined'
+        AWAITING_DEPOSIT = 'awaiting_deposit', 'Awaiting Deposit'
+        DEPOSIT_PAID = 'deposit_paid', 'Deposit Paid'
+        DELIVERED = 'delivered', 'Delivered to Patient'
+        PAID = 'paid', 'Fully Paid'
+
+    patient = models.ForeignKey('PatientProfile', on_delete=models.CASCADE, related_name='equipment_requests')
+    equipment = models.ForeignKey('Equipment', on_delete=models.CASCADE, related_name='requests')
+    status = models.CharField(max_length=40, choices=RequestStatus.choices, default=RequestStatus.PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Delivery details
+    delivery_address = models.TextField(blank=True, null=True)
+    delivery_date = models.DateField(blank=True, null=True)
+    rental_days = models.IntegerField(default=1, help_text='Number of days for rental')
+    
+    # Decline details
+    decline_reason = models.TextField(blank=True, null=True)
+    
+    # Deposit tracking
+    deposit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    deposit_paid = models.BooleanField(default=False)
+    
+    @property
+    def total_cost(self):
+        """Calculate total rental cost based on daily rate and rental days"""
+        return self.equipment.daily_rate * self.rental_days
+
+    def __str__(self):
+        return f"{self.patient.full_name} → {self.equipment.name} ({self.get_status_display()})"
+    

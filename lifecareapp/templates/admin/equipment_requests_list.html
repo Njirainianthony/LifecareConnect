@@ -1,0 +1,98 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block content %}
+<h2 class="mb-4">Equipment Requests</h2>
+
+<style>
+  thead th {
+    background-color: #00796b !important;
+    color: white !important;
+  }
+</style>
+
+{# Flash messages for success / info #}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+  {{ message }}
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+{% endif %}
+
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead>
+      <tr>
+        <th>Patient</th>
+        <th>Equipment</th>
+        <th>Rental Days</th>
+        <th>Total Cost</th>
+        <th>Deposit</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for req in requests_list %}
+      <tr>
+        <td>
+          <strong>{{ req.patient.full_name }}</strong><br>
+          <small class="text-muted">{{ req.patient.phone }}</small>
+        </td>
+        <td>{{ req.equipment.name }}</td>
+        <td>{{ req.rental_days }} day{{ req.rental_days|pluralize }}</td>
+        <td>KES {{ req.total_cost }}</td>
+        <td>
+          KES {{ req.deposit_amount }}
+          {% if req.deposit_paid %}
+          <span class="badge bg-success">Paid</span>
+          {% else %}
+          <span class="badge bg-secondary">Unpaid</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if req.status == 'pending_admin_approval' %}
+          <span class="badge bg-warning text-dark">Pending</span>
+          {% elif req.status == 'approved_admin' %}
+          <span class="badge bg-info">Approved</span>
+          {% elif req.status == 'declined' %}
+          <span class="badge bg-danger">Declined</span>
+          {% elif req.status == 'awaiting_deposit' %}
+          <span class="badge bg-primary">Awaiting Deposit</span>
+          {% elif req.status == 'deposit_paid' %}
+          <span class="badge bg-info">Deposit Paid</span>
+          {% elif req.status == 'delivered' %}
+          <span class="badge bg-success">Delivered</span>
+          {% elif req.status == 'paid' %}
+          <span class="badge bg-success">Fully Paid</span>
+          {% endif %}
+        </td>
+        <td>{{ req.created_at|date:"Y-m-d H:i" }}</td>
+
+        <td>
+          {# Inline form to change the status #}
+          <form method="post" action="{% url 'equipment_requests_list' %}" class="d-flex align-items-center gap-2">
+            {% csrf_token %}
+            <input type="hidden" name="req_id" value="{{ req.id }}">
+
+            <select name="status" class="form-select form-select-sm" style="min-width: 150px;">
+              {% for val, label in req.RequestStatus.choices %}
+              <option value="{{ val }}" {% if req.status==val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+
+            <button type="submit" class="btn btn-sm btn-primary">Update</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="8" class="text-center text-muted">No requests yet.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

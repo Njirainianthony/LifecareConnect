@@ -1,0 +1,200 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .equipment-header {
+        background: linear-gradient(135deg, #00796b 0%, #004d40 100%);
+        padding: 30px;
+        border-radius: 12px;
+        color: white;
+        margin-bottom: 30px;
+    }
+
+    .equipment-header h2 {
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: white;
+    }
+
+    .search-bar {
+        max-width: 500px;
+        margin-top: 15px;
+    }
+
+    .search-bar input {
+        border-radius: 25px;
+        padding: 12px 20px;
+        border: none;
+    }
+
+    .equipment-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%;
+    }
+
+    .equipment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 121, 107, 0.2);
+    }
+
+    .equipment-card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .equipment-card-body {
+        padding: 20px;
+    }
+
+    .equipment-card h5 {
+        font-weight: 600;
+        color: #00796b;
+        margin-bottom: 10px;
+    }
+
+    .equipment-card p {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+
+    .badge-available {
+        background: #c8e6c9;
+        color: #256029;
+        font-size: 0.75rem;
+        padding: 5px 12px;
+        border-radius: 15px;
+    }
+
+    .badge-unavailable {
+        background: #ffcdd2;
+        color: #c62828;
+        font-size: 0.75rem;
+        padding: 5px 12px;
+        border-radius: 15px;
+    }
+
+    .equipment-price {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #00796b;
+        margin-top: 10px;
+    }
+
+    .equipment-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .btn-lease {
+        background: #00796b;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 8px 20px;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .btn-lease:hover {
+        background: #004d40;
+        color: white;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+        gap: 5px;
+    }
+
+    .pagination a,
+    .pagination span {
+        padding: 8px 16px;
+        background: #00796b;
+        color: white;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+
+    .pagination .current {
+        background: #004d40;
+    }
+</style>
+
+<div class="equipment-header">
+    <h2><i class="bi bi-tools me-2"></i>Medical Equipment Management</h2>
+    <p>Manage and monitor equipment inventory</p>
+    <div class="search-bar">
+        <form method="GET" action="">
+            <input type="text" name="q" value="{{ q }}" class="form-control shadow-sm"
+                placeholder="Search equipment...">
+        </form>
+    </div>
+</div>
+
+<div class="mb-4">
+    <a href="{% url 'equipment_create' %}" class="btn btn-success">
+        <i class="bi bi-plus-circle me-2"></i>Add New Equipment
+    </a>
+</div>
+
+<div class="row g-4">
+    {% for item in page_obj %}
+    <div class="col-md-4 col-lg-3">
+        <div class="equipment-card">
+            {% if item.image %}
+            <img src="{{ item.image.url }}" alt="{{ item.name }}">
+            {% else %}
+            <img src="{% static 'assets/img/placeholder-equipment.jpg' %}" alt="{{ item.name }}">
+            {% endif %}
+
+            <div class="equipment-card-body">
+                <h5>{{ item.name }}</h5>
+                <p>{{ item.description|truncatechars:80 }}</p>
+
+                {% if item.available %}
+                <span class="badge-available">Available</span>
+                {% else %}
+                <span class="badge-unavailable">Unavailable</span>
+                {% endif %}
+
+                <p class="equipment-price">KES {{ item.daily_rate }}/day</p>
+
+                <div class="equipment-actions">
+                    <a href="{% url 'equipment_detail' item.id %}" class="btn-lease">View Details</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p class="text-center text-muted">No equipment found.</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="pagination">
+    {% if page_obj.has_previous %}
+    <a href="?q={{ q }}&page={{ page_obj.previous_page_number }}">&laquo; Previous</a>
+    {% endif %}
+
+    <span class="current">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+    <a href="?q={{ q }}&page={{ page_obj.next_page_number }}">Next &raquo;</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "admin/base_admin.html" %}
+
+{% block content %}
+<h2>👥 All Users</h2>
+
+<!-- ✅ STEP 2: Filter Buttons -->
+<div class="mb-3 d-flex gap-3">
+  <a href="{% url 'user_list' %}" class="btn btn-outline-dark {% if not filter_type %}active{% endif %}">All</a>
+  <a href="?type=doctor" class="btn btn-outline-primary {% if filter_type == 'doctor' %}active{% endif %}">Doctors</a>
+  <a href="?type=patient" class="btn btn-outline-success {% if filter_type == 'patient' %}active{% endif %}">Patients</a>
+</div>
+
+<!-- ✅ User Table -->
+<table class="table table-bordered table-hover mt-4">
+  <thead class="table-success">
+    <tr>
+      <th>Email</th>
+      <th>User Type</th>
+      <th>Is Active</th>
+      <th>Is Staff</th>
+      <th>Last Login</th>
+      <th>Actions</th> <!-- 🔥 New -->
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+      <tr>
+        <td>{{ user.email }}</td>
+        <td>
+          {% if user.profile %}
+            {{ user.profile.user_type|title }}
+          {% else %}
+            <span class="text-muted">N/A</span>
+          {% endif %}
+        </td>
+        <td>{{ user.is_active }}</td>
+        <td>{{ user.is_staff }}</td>
+        <td>{{ user.last_login|default:"Never" }}</td>
+
+        <!-- ✅ Action Button Column -->
+        <td>
+          {% if user != request.user %}
+            <form method="POST" action="{% url 'toggle_user_status' user.id %}">
+              {% csrf_token %}
+              {% if user.is_active %}
+                <button type="submit" class="btn btn-sm btn-warning">Deactivate</button>
+              {% else %}
+                <button type="submit" class="btn btn-sm btn-success">Reactivate</button>
+              {% endif %}
+            </form>
+          {% else %}
+            <span class="text-muted">You</span>
+          {% endif %}
+        </td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="6" class="text-center">No users found.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

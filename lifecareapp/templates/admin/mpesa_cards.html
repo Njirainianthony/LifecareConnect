@@ -1,0 +1,105 @@
+{% extends 'admin/base_admin.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    button{
+        background-color: #00796b !important;
+        color: white !important;
+    }
+
+    thead th {
+        background-color: #00796b !important;
+        color: white !important;
+    }
+</style>
+
+<div class="container mt-5">
+  <div class="card shadow-sm rounded-lg border-0">
+    <div class="card-body">
+      <h2 class="mb-4 fw-bold text-dark">MPESA Transactions</h2>
+
+      <!-- Search & Filter Form -->
+      <form method="get" class="row g-3 align-items-center mb-4">
+        <div class="col-md-4">
+          <input type="text" name="search" class="form-control"
+                 placeholder="Search patient or doctor..."
+                 value="{{ search_query }}">
+        </div>
+
+        <div class="col-md-3">
+          <select name="status" class="form-select" onchange="this.form.submit()">
+            <option value="">-- Filter by Status --</option>
+            <option value="PAID" {% if selected_status == "PAID" %}selected{% endif %}>Paid</option>
+            <option value="FAILED" {% if selected_status == "FAILED" %}selected{% endif %}>Failed</option>
+          </select>
+        </div>
+
+        <div class="col-auto">
+          <button type="submit">Filter</button>
+        </div>
+
+        <div class="col-auto">
+          <a href="{% url 'mpesa_transactions' %}" class="btn btn-outline-secondary">Clear</a>
+        </div>
+      </form>
+
+      <!-- Transaction Table -->
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-success">
+            <tr>
+              <th>Patient</th>
+              <th>Doctor</th>
+              <th>Amount (KES)</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for tx in transactions %}
+              <tr>
+                <td>{{ tx.user.full_name|default:"—" }}</td>
+                <td>{{ tx.doctor.full_name|default:"—" }}</td>
+                <td>{{ tx.amount|floatformat:2 }}</td>
+                <td>
+                  {% if tx.status == "PAID" %}
+                    <span class="badge bg-success">Paid</span>
+                  {% else %}
+                    <span class="badge bg-danger">Failed</span>
+                  {% endif %}
+                </td>
+                <td>{{ tx.created_at|date:"M d, Y H:i" }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted">No transactions found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if is_paginated %}
+        <nav class="mt-4">
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&status={{ selected_status }}">Previous</a>
+              </li>
+            {% endif %}
+            <li class="page-item disabled">
+              <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </li>
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&status={{ selected_status }}">Next</a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
