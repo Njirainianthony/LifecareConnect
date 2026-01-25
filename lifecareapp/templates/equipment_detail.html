@@ -14,6 +14,23 @@ Lease {{ equipment.name }}
     </div>
 
     <div class="col-md-6">
+      {# Display success/error messages #}
+      {% if messages %}
+      {% for message in messages %}
+      <div
+        class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-info{% endif %} alert-dismissible fade show"
+        role="alert">
+        {% if message.tags == 'success' %}
+        <i class="bi bi-check-circle-fill me-2"></i>
+        {% elif message.tags == 'error' %}
+        <i class="bi bi-exclamation-circle-fill me-2"></i>
+        {% endif %}
+        <strong>{{ message }}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endfor %}
+      {% endif %}
+
       <h3>{{ equipment.name }}</h3>
       <p>{{ equipment.description }}</p>
       <p><strong>Daily rate:</strong> KES {{ equipment.daily_rate }}</p>

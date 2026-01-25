@@ -41,14 +41,15 @@ urlpatterns = [
     path('edit-patient-profile/', views.edit_patient_profile, name='edit_patient_profile'),
     path('edit-doctor-profile/', views.edit_doctor_profile, name='edit_doctor_profile'),
     path('book-doctor/<int:doctor_id>/', views.book_doctor_ajax, name='book_doctor_ajax'),
-    path('booking/<int:booking_id>/<str:decision>/', views.update_booking_status, name='update_booking_status'),
-    path('booking/<int:booking_id>/decline/', views.decline_booking, name='decline_booking'),
+    path('booking/<int:booking_id>/update-status/', views.update_appointment_status, name='update_appointment_status'),
+
     path('booking/<int:booking_id>/cancel/', views.cancel_booking, name='cancel_booking'),
     path('patient-profile/<int:patient_id>/booking/<int:booking_id>/', views.view_patient_profile_for_doctor, name='view_patient_profile_for_doctor'),
     path('delete-account/', views.delete_account, name='delete_account'),
     path('appointments/', views.appointments, name='appointments'),
-    path('bookings/confirm/<int:booking_id>/', views.confirm_booking, name='confirm_booking'),
-    path('bookings/complete/<int:booking_id>/', views.complete_booking, name='complete_booking'),
+    path('bookings/confirm/<int:booking_id>/', views.update_appointment_status, name='confirm_booking'),
+
+    path('bookings/complete/<int:booking_id>/', views.update_appointment_status, name='complete_booking'),
     path('doctor_profile/<int:doctor_id>', views.view_doctor_profile, name='doctor-profile'),
     path('mpesa/stk/', views.initiate_stk_push, name='stk_push'),
     path('stk-push', views.stk_push, name='process_stk_push'),
@@ -77,6 +78,7 @@ urlpatterns = [
     #path('admin-dashboard/bookings/delete/<int:booking_id>/', views.delete_booking, name='delete_booking'),
     path('admin-dashboard/equipment-requests/', views.equipment_requests_list, name='equipment_requests_list'),
     path("admin-dashboard/equipment-requests/<int:req_id>/approve/", views.approve_equipment_request,name="approve_equipment_request",),
+    path("admin-dashboard/equipment-requests/<int:req_id>/send-payment/", views.send_equipment_payment, name="send_equipment_payment"),
 
 
 

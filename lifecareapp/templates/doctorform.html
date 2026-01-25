@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Create Doctor Profile | Lifecare Connect</title>
@@ -8,6 +9,7 @@
 
   <!-- Bootstrap & Icons -->
   <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
   <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
 
   <style>
@@ -26,7 +28,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: rgba(255, 255, 255, 0.85);
+      background-color: rgba(255, 255, 255, 0.8);
       z-index: 0;
     }
 
@@ -60,7 +62,8 @@
       font-weight: 500;
     }
 
-    .form-control:focus, .form-select:focus {
+    .form-control:focus,
+    .form-select:focus {
       border-color: #00796b;
       box-shadow: 0 0 0 0.2rem rgba(0, 121, 107, 0.25);
     }
@@ -79,103 +82,169 @@
     }
 
     @media (max-width: 768px) {
-      .row > div[class*="col-md-6"] {
+      .row>div[class*="col-md-6"] {
         flex: 0 0 100%;
         max-width: 100%;
       }
     }
   </style>
 </head>
+
 <body>
 
-<div class="container profile-wrapper">
-  <div class="profile-card">
-    <h2 class="form-title">Doctor Profile Form</h2>
-    <form method="POST" enctype="multipart/form-data" action="{% url 'doctorform' %}">
-      {% csrf_token %}
+  <div class="container profile-wrapper">
+    <div class="profile-card">
+      <h2 class="form-title">Doctor Profile Form</h2>
 
       {% if form.errors %}
-  <div class="alert alert-danger">
-    <ul>
-      {% for field in form %}
-        {% for error in field.errors %}
+      <div class="alert alert-danger">
+        <ul>
+          {% for field in form %}
+          {% for error in field.errors %}
           <li><strong>{{ field.label }}:</strong> {{ error }}</li>
-        {% endfor %}
-      {% endfor %}
-      {% for error in form.non_field_errors %}
-        <li>{{ error }}</li>
-      {% endfor %}
-    </ul>
-  </div>
-{% endif %}
-
-<form method="POST" enctype="multipart/form-data">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit" class="btn btn-blue-green mt-3">Submit Profile</button>
-</form>
-
-<!--
-      <div class="row">
-        <div class="mb-3 col-md-6">
-          <label for="full_name" class="form-label">Full Name</label>
-          <input type="text" class="form-control" id="full_name" name="full_name" required>
-        </div>
-        <div class="mb-3 col-md-6">
-          <label for="professional_title" class="form-label">Professional Title</label>
-          <input type="text" class="form-control" id="professional_title" name="professional_title" required>
-        </div>
-        <div class="mb-3 col-md-6">
-          <label for="license_number" class="form-label">License Number</label>
-          <input type="text" class="form-control" id="license_number" name="license_number" required>
-        </div>
-        <div class="mb-3 col-md-6">
-          <label for="qualifications" class="form-label">Qualifications</label>
-          <textarea class="form-control" id="qualifications" name="qualifications" rows="2"></textarea>
-        </div>
-        <div class="mb-3 col-md-6">
-          <label for="expertise" class="form-label">Areas of Expertise</label>
-          <textarea class="form-control" id="expertise" name="expertise" rows="2"></textarea>
-        </div>
-        <div class="mb-3 col-md-6">
-          <label for="languages" class="form-label">Languages Spoken</label>
-          <textarea class="form-control" id="languages" name="languages" rows="2"></textarea>
-        </div>
-        <div class="mb-3 col-md-6">
-          <label for="available_location" class="form-label">Available Location</label>
-          <input type="text" class="form-control" id="available_location" name="available_location" required>
-        </div>
-        <div class="mb-3 col-md-6">
-          <label for="contact" class="form-label">Contact</label>
-          <input type="text" class="form-control" id="contact" name="contact" required>
-        </div>
-        <div class="mb-3 col-md-6">
-          <label for="email" class="form-label">Email</label>
-          <input type="email" class="form-control" id="email" name="email" required>
-        </div>
-        <div class="mb-3 col-md-6">
-          <label for="charge_rates" class="form-label">Charge Rates</label>
-          <input type="text" class="form-control" id="charge_rates" name="charge_rates">
-        </div>
-        <div class="mb-3 col-md-6">
-          <label for="start_time" class="form-label">Start Time</label>
-          {{ form.start_time }}
-        </div>
-        <div class="mb-3 col-md-6">
-          <label for="end_time" class="form-label">End Time</label>
-          {{ form.end_time }}
-        </div>
-        <div class="mb-4 col-md-6">
-          <label for="profile_pic" class="form-label">Upload Profile Picture</label>
-          <input class="form-control" type="file" id="profile_pic" name="profile_pic" accept="image/*">
-        </div>
+          {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
       </div>
-      <button type="submit" class="btn btn-blue-green mt-3">Submit Profile</button>
-    </form>
-  </div>
-</div>
--->
+      {% endif %}
 
-<script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+      <form method="POST" enctype="multipart/form-data" action="{% url 'doctorform' %}">
+        {% csrf_token %}
+
+        <div class="row">
+          <div class="mb-3 col-md-6">
+            <label for="full_name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="full_name" name="full_name"
+              value="{{ form.full_name.value|default:'' }}" required>
+          </div>
+
+          <div class="mb-3 col-md-6">
+            <label for="professional_title" class="form-label">Professional Title</label>
+            <input type="text" class="form-control" id="professional_title" name="professional_title"
+              value="{{ form.professional_title.value|default:'' }}"
+              placeholder="e.g. Registered Nurse, Physiotherapist" required>
+          </div>
+
+          <div class="mb-3 col-md-6">
+            <label for="license_number" class="form-label">License Number</label>
+            <input type="text" class="form-control" id="license_number" name="license_number"
+              value="{{ form.license_number.value|default:'' }}" required>
+          </div>
+
+          <div class="mb-3 col-md-6">
+            <label for="qualifications" class="form-label">Qualifications</label>
+            <textarea class="form-control" id="qualifications" name="qualifications"
+              rows="2">{{ form.qualifications.value|default:'' }}</textarea>
+          </div>
+
+          <div class="mb-3 col-md-6">
+            <label for="expertise" class="form-label">Areas of Expertise</label>
+            <textarea class="form-control" id="expertise" name="expertise"
+              rows="2">{{ form.expertise.value|default:'' }}</textarea>
+          </div>
+
+          <div class="mb-3 col-md-6">
+            <label for="languages" class="form-label">Languages Spoken</label>
+            <textarea class="form-control" id="languages" name="languages"
+              rows="2">{{ form.languages.value|default:'' }}</textarea>
+          </div>
+
+          <div class="mb-3 col-md-6">
+            <label for="available_location" class="form-label">Available Location</label>
+            <input type="text" class="form-control" id="available_location" name="available_location"
+              value="{{ form.available_location.value|default:'' }}" placeholder="e.g. Nairobi, Mombasa" required>
+          </div>
+
+          <div class="mb-3 col-md-6">
+            <label for="contact" class="form-label">Contact</label>
+            <input type="text" class="form-control" id="contact" name="contact"
+              value="{{ form.contact.value|default:'' }}" placeholder="e.g. 0712345678" required>
+          </div>
+
+          <div class="mb-3 col-md-6">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ form.email.value|default:'' }}"
+              required>
+          </div>
+
+          <div class="mb-3 col-md-6">
+            <label for="charge_rates" class="form-label">Charge Rates (KES per visit)</label>
+            <input type="number" class="form-control" id="charge_rates" name="charge_rates"
+              value="{{ form.charge_rates.value|default:'' }}" step="0.01" placeholder="e.g. 1500.00">
+          </div>
+
+          <div class="mb-3 col-md-6">
+            <label for="start_time" class="form-label">Start Time</label>
+            <input type="time" class="form-control" id="start_time" name="start_time"
+              value="{{ form.start_time.value|default:'08:00' }}">
+          </div>
+
+          <div class="mb-3 col-md-6">
+            <label for="end_time" class="form-label">End Time</label>
+            <input type="time" class="form-control" id="end_time" name="end_time"
+              value="{{ form.end_time.value|default:'17:00' }}">
+          </div>
+
+          <div class="mb-3 col-md-6">
+            <label class="form-label">Available Days</label>
+            <div class="d-flex flex-wrap gap-2">
+              {% with days="monday,tuesday,wednesday,thursday,friday,saturday,sunday" %}
+              {% for day in days|make_list %}
+              {% endfor %}
+              {% endwith %}
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="day_monday" name="available_days" value="monday"
+                  checked>
+                <label class="form-check-label" for="day_monday">Monday</label>
+              </div>
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="day_tuesday" name="available_days" value="tuesday"
+                  checked>
+                <label class="form-check-label" for="day_tuesday">Tuesday</label>
+              </div>
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="day_wednesday" name="available_days"
+                  value="wednesday" checked>
+                <label class="form-check-label" for="day_wednesday">Wednesday</label>
+              </div>
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="day_thursday" name="available_days" value="thursday"
+                  checked>
+                <label class="form-check-label" for="day_thursday">Thursday</label>
+              </div>
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="day_friday" name="available_days" value="friday"
+                  checked>
+                <label class="form-check-label" for="day_friday">Friday</label>
+              </div>
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="day_saturday" name="available_days"
+                  value="saturday">
+                <label class="form-check-label" for="day_saturday">Saturday</label>
+              </div>
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="day_sunday" name="available_days" value="sunday">
+                <label class="form-check-label" for="day_sunday">Sunday</label>
+              </div>
+            </div>
+            <small class="text-muted">Select the days you are available for appointments</small>
+          </div>
+
+          <div class="mb-4 col-md-6">
+            <label for="profile_pic" class="form-label">Upload Profile Picture</label>
+            <input class="form-control" type="file" id="profile_pic" name="profile_pic" accept="image/*">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-blue-green mt-3">Submit Profile</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 </body>
+
 </html>

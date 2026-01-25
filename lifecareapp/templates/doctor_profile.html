@@ -570,8 +570,8 @@
                 body: JSON.stringify({
                     appointment_date: selectedDate,
                     appointment_time: selectedTime,
-                    doctor_id: {{ doctor.id }},
-            })
+                    doctor_id: {{ doctor.id }}
+                })
     });
 
     const data = await response.json();

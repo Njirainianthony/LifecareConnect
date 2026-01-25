@@ -241,6 +241,14 @@ def doctor_form(request):
         if form.is_valid():
             profile = form.save(commit=False)
             profile.user = request.user
+            
+            # Handle available_days checkboxes - get all selected values and join with comma
+            available_days_list = request.POST.getlist('available_days')
+            if available_days_list:
+                profile.available_days = ','.join(available_days_list)
+            else:
+                profile.available_days = 'monday,tuesday,wednesday,thursday,friday'  # default
+            
             profile.save()
             return redirect('dashboard_doctor')
     else:
@@ -274,42 +282,76 @@ def dashboard_doctor(request):
         
 #Update booking status
 @login_required
-def update_booking_status(request, booking_id, decision):
+def update_appointment_status(request, booking_id):
+    """
+    Unified view to handle all appointment status updates from the doctor.
+    Supports 'accept', 'decline', and 'complete' actions.
+    """
     booking = get_object_or_404(Booking, id=booking_id)
     
-    # Security check: Ensure only the doctor associated with this booking can update it
+    # Security check: Ensure only the assigned doctor can update the booking
     if request.user != booking.doctor.user:
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=403)
-        messages.error(request, "You are not authorized to perform this action.")
+        messages.error(request, "Unauthorized action.")
         return redirect('appointments')
     
-    if decision in ['accepted', 'declined']:
-        booking.status = decision
+    if request.method == 'POST':
+        action = request.POST.get('action')
         
-        # Handle decline reason if provided
-        if decision == 'declined' and request.method == 'POST':
-            decline_reason = request.POST.get('decline_reason', '')
+        if action == 'accept':
+            booking.status = Booking.AppointmentStatus.ACCEPTED
+            messages.success(request, f"Appointment with {booking.patient.full_name} accepted.")
+            
+        elif action == 'decline':
+            decline_reason = request.POST.get('decline_reason', '').strip()
+            if not decline_reason:
+                messages.error(request, "Please provide a reason for declining.")
+                return redirect('appointments')
+            
+            booking.status = Booking.AppointmentStatus.DECLINED
             booking.decline_reason = decline_reason
-        
+            messages.success(request, f"Appointment with {booking.patient.full_name} declined.")
+            
+        elif action == 'complete':
+            # Handle phone number for payment request
+            phone_number = request.POST.get('payment_phone', '').strip()
+            if not phone_number:
+                phone_number = booking.patient.phone or ""
+            
+            # Format phone number to 254XXXXXXXXX format
+            phone_number = phone_number.replace('+', '').replace(' ', '').replace('-', '')
+            if phone_number.startswith('0'):
+                phone_number = '254' + phone_number[1:]
+            elif phone_number and not phone_number.startswith('254'):
+                phone_number = '254' + phone_number
+                
+            booking.status = Booking.AppointmentStatus.COMPLETED
+            booking.save() # Save before initiating payment flow
+            
+            # Initiate payment via M-Pesa STK Push
+            success, message = initiate_payment_for_booking(booking, phone_number)
+            if success:
+                messages.success(request, f"Appointment completed. {message}")
+            else:
+                messages.warning(request, f"Appointment completed, but payment request failed: {message}")
+                
+            return redirect('appointments')
+            
+        else:
+            messages.error(request, "Invalid action.")
+            return redirect('appointments')
+            
         booking.save()
         
-        # Notify the patient
+        # Send Notification to Patient
         try:
             notify_patient(booking)
             booking.patient_notified = True
             booking.save()
-            messages.success(request, f"Booking {decision} successfully. Patient has been notified.")
         except Exception as e:
-            print(f"Error sending notification to patient: {str(e)}")
-            messages.warning(request, f"Booking {decision}, but email notification failed.")
-    
-    # Check if this is an AJAX request
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return JsonResponse({'status': 'success', 'booking_status': booking.status})
-    
-    # If not AJAX, redirect to appointments
-    return redirect('appointments')    
+            print(f"Error notifying patient: {e}")
+            
+    return redirect('appointments')
+
 
 @login_required
 def edit_patient_profile(request):
@@ -341,7 +383,16 @@ def edit_doctor_profile(request):
     if request.method == 'POST':
         form = DoctorProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
-            form.save()
+            updated_profile = form.save(commit=False)
+            
+            # Handle available_days checkboxes - get all selected values and join with comma
+            available_days_list = request.POST.getlist('available_days')
+            if available_days_list:
+                updated_profile.available_days = ','.join(available_days_list)
+            else:
+                updated_profile.available_days = 'monday,tuesday,wednesday,thursday,friday'  # default
+            
+            updated_profile.save()
             messages.success(request, "Doctor profile updated successfully.")
             return redirect('dashboard_doctor')
         else:
@@ -349,7 +400,9 @@ def edit_doctor_profile(request):
     else:
         form = DoctorProfileForm(instance=profile)
 
-    return render(request, 'edit_doctor_profile.html', {'form': form})
+    # Pass the current available days for checkbox state
+    current_days = profile.get_available_days_list()
+    return render(request, 'edit_doctor_profile.html', {'form': form, 'current_days': current_days})
 
 #Appointment View
 """
@@ -454,33 +507,6 @@ def appointments(request):
     return render(request, 'appointments.html', context)
 
 
-@login_required
-def decline_booking(request, booking_id):
-    """Decline a booking with optional reason"""
-    booking = get_object_or_404(Booking, id=booking_id)
-    
-    # Security check: ensure the request is from the correct doctor
-    if request.user != booking.doctor.user:
-        messages.error(request, "Unauthorized action.")
-        return redirect('appointments')
-    
-    if request.method == 'POST':
-        decline_reason = request.POST.get('decline_reason', '')
-        booking.status = Booking.AppointmentStatus.DECLINED
-        booking.decline_reason = decline_reason
-        booking.save()
-        
-        # Notify the patient
-        try:
-            notify_patient(booking)
-            booking.patient_notified = True
-            booking.save()
-            messages.success(request, "Booking declined. Patient has been notified.")
-        except Exception as e:
-            print(f"Notification error: {e}")
-            messages.warning(request, "Booking declined, but email notification failed.")
-    
-    return redirect('appointments')
 
 
 @login_required
@@ -560,72 +586,7 @@ def view_patient_profile_for_doctor(request, patient_id, booking_id):
     return render(request, 'patient_profile_detail.html', context)
 
 
-@login_required
-def confirm_booking(request, booking_id):
-    """Accept a booking - alias for update_booking_status with accepted"""
-    booking = get_object_or_404(Booking, id=booking_id)
-    # Security check: ensure the request is from the correct doctor
-    if request.user == booking.doctor.user and request.method == 'POST':
-        booking.status = Booking.AppointmentStatus.ACCEPTED
-        booking.save()
-        # Send a notification to the patient
-        try:
-            notify_patient(booking)
-            booking.patient_notified = True
-            booking.save()
-            messages.success(request, "Booking accepted! Patient has been notified.")
-        except Exception as e:
-            print(f"Notification error: {e}")
-            messages.warning(request, "Booking accepted, but email notification failed.")
-    else:
-        messages.error(request, "Unauthorized action.")
 
-    return redirect('appointments') # Redirect back to the appointments page
-
-@login_required
-def complete_booking(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id)
-
-    # Security check: ensure the request is from the correct doctor and is a POST request
-    if request.user != booking.doctor.user:
-        messages.error(request, "You are not authorized to perform this action.")
-        return redirect('appointments')
-
-    if request.method == 'POST':
-        # Get the phone number from the form
-        phone_number = request.POST.get('payment_phone', '').strip()
-        
-        if not phone_number:
-            # Use patient's registered phone as fallback
-            phone_number = booking.patient.phone
-        
-        # Format phone number to 254XXXXXXXXX format
-        phone_number = phone_number.replace('+', '').replace(' ', '').replace('-', '')
-        if phone_number.startswith('0'):
-            phone_number = '254' + phone_number[1:]
-        elif not phone_number.startswith('254'):
-            phone_number = '254' + phone_number
-        
-        # Try to initiate payment FIRST, only mark complete if successful
-        success, error_msg = initiate_payment_for_booking(booking, phone_number)
-        
-        if success:
-            # Payment initiated successfully - now mark as completed
-            booking.status = Booking.AppointmentStatus.COMPLETED
-            booking.save()
-            
-            # Notify patient
-            try:
-                notify_patient(booking)
-            except Exception as e:
-                print(f"Notification error: {e}")
-            
-            messages.success(request, f"Appointment marked as complete. Payment request sent to {phone_number}.")
-        else:
-            # Payment failed - do NOT mark as complete
-            messages.error(request, f"Payment request failed: {error_msg}. Appointment not marked as complete. Please try again.")
-
-    return redirect('appointments')
 
         
 @csrf_exempt
@@ -1119,7 +1080,7 @@ def equipment_detail(request, pk):
         total_cost = equipment.daily_rate * rental_days
         deposit_amount = round(float(total_cost) * 0.30, 2)
 
-        EquipmentRequest.objects.create(
+        equipment_request = EquipmentRequest.objects.create(
             equipment=equipment,
             patient=profile,
             status=EquipmentRequest.RequestStatus.PENDING,
@@ -1127,7 +1088,11 @@ def equipment_detail(request, pk):
             delivery_address=delivery_address,
             deposit_amount=deposit_amount
         )
-        messages.success(request, "Your equipment request has been submitted! You will be notified once it's approved.")
+        
+        # Notify admin about the new equipment request
+        notify_admin_new_equipment_request(equipment_request)
+        
+        messages.success(request, "Your equipment request has been submitted successfully! You will be notified by email once it's approved.")
         return redirect("equipment_detail", pk=equipment.pk)
 
     return render(
@@ -1176,8 +1141,6 @@ def equipment_requests_list(request):
             else:
                 messages.error(request, f"Failed to initiate payment for {request_obj.equipment.name}")
 
-            messages.success(request, f"Status updated to {request_obj.get_status_display()}")
-
             return redirect("equipment_requests_list")
         
 
@@ -1189,13 +1152,65 @@ def equipment_requests_list(request):
             messages.success(request, f"{request_obj.equipment.name} approved, marked unavailable, and email sent to {request_obj.patient.full_name}.")
 
             return redirect("equipment_requests_list")
-    
-
+        
+        # For all other status changes, show success message
+        messages.success(request, f"Status updated to {request_obj.get_status_display()}")
+        return redirect("equipment_requests_list")
 
     requests_list = EquipmentRequest.objects.select_related('patient', 'equipment').order_by('-created_at')
     return render(request, 'admin/equipment_requests_list.html', {
         'requests_list': requests_list
     })
+
+
+@login_required
+@user_passes_test(is_admin)
+def send_equipment_payment(request, req_id):
+    """
+    Admin initiates STK push for payment after equipment has been delivered.
+    """
+    equipment_request = get_object_or_404(EquipmentRequest, id=req_id)
+    
+    if equipment_request.status != EquipmentRequest.RequestStatus.DELIVERED:
+        messages.error(request, "Payment can only be requested for delivered equipment.")
+        return redirect("equipment_requests_list")
+    
+    success = initiate_payment_for_equipment(equipment_request)
+    
+    if success:
+        messages.success(request, f"Payment request of KES {equipment_request.total_cost} sent to {equipment_request.patient.full_name}'s phone ({equipment_request.patient.phone})")
+    else:
+        messages.error(request, f"Failed to send payment request. Please check the patient's phone number and try again.")
+    
+    return redirect("equipment_requests_list")
+
+
+def notify_admin_new_equipment_request(equipment_request):
+    """Send email notification to admin when a new equipment request is submitted."""
+    try:
+        admin_email = settings.DEFAULT_FROM_EMAIL or 'admin@lifecareconnect.com'
+        subject = f"New Equipment Request: {equipment_request.equipment.name}"
+        message = (
+            f"A new equipment request has been submitted.\n\n"
+            f"Equipment: {equipment_request.equipment.name}\n"
+            f"Patient: {equipment_request.patient.full_name}\n"
+            f"Phone: {equipment_request.patient.phone}\n"
+            f"Email: {equipment_request.patient.email}\n"
+            f"Rental Days: {equipment_request.rental_days}\n"
+            f"Total Cost: KES {equipment_request.total_cost}\n"
+            f"Deposit: KES {equipment_request.deposit_amount}\n"
+            f"Delivery Address: {equipment_request.delivery_address}\n\n"
+            "Please log in to the admin dashboard to approve or decline this request."
+        )
+        send_mail(
+            subject,
+            message,
+            'noreply@lifecareconnect.com',
+            [admin_email],
+            fail_silently=True
+        )
+    except Exception as e:
+        print(f"Failed to send admin notification email: {e}")
 
 
 @user_passes_test(is_admin)
@@ -1563,14 +1578,15 @@ def initiate_payment_for_equipment(equipment_request):
         # 1. Extract necessary information directly from the equipment request
         patient_profile = equipment_request.patient
         equipment = equipment_request.equipment
-        amount = int(equipment.daily_rate)  # Ensure amount is an integer
+        # Use total cost (daily_rate * rental_days) instead of just daily_rate
+        amount = int(equipment_request.total_cost)
         phone_number = patient_profile.phone
 
         # 2. Prepare STK Push details
         cl = MpesaClient()
-        account_reference = 'LifecareEquipmentPayment'
-        transaction_desc = f'Payment for equipment: {equipment.name}'
-        callback_url = 'https://your-domain.com/payments/equipment/callback/'  # update accordingly
+        account_reference = 'LifecareEquipment'
+        transaction_desc = f'Payment for {equipment.name} - {equipment_request.rental_days} days'
+        callback_url = os.getenv('MPESA_CALLBACK_URL', 'https://your-domain.com/mpesa/callback/')
 
         # 3. Call the Mpesa API
         response = cl.stk_push(
@@ -1581,22 +1597,24 @@ def initiate_payment_for_equipment(equipment_request):
             callback_url=callback_url
         )
 
+        print(f"Equipment STK Push Response: {response.status_code} - {response.text}")
+
         # 4. Handle the API response
         if response.ok:
             # Create a payment record to track the transaction
+            # Note: doctor field is required, so we need to handle this
+            # For equipment payments, we'll set doctor to None or first available
             Payment.objects.create(
                 user=patient_profile,
-                equipment_request=equipment_request,  # add this FK in Payment model if not present
+                doctor=DoctorProfile.objects.first(),  # Placeholder - equipment payments don't have a doctor
+                equipment_request=equipment_request,
                 amount=amount,
                 status="PENDING"
             )
             
-            # Update the equipment request status to "PAID" only after confirmation
-            equipment_request.status = EquipmentRequest.RequestStatus.PAID
-            equipment_request.save()
-
-            # Notify patient that payment has been initiated
-            equipment_approval_email(equipment_request, "Payment for your equipment request has been initiated.")
+            # Don't update status to PAID here - wait for callback confirmation
+            # equipment_request.status = EquipmentRequest.RequestStatus.PAID
+            # equipment_request.save()
 
             return True
         else:
@@ -1606,3 +1624,4 @@ def initiate_payment_for_equipment(equipment_request):
     except Exception as e:
         print(f"An exception occurred in initiate_payment_for_equipment for request {equipment_request.id}: {e}")
         return False
+

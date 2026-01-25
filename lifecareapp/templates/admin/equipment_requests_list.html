@@ -73,18 +73,28 @@
 
         <td>
           {# Inline form to change the status #}
-          <form method="post" action="{% url 'equipment_requests_list' %}" class="d-flex align-items-center gap-2">
+          <form method="post" action="{% url 'equipment_requests_list' %}" class="d-flex align-items-center gap-2 mb-2">
             {% csrf_token %}
             <input type="hidden" name="req_id" value="{{ req.id }}">
 
             <select name="status" class="form-select form-select-sm" style="min-width: 150px;">
               {% for val, label in req.RequestStatus.choices %}
-              <option value="{{ val }}" {% if req.status==val %}selected{% endif %}>{{ label }}</option>
+              <option value="{{ val }}" {% if req.status == val %}selected{% endif %}>{{ label }}</option>
               {% endfor %}
             </select>
 
             <button type="submit" class="btn btn-sm btn-primary">Update</button>
           </form>
+
+          {# Show Send Payment button when equipment is delivered #}
+          {% if req.status == 'delivered' %}
+          <form method="post" action="{% url 'send_equipment_payment' req.id %}" class="mt-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-success">
+              <i class="bi bi-phone"></i> Send Payment Request (KES {{ req.total_cost }})
+            </button>
+          </form>
+          {% endif %}
         </td>
       </tr>
       {% empty %}

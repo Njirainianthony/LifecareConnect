@@ -137,8 +137,13 @@
     <a href="{% url 'booking_list' %}" class="{% if '/admin/bookings/' in request.path %}active{% endif %}">
       <i class="bi bi-calendar-check"></i> Bookings
     </a>
-    <a href="{% url 'equipment_list' %}" class="{% if '/equipment/' in request.path %}active{% endif %}">
+    <a href="{% url 'equipment_list' %}"
+      class="{% if '/equipment/' in request.path and 'requests' not in request.path %}active{% endif %}">
       <i class="bi bi-tools"></i> Equipment
+    </a>
+    <a href="{% url 'equipment_requests_list' %}"
+      class="{% if '/equipment-requests/' in request.path %}active{% endif %}">
+      <i class="bi bi-clipboard-check"></i> Equipment Requests
     </a>
     <a href="{% url 'mpesa_transactions' %}" class="{% if '/admin/mpesa/' in request.path %}active{% endif %}">
       <i class="bi bi-cash-coin"></i> MPESA
