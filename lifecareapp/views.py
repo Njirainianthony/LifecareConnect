@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse, JsonResponse
 from .models import PatientProfile, DoctorProfile, Profile, Booking, Payment, DoctorAvailability, Equipment, EquipmentRequest
-from .forms import UserRegistrationForm, PatientProfileForm, DoctorProfileForm, UserEditForm, ProfileEditForm, EquipmentForm, DoctorAvailabilityForm
+from .forms import UserRegistrationForm, PatientProfileForm, DoctorProfileForm, UserEditForm, ProfileEditForm, EquipmentForm, DoctorAvailabilityForm, DoctorWorkingHoursForm
 from django.contrib import messages
 from django.urls import reverse
 from django.db.models import Q 
@@ -985,36 +985,29 @@ def manage_availability(request):
         return redirect('addprofile')
 
     if request.method == 'POST':
-        # Use the new form
-        form = DoctorAvailabilityForm(request.POST)
+        form = DoctorWorkingHoursForm(request.POST, instance=doctor)
         if form.is_valid():
-            # The form now correctly creates a DoctorAvailability instance
-            slot = form.save(commit=False)
-            slot.doctor = doctor
-
-            # Check for overlaps using the attributes from the 'slot' instance
-            overlap = DoctorAvailability.objects.filter(
-                doctor=doctor,
-                date=slot.date,
-                start_time__lt=slot.end_time, # (start < new_end)
-                end_time__gt=slot.start_time   # (end > new_start)
-            ).exists()
-
-            if overlap:
-                messages.error(request, "This time slot overlaps with an existing one.")
-            else:
-                slot.save()
-                messages.success(request, "New availability slot has been added.")
-                return redirect('manage_availability')
-        # If form is not valid, it will fall through and re-render with errors
+            # Handle available_days manually
+            available_days_list = request.POST.getlist('available_days')
+            if available_days_list:
+                doctor.available_days = ','.join(available_days_list)
+            
+            form.save()
+            messages.success(request, "Working hours and availability updated successfully.")
+            return redirect('manage_availability')
     else:
-        # Use the new form for GET requests too
-        form = DoctorAvailabilityForm()
+        form = DoctorWorkingHoursForm(instance=doctor)
 
     # Show all of the doctor's availability slots
     slots = DoctorAvailability.objects.filter(doctor=doctor).order_by('date', 'start_time')
+    current_days = doctor.get_available_days_list()
     
-    return render(request, 'manage_availability.html', {'form': form, 'slots': slots})
+    return render(request, 'manage_availability.html', {
+        'form': form, 
+        'slots': slots, 
+        'doctor': doctor,
+        'current_days': current_days
+    })
 @login_required
 def delete_availability(request, availability_id):
     try:

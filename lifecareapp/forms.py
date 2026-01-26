@@ -136,6 +136,24 @@ class DoctorAvailabilityForm(forms.ModelForm):
 
         return cleaned_data
 
+
+class DoctorWorkingHoursForm(forms.ModelForm):
+    class Meta:
+        model = DoctorProfile
+        fields = ['start_time', 'end_time', 'slot_duration']
+        widgets = {
+            'start_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'end_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'slot_duration': forms.Select(choices=[
+                (15, '15 minutes'),
+                (30, '30 minutes'),
+                (45, '45 minutes'),
+                (60, '1 hour'),
+                (90, '1.5 hours'),
+                (120, '2 hours'),
+            ], attrs={'class': 'form-control'}),
+        }
+
 #Equipment
 class EquipmentForm(forms.ModelForm):
     class Meta:

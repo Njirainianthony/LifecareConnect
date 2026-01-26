@@ -175,11 +175,11 @@
             flex-direction: column;
             align-items: center;
         }
-        
+
         .btn {
             width: 200px;
         }
-        
+
         .card-body {
             padding: 30px 20px;
         }
@@ -199,36 +199,31 @@
                 <h5>Current Working Hours:</h5>
                 <span class="slot-tag">{{ doctor.start_time|time:"g:i A" }} - {{ doctor.end_time|time:"g:i A" }}</span>
                 <span class="slot-tag">{{ doctor.slot_duration }} minute appointments</span>
-                
+
                 <!-- Show generated time slots preview -->
                 {% if doctor.get_formatted_time_slots %}
-                    <div style="margin-top: 15px;">
-                        <strong>Generated Time Slots:</strong><br>
-                        {% for slot in doctor.get_formatted_time_slots %}
-                            <span class="preview-slot">{{ slot }}</span>
-                        {% endfor %}
-                    </div>
+                <div style="margin-top: 15px;">
+                    <strong>Generated Time Slots:</strong><br>
+                    {% for slot in doctor.get_formatted_time_slots %}
+                    <span class="preview-slot">{{ slot }}</span>
+                    {% endfor %}
+                </div>
                 {% endif %}
             </div>
             {% endif %}
 
             <form method="post">
                 {% csrf_token %}
-                
+
                 <!-- Start Time Field -->
                 <div class="form-group">
                     <label class="form-label" for="id_start_time">
                         <strong>Working Hours Start</strong>
                     </label>
-                    <input type="time" 
-                           id="id_start_time" 
-                           name="start_time" 
-                           class="form-control"
-                           value="{% if form.start_time.value %}{{ form.start_time.value|time:'H:i' }}{% else %}08:00{% endif %}"
-                           step="900">
+                    {{ form.start_time }}
                     <p class="form-help-text">When do you start seeing patients?</p>
                     {% if form.start_time.errors %}
-                        <div class="error-message">{{ form.start_time.errors.0 }}</div>
+                    <div class="error-message">{{ form.start_time.errors.0 }}</div>
                     {% endif %}
                 </div>
 
@@ -237,15 +232,10 @@
                     <label class="form-label" for="id_end_time">
                         <strong>Working Hours End</strong>
                     </label>
-                    <input type="time" 
-                           id="id_end_time" 
-                           name="end_time" 
-                           class="form-control"
-                           value="{% if form.end_time.value %}{{ form.end_time.value|time:'H:i' }}{% else %}17:00{% endif %}"
-                           step="900">
+                    {{ form.end_time }}
                     <p class="form-help-text">When do you stop seeing patients?</p>
                     {% if form.end_time.errors %}
-                        <div class="error-message">{{ form.end_time.errors.0 }}</div>
+                    <div class="error-message">{{ form.end_time.errors.0 }}</div>
                     {% endif %}
                 </div>
 
@@ -254,35 +244,72 @@
                     <label class="form-label" for="id_slot_duration">
                         <strong>Appointment Duration</strong>
                     </label>
-                    <select id="id_slot_duration" name="slot_duration" class="form-control">
-                        <option value="15" {% if form.slot_duration.value == 15 %}selected{% endif %}>15 minutes</option>
-                        <option value="30" {% if form.slot_duration.value == 30 or not form.slot_duration.value %}selected{% endif %}>30 minutes</option>
-                        <option value="45" {% if form.slot_duration.value == 45 %}selected{% endif %}>45 minutes</option>
-                        <option value="60" {% if form.slot_duration.value == 60 %}selected{% endif %}>1 hour</option>
-                        <option value="90" {% if form.slot_duration.value == 90 %}selected{% endif %}>1.5 hours</option>
-                        <option value="120" {% if form.slot_duration.value == 120 %}selected{% endif %}>2 hours</option>
-                    </select>
+                    {{ form.slot_duration }}
                     <p class="form-help-text">How long should each appointment slot be?</p>
                     {% if form.slot_duration.errors %}
-                        <div class="error-message">{{ form.slot_duration.errors.0 }}</div>
+                    <div class="error-message">{{ form.slot_duration.errors.0 }}</div>
                     {% endif %}
                 </div>
-                
+
                 <!-- Display any form-wide errors -->
                 {% if form.non_field_errors %}
-                    <div class="error-message">
-                        {% for error in form.non_field_errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
-                    </div>
+                <div class="error-message">
+                    {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
                 {% endif %}
+
+                <!-- Available Days Field -->
+                <div class="form-group">
+                    <label class="form-label"><strong>Available Days</strong></label>
+                    <div class="d-flex flex-wrap gap-2">
+
+                        <div class="form-check me-3">
+                            <input type="checkbox" class="form-check-input" id="day_monday" name="available_days"
+                                value="monday" {% if 'monday' in current_days %}checked{% endif %}>
+                            <label class="form-check-label" for="day_monday">Monday</label>
+                        </div>
+                        <div class="form-check me-3">
+                            <input type="checkbox" class="form-check-input" id="day_tuesday" name="available_days"
+                                value="tuesday" {% if 'tuesday' in current_days %}checked{% endif %}>
+                            <label class="form-check-label" for="day_tuesday">Tuesday</label>
+                        </div>
+                        <div class="form-check me-3">
+                            <input type="checkbox" class="form-check-input" id="day_wednesday" name="available_days"
+                                value="wednesday" {% if 'wednesday' in current_days %}checked{% endif %}>
+                            <label class="form-check-label" for="day_wednesday">Wednesday</label>
+                        </div>
+                        <div class="form-check me-3">
+                            <input type="checkbox" class="form-check-input" id="day_thursday" name="available_days"
+                                value="thursday" {% if 'thursday' in current_days %}checked{% endif %}>
+                            <label class="form-check-label" for="day_thursday">Thursday</label>
+                        </div>
+                        <div class="form-check me-3">
+                            <input type="checkbox" class="form-check-input" id="day_friday" name="available_days"
+                                value="friday" {% if 'friday' in current_days %}checked{% endif %}>
+                            <label class="form-check-label" for="day_friday">Friday</label>
+                        </div>
+                        <div class="form-check me-3">
+                            <input type="checkbox" class="form-check-input" id="day_saturday" name="available_days"
+                                value="saturday" {% if 'saturday' in current_days %}checked{% endif %}>
+                            <label class="form-check-label" for="day_saturday">Saturday</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="day_sunday" name="available_days"
+                                value="sunday" {% if 'sunday' in current_days %}checked{% endif %}>
+                            <label class="form-check-label" for="day_sunday">Sunday</label>
+                        </div>
+                    </div>
+                    <p class="form-help-text">Which days of the week are you available?</p>
+                </div>
 
                 <!-- Preview area for generated time slots -->
                 <div id="previewSlots" class="preview-slots" style="display: none;">
                     <h6>Preview Time Slots:</h6>
                     <div id="slotsPreview"></div>
                 </div>
-                
+
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Save Working Hours</button>
                     <a href="{% url 'dashboard_doctor' %}" class="btn btn-secondary">Cancel</a>
@@ -293,59 +320,59 @@
 </div>
 
 <script>
-// Generate time slots preview
-function generateTimeSlots(startTime, endTime, duration) {
-    if (!startTime || !endTime || !duration) return [];
-    
-    const slots = [];
-    const start = new Date(`2000-01-01T${startTime}:00`);
-    const end = new Date(`2000-01-01T${endTime}:00`);
-    const durationMs = duration * 60 * 1000;
-    
-    let current = new Date(start);
-    while (current < end) {
-        const timeStr = current.toTimeString().slice(0, 5);
-        slots.push(timeStr);
-        current = new Date(current.getTime() + durationMs);
-    }
-    
-    return slots;
-}
+    // Generate time slots preview
+    function generateTimeSlots(startTime, endTime, duration) {
+        if (!startTime || !endTime || !duration) return [];
 
-function updatePreview() {
-    const startTime = document.getElementById('id_start_time').value;
-    const endTime = document.getElementById('id_end_time').value;
-    const duration = parseInt(document.getElementById('id_slot_duration').value);
-    
-    if (startTime && endTime && duration) {
-        const slots = generateTimeSlots(startTime, endTime, duration);
-        const previewDiv = document.getElementById('previewSlots');
-        const slotsDiv = document.getElementById('slotsPreview');
-        
-        if (slots.length > 0) {
-            slotsDiv.innerHTML = slots.map(slot => 
-                `<span class="preview-slot">${slot}</span>`
-            ).join('');
-            previewDiv.style.display = 'block';
-        } else {
-            previewDiv.style.display = 'none';
+        const slots = [];
+        const start = new Date(`2000-01-01T${startTime}:00`);
+        const end = new Date(`2000-01-01T${endTime}:00`);
+        const durationMs = duration * 60 * 1000;
+
+        let current = new Date(start);
+        while (current < end) {
+            const timeStr = current.toTimeString().slice(0, 5);
+            slots.push(timeStr);
+            current = new Date(current.getTime() + durationMs);
+        }
+
+        return slots;
+    }
+
+    function updatePreview() {
+        const startTime = document.getElementById('id_start_time').value;
+        const endTime = document.getElementById('id_end_time').value;
+        const duration = parseInt(document.getElementById('id_slot_duration').value);
+
+        if (startTime && endTime && duration) {
+            const slots = generateTimeSlots(startTime, endTime, duration);
+            const previewDiv = document.getElementById('previewSlots');
+            const slotsDiv = document.getElementById('slotsPreview');
+
+            if (slots.length > 0) {
+                slotsDiv.innerHTML = slots.map(slot =>
+                    `<span class="preview-slot">${slot}</span>`
+                ).join('');
+                previewDiv.style.display = 'block';
+            } else {
+                previewDiv.style.display = 'none';
+            }
         }
     }
-}
 
-// Add event listeners when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    const startTimeInput = document.getElementById('id_start_time');
-    const endTimeInput = document.getElementById('id_end_time');
-    const durationInput = document.getElementById('id_slot_duration');
+    // Add event listeners when page loads
+    document.addEventListener('DOMContentLoaded', function () {
+        const startTimeInput = document.getElementById('id_start_time');
+        const endTimeInput = document.getElementById('id_end_time');
+        const durationInput = document.getElementById('id_slot_duration');
 
-    if (startTimeInput) startTimeInput.addEventListener('change', updatePreview);
-    if (endTimeInput) endTimeInput.addEventListener('change', updatePreview);
-    if (durationInput) durationInput.addEventListener('change', updatePreview);
-    
-    // Initial preview if values exist
-    updatePreview();
-});
+        if (startTimeInput) startTimeInput.addEventListener('change', updatePreview);
+        if (endTimeInput) endTimeInput.addEventListener('change', updatePreview);
+        if (durationInput) durationInput.addEventListener('change', updatePreview);
+
+        // Initial preview if values exist
+        updatePreview();
+    });
 </script>
 
 {% endblock %}
