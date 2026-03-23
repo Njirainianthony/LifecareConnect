@@ -7,7 +7,7 @@ register = template.Library()
 @register.simple_tag
 def get_dashboard_url(user):
     if user.is_superuser or user.is_staff:
-        return reverse('admin_dashboard')  # Update with correct URL name
+        return reverse('admin_dashboard_home')  # Update with correct URL name
     try:
         profile = Profile.objects.get(user=user)
         if profile.user_type == 'doctor':

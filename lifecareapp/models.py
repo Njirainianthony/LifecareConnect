@@ -68,6 +68,10 @@ class PatientProfile(models.Model):
     profile_pic = models.ImageField(upload_to='dashboard_patient/', blank=True, null=True)
     medical_history_pdf = models.FileField(upload_to='patient_medical_history/', blank=True, null=True, validators=[FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'])])
     medical_history_uploaded_at = models.DateTimeField(auto_now_add=True, null=True)
+    
+    # Data Protection Consent
+    consent_accepted = models.BooleanField(default=False)
+    consent_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.full_name} - Patient"
@@ -97,6 +101,10 @@ class DoctorProfile(models.Model):
         help_text='Comma-separated days: monday,tuesday,wednesday,thursday,friday,saturday,sunday'
     )
     is_accepting_appointments = models.BooleanField(default=True)
+
+    # Data Protection Consent
+    consent_accepted = models.BooleanField(default=False)
+    consent_date = models.DateTimeField(null=True, blank=True)
 
     def get_formatted_time_slots(self):
         """

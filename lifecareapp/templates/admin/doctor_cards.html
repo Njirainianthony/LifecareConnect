@@ -4,10 +4,10 @@
 {% block content %}
 
 <style>
-    thead th {
-        background-color: #00796b !important;
-        color: white !important;
-    }
+  thead th {
+    background-color: #00796b !important;
+    color: white !important;
+  }
 </style>
 
 
@@ -17,7 +17,8 @@
   <!-- 🔍 Search Bar -->
   <form method="GET" class="mb-4">
     <div class="input-group">
-      <input type="text" id="doctorSearch" class="form-control border border-blue-300 rounded-start-2 p-2" placeholder="Search doctors...">
+      <input type="text" id="doctorSearch" class="form-control border border-blue-300 rounded-start-2 p-2"
+        placeholder="Search doctors...">
       <button class="btn" style="background-color: #00796b; color: white;" type="button">Search</button>
     </div>
   </form>
@@ -38,6 +39,7 @@
           <th>Languages</th>
           <th>Expertise</th>
           <th>Qualifications</th>
+          <th>Data Consent</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -47,9 +49,10 @@
           <td>{{ forloop.counter }}</td>
           <td>
             {% if doctor.profile_pic %}
-              <img src="{{ doctor.profile_pic.url }}" alt="Profile" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+            <img src="{{ doctor.profile_pic.url }}" alt="Profile" class="rounded-circle"
+              style="width: 50px; height: 50px; object-fit: cover;">
             {% else %}
-              <span class="text-muted">No Image</span>
+            <span class="text-muted">No Image</span>
             {% endif %}
           </td>
           <td>{{ doctor.full_name }}</td>
@@ -63,7 +66,16 @@
           <td style="white-space: pre-line;">{{ doctor.expertise }}</td>
           <td style="white-space: pre-line;">{{ doctor.qualifications }}</td>
           <td>
-            <a href="{% url 'edit_doctor' doctor.pk %}" class="btn btn-sm" style="background-color: #00796b; color: white;">Edit</a><br>
+            {% if doctor.consent_accepted %}
+            <span class="badge bg-success">Accepted</span><br>
+            <small class="text-muted">{{ doctor.consent_date|date:"M d, Y" }}</small>
+            {% else %}
+            <span class="badge bg-danger">Not Accepted</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'edit_doctor' doctor.pk %}" class="btn btn-sm"
+              style="background-color: #00796b; color: white;">Edit</a><br>
             <a href="{% url 'delete_doctor' doctor.pk %}" class="btn btn-sm btn-danger mt-1">Delete</a>
           </td>
         </tr>

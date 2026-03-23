@@ -70,44 +70,32 @@
           <div class="mb-3">
             <label class="form-label">Available Days</label>
             <div class="d-flex flex-wrap gap-2">
-              {% for day_val, day_label in
-              "monday:Monday,tuesday:Tuesday,wednesday:Wednesday,thursday:Thursday,friday:Friday,saturday:Saturday,sunday:Sunday"|slugify|slice:":0"
-              %}
-              {% endfor %}
-              {# Manual iteration for exact control #}
               <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="day_monday" name="available_days" value="monday" {%
-                  if 'monday' in current_days %}checked{% endif %}>
+                <input type="checkbox" class="form-check-input" id="day_monday" name="available_days" value="monday" {% if 'monday' in current_days %}checked{% endif %}>
                 <label class="form-check-label" for="day_monday">Monday</label>
               </div>
               <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="day_tuesday" name="available_days" value="tuesday"
-                  {% if 'tuesday' in current_days %}checked{% endif %}>
+                <input type="checkbox" class="form-check-input" id="day_tuesday" name="available_days" value="tuesday" {% if 'tuesday' in current_days %}checked{% endif %}>
                 <label class="form-check-label" for="day_tuesday">Tuesday</label>
               </div>
               <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="day_wednesday" name="available_days"
-                  value="wednesday" {% if 'wednesday' in current_days %}checked{% endif %}>
+                <input type="checkbox" class="form-check-input" id="day_wednesday" name="available_days" value="wednesday" {% if 'wednesday' in current_days %}checked{% endif %}>
                 <label class="form-check-label" for="day_wednesday">Wednesday</label>
               </div>
               <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="day_thursday" name="available_days" value="thursday"
-                  {% if 'thursday' in current_days %}checked{% endif %}>
+                <input type="checkbox" class="form-check-input" id="day_thursday" name="available_days" value="thursday" {% if 'thursday' in current_days %}checked{% endif %}>
                 <label class="form-check-label" for="day_thursday">Thursday</label>
               </div>
               <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="day_friday" name="available_days" value="friday" {%
-                  if 'friday' in current_days %}checked{% endif %}>
+                <input type="checkbox" class="form-check-input" id="day_friday" name="available_days" value="friday" {% if 'friday' in current_days %}checked{% endif %}>
                 <label class="form-check-label" for="day_friday">Friday</label>
               </div>
               <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="day_saturday" name="available_days" value="saturday"
-                  {% if 'saturday' in current_days %}checked{% endif %}>
+                <input type="checkbox" class="form-check-input" id="day_saturday" name="available_days" value="saturday" {% if 'saturday' in current_days %}checked{% endif %}>
                 <label class="form-check-label" for="day_saturday">Saturday</label>
               </div>
               <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="day_sunday" name="available_days" value="sunday" {%
-                  if 'sunday' in current_days %}checked{% endif %}>
+                <input type="checkbox" class="form-check-input" id="day_sunday" name="available_days" value="sunday" {% if 'sunday' in current_days %}checked{% endif %}>
                 <label class="form-check-label" for="day_sunday">Sunday</label>
               </div>
             </div>

@@ -23,6 +23,7 @@ urlpatterns = [
     path('redirect/', views.redirect_after_login, name='redirect_after_login'),
     path('', views.index, name='home'),
     path('inner/', views.inner, name='inner'),
+    path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
     path('about/', views.about, name='about'),
     path('services/', views.services, name='services'),
     path('departments/', views.departments, name='departments'),

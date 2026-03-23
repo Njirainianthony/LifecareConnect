@@ -35,6 +35,9 @@ def index(request):
 def inner(request):
     return render(request, 'inner-page.html')
 
+def privacy_policy(request):
+    return render(request, 'privacy_policy.html')
+
 def about(request):
     return render(request, 'about.html')
 
@@ -130,6 +133,17 @@ def custom_login_view(request):
         else:
             messages.error(request, 'Invalid username or password.')
     else:
+        # Clear any stale messages from previous sessions (e.g. admin messages,
+        # profile updates, etc.) to prevent them from being shown to other users
+        # on the login page. We directly flush the message storage.
+        storage = messages.get_messages(request)
+        storage.used = True
+        # Also clear from session directly to be thorough
+        if hasattr(request, '_messages'):
+            del request._messages
+        if '_messages' in request.session:
+            del request.session['_messages']
+            request.session.modified = True
         form = AuthenticationForm()
 
     return render(request, 'registration/login.html', {'form': form})
@@ -206,6 +220,8 @@ def create_patient_profile(request):
         if form.is_valid():
             profile = form.save(commit=False)
             profile.user = request.user
+            if profile.consent_accepted:
+                profile.consent_date = timezone.now()
             profile.save()
             return redirect('list_patient_profiles')  # A view that shows all profiles for this user
     else:
@@ -241,6 +257,10 @@ def doctor_form(request):
         if form.is_valid():
             profile = form.save(commit=False)
             profile.user = request.user
+            
+            # Record consent timestamp
+            if profile.consent_accepted:
+                profile.consent_date = timezone.now()
             
             # Handle available_days checkboxes - get all selected values and join with comma
             available_days_list = request.POST.getlist('available_days')
@@ -385,7 +405,7 @@ def edit_doctor_profile(request):
         if form.is_valid():
             updated_profile = form.save(commit=False)
             
-            # Handle available_days checkboxes - get all selected values and join with comma
+            # Handle available_days checkboxes 
             available_days_list = request.POST.getlist('available_days')
             if available_days_list:
                 updated_profile.available_days = ','.join(available_days_list)
@@ -736,7 +756,7 @@ def stk_push(patient_profile, doctor, amount, booking):
 
 
 
-#ADMIN STUUUUFFF!!!!!!!!!🤖🤖🤖
+#ADMIN STUff
 
 # Check if user is admin (superuser)
 def is_admin(user):

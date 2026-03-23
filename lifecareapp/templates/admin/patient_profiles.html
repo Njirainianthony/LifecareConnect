@@ -4,10 +4,10 @@
 {% block content %}
 
 <style>
-    thead th {
-        background-color: #00796b !important;
-        color: white !important;
-    }
+  thead th {
+    background-color: #00796b !important;
+    color: white !important;
+  }
 </style>
 
 <div class="container-fluid px-4">
@@ -18,7 +18,8 @@
   <!-- Search -->
   <form method="GET" class="mb-4">
     <div class="input-group w-50">
-      <input type="text" name="search" class="form-control rounded-start" placeholder="🔍 Search patients..." value="{{ search_query|default:'' }}">
+      <input type="text" name="search" class="form-control rounded-start" placeholder="🔍 Search patients..."
+        value="{{ search_query|default:'' }}">
       <button class="btn text-white" type="submit" style="background-color: #00796b;">Search</button>
     </div>
   </form>
@@ -43,6 +44,7 @@
               <th>Conditions</th>
               <th>Care Type</th>
               <th>Medical History</th>
+              <th>Data Consent</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -52,9 +54,10 @@
               <td>{{ forloop.counter }}</td>
               <td>
                 {% if patient.profile_pic %}
-                  <img src="{{ patient.profile_pic.url }}" alt="Profile Pic" class="rounded-circle border" style="width: 45px; height: 45px; object-fit: cover;">
+                <img src="{{ patient.profile_pic.url }}" alt="Profile Pic" class="rounded-circle border"
+                  style="width: 45px; height: 45px; object-fit: cover;">
                 {% else %}
-                  <span class="text-muted">No Image</span>
+                <span class="text-muted">No Image</span>
                 {% endif %}
               </td>
               <td>{{ patient.full_name }}</td>
@@ -70,9 +73,18 @@
               <td>{{ patient.preferred_care_type|default:"—" }}</td>
               <td>
                 {% if patient.medical_history_pdf %}
-                  <a href="{{ patient.medical_history_pdf.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
+                <a href="{{ patient.medical_history_pdf.url }}" target="_blank"
+                  class="btn btn-sm btn-outline-primary">View</a>
                 {% else %}
-                  <span class="text-muted">Not Uploaded</span>
+                <span class="text-muted">Not Uploaded</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if patient.consent_accepted %}
+                <span class="badge bg-success">Accepted</span><br>
+                <small class="text-muted">{{ patient.consent_date|date:"M d, Y" }}</small>
+                {% else %}
+                <span class="badge bg-danger">Not Accepted</span>
                 {% endif %}
               </td>
               <td>

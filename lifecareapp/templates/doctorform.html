@@ -256,6 +256,16 @@
           </div>
         </div>
 
+        <div class="mb-4 col-12">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="consent_accepted" id="id_consent_accepted" required>
+            <label class="form-check-label" for="id_consent_accepted">
+              I agree for Lifecare to use and store my data as per the <a href="{% url 'privacy_policy' %}"
+                target="_blank">privacy policy</a>.
+            </label>
+          </div>
+        </div>
+
         <button type="submit" class="btn btn-blue-green mt-3">Submit Profile</button>
       </form>
     </div>

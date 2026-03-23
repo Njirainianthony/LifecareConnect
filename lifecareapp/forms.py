@@ -52,6 +52,10 @@ class PatientProfileForm(forms.ModelForm):
             'accept': '.pdf,.doc,.docx,.jpg,.jpeg,.png',
             'class': 'form-control'
             }),
+            'consent_accepted': forms.CheckboxInput(attrs={'class': 'form-check-input', 'required': 'required'}),
+        }
+        labels = {
+            'consent_accepted': 'I agree for Lifecare to use and store my data as per the privacy policy.'
         }
 
     def clean_medical_history_pdf(self):
@@ -70,7 +74,6 @@ class DoctorProfileForm(forms.ModelForm):
     class Meta:
         model = DoctorProfile
         exclude = ['user']  # user will be set in the view
-        #fields = ['start_time', 'end_time']
         widgets = {
             'qualifications': forms.Textarea(attrs={'rows': 2}),
             'expertise': forms.Textarea(attrs={'rows': 2}),
@@ -81,6 +84,10 @@ class DoctorProfileForm(forms.ModelForm):
             'end_time': forms.TimeInput(
                 attrs={'type': 'time', 'class': 'form-control'}
             ),
+            'consent_accepted': forms.CheckboxInput(attrs={'class': 'form-check-input', 'required': 'required'}),
+        }
+        labels = {
+            'consent_accepted': 'I agree for Lifecare to use and store my data as per the privacy policy.'
         }
 
     #Generate Intervals
@@ -185,4 +192,3 @@ class BookingForm(forms.ModelForm):
             'date': forms.DateInput(attrs={'type': 'date'}),
         }
 '''
-
