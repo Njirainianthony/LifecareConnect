@@ -375,9 +375,16 @@ def update_appointment_status(request, booking_id):
 
 @login_required
 def edit_patient_profile(request):
-    try:
-        profile = PatientProfile.objects.get(user=request.user)
-    except PatientProfile.DoesNotExist:
+    profile_id = request.session.get("active_profile_id")
+    if profile_id:
+        try:
+            profile = PatientProfile.objects.get(id=profile_id, user=request.user)
+        except PatientProfile.DoesNotExist:
+            profile = PatientProfile.objects.filter(user=request.user).first()
+    else:
+        profile = PatientProfile.objects.filter(user=request.user).first()
+        
+    if not profile:
         return redirect('patientform')
 
     if request.method == 'POST':
@@ -385,7 +392,7 @@ def edit_patient_profile(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Patient profile updated successfully.")
-            return redirect('dashboard_patient')
+            return redirect('dashboard_patient', profile_id=profile.id)
         else:
             messages.error(request, "Please correct the errors below.")
     else:
@@ -464,7 +471,7 @@ def book_doctor_ajax(request, doctor_id):
 
 def notify_doctor(booking):
     doctor_email = booking.doctor.user.email
-    patient_name = booking.patient.user.get_full_name()
+    patient_name = booking.patient.full_name
     subject = f"New Appointment Request From {patient_name}"
     
     accept_url = f"https://lifecareconnect.com/booking/{booking.id}/accepted/"
@@ -1513,10 +1520,7 @@ def notify_doctor(booking):
 
 
 def initiate_payment_for_booking(booking, phone_number=None):
-    """
-    Initiates M-Pesa STK Push for a booking.
-    Returns: (success: bool, error_message: str)
-    """
+    
     try:
         # 1. Extract necessary information directly from the booking
         patient_profile = booking.patient

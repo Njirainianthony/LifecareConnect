@@ -153,13 +153,13 @@ class DoctorProfile(models.Model):
         return available_slots
     
     def get_available_days_list(self):
-        """Return list of available days"""
+        #Return list of available days
         if self.available_days:
             return [day.strip().lower() for day in self.available_days.split(',')]
         return []
     
     def is_available_on_day(self, date):
-        """Check if doctor is available on a specific day of the week"""
+        #Check if doctor is available on a specific day of the week
         day_name = date.strftime('%A').lower()
         return day_name in self.get_available_days_list()
 
@@ -282,7 +282,7 @@ class EquipmentRequest(models.Model):
     
     @property
     def total_cost(self):
-        """Calculate total rental cost based on daily rate and rental days"""
+        # Calculate total rental cost based on daily rate and rental days
         return self.equipment.daily_rate * self.rental_days
 
     def __str__(self):

@@ -174,8 +174,8 @@ LOGOUT_REDIRECT_URL = 'home'
 # EMAIL CONFIGURATION
 # =============================================================================
 
-# Use console backend for development, SMTP for production
-if DEBUG:
+# Use SMTP if EMAIL_HOST_USER is provided, else console for development
+if DEBUG and not os.getenv('EMAIL_HOST_USER'):
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

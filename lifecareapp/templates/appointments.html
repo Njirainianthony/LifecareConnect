@@ -212,7 +212,7 @@
                     data-bs-target="#paymentModal{{ appointment.id }}">Mark Complete & Pay</button>
                 </div>
                 {% elif appointment.status == 'completed' %}
-                <div class="mt-2"><span class="text-muted small">Awaiting Payment...</span></div>
+                <div class="mt-2"><span class="text-success small"><i class="bi bi-check-circle me-1"></i>Payment Complete</span></div>
                 {% elif appointment.status == 'paid' %}
                 <div class="mt-2"><span class="text-success"><i class="bi bi-check-circle"></i> Paid</span></div>
                 {% endif %}

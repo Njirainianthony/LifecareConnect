@@ -197,8 +197,51 @@
         </div>
 
         <div class="profile-card mt-4">
-            <h5 class="text-muted text-center">Upcoming Bookings / Tasks</h5>
-            <p class="text-center text-muted">Coming soon...</p>
+            <h5 class="profile-title"><i class="bi bi-calendar-check me-2"></i>Upcoming Appointments</h5>
+            {% if bookings %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th style="background-color:#00796b; color:white; font-weight:500;">Doctor</th>
+                            <th style="background-color:#00796b; color:white; font-weight:500;">Date &amp; Time</th>
+                            <th style="background-color:#00796b; color:white; font-weight:500;">Status</th>
+                            <th style="background-color:#00796b; color:white; font-weight:500;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td class="fw-medium">Dr. {{ booking.doctor.full_name }}</td>
+                            <td>{{ booking.date }} at {{ booking.time }}</td>
+                            <td>
+                                {% if booking.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                                {% elif booking.status == 'accepted' %}
+                                <span class="badge bg-success">Accepted</span>
+                                {% elif booking.status == 'completed' %}
+                                <span class="badge bg-primary">Completed</span>
+                                {% elif booking.status == 'paid' %}
+                                <span class="badge bg-info text-dark">Paid</span>
+                                {% elif booking.status == 'declined' %}
+                                <span class="badge bg-danger">Declined</span>
+                                {% elif booking.status == 'cancelled' %}
+                                <span class="badge bg-secondary">Cancelled</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'appointments' %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-arrow-right-circle me-1"></i>View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-center text-muted mt-3"><i class="bi bi-calendar-x me-2"></i>No upcoming appointments at the moment.</p>
+            {% endif %}
         </div>
     </div>
 
