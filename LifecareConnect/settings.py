@@ -139,7 +139,7 @@ USE_TZ = True
 # STATIC FILES (CSS, JavaScript, Images)
 # =============================================================================
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # WhiteNoise configuration for production static file serving
@@ -150,7 +150,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # MEDIA FILES
 # =============================================================================
 
-MEDIA_URL = 'media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
@@ -174,7 +174,7 @@ LOGOUT_REDIRECT_URL = 'home'
 # EMAIL CONFIGURATION
 # =============================================================================
 
-# Use SMTP if EMAIL_HOST_USER is provided, else console for development
+# Use SMTP 
 if DEBUG and not os.getenv('EMAIL_HOST_USER'):
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
@@ -221,6 +221,14 @@ if not DEBUG:
     # Content Security
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
+    
+    # CSRF Trusted Origins (required for Django 4.0+ behind HTTPS)
+    # Update these when you get your production domain
+    CSRF_TRUSTED_ORIGINS = [
+        origin.strip() 
+        for origin in os.getenv('CSRF_TRUSTED_ORIGINS', 'https://localhost').split(',') 
+        if origin.strip()
+    ]
 
 
 # =============================================================================
@@ -251,6 +259,12 @@ LOGGING = {
             'filename': BASE_DIR / 'logs' / 'django_errors.log',
             'formatter': 'verbose',
         },
+        'app_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'lifecare.log',
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         'django': {
@@ -264,7 +278,7 @@ LOGGING = {
             'propagate': False,
         },
         'lifecareapp': {
-            'handlers': ['console'],
+            'handlers': ['console', 'app_file'],
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True,
         },

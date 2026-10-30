@@ -4,7 +4,6 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.core.validators import FileExtensionValidator
 from django.utils import timezone
 
-created_at = models.DateTimeField(default=timezone.now)  # TEMP
 
 
 
@@ -204,10 +203,11 @@ class Booking(models.Model):
 # models.py
 class Payment(models.Model):
     user = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(DoctorProfile, on_delete=models.SET_NULL, null=True, blank=True)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
-    status = models.CharField(max_length=20)  # 'PAID' or 'FAILED'
-    created_at = models.DateTimeField(auto_now_add=True)   # <- add this & migrate if you want time-series revenue
+    status = models.CharField(max_length=20)  # 'PAID', 'COMPLETED', 'FAILED', or 'PENDING'
+    mpesa_receipt = models.CharField(max_length=50, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     booking = models.ForeignKey(Booking, on_delete=models.SET_NULL, null=True, blank=True, related_name='payments')
     equipment_request = models.ForeignKey('EquipmentRequest', on_delete=models.CASCADE, null=True, blank=True)

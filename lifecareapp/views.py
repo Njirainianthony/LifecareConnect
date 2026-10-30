@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger('lifecareapp')
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required,user_passes_test
@@ -616,42 +618,18 @@ def view_patient_profile_for_doctor(request, patient_id, booking_id):
 
 
         
-@csrf_exempt
-def initiate_stk_push(phone_number, amount, doctor, booking):
-    """
-    Function version of STK push you can call from complete_booking
-    """
-    try:
-        cl = MpesaClient()
-        account_reference = 'LifecarePayment'
-        transaction_desc = f'Payment for services with Dr. {doctor.full_name}'
-        callback_url = 'https://mydomain.com/path'
-
-        # Actual STK push call
-        response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
-
-        # Send notifications
-        from .utils import notify_patient, notify_doctor
-        notify_patient(booking)
-        notify_doctor(booking)
-
-        return True, response.text
-
-    except Exception as e:
-        print(f"Error in STK Push: {e}")
-        return False, str(e)
 
 
 @csrf_exempt
 def mpesa_callback(request):
     """
     Handle M-Pesa STK Push callback.
-    Updates Payment and Booking status when payment is confirmed.
+    Updates Payment and Booking/EquipmentRequest status when payment is confirmed.
     """
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            print("M-Pesa Callback received:", json.dumps(data, indent=2))
+            logger.info(f"M-Pesa Callback received: {json.dumps(data, indent=2)}")
             
             # Extract callback data
             stk_callback = data.get('Body', {}).get('stkCallback', {})
@@ -675,90 +653,47 @@ def mpesa_callback(request):
                     elif item.get('Name') == 'PhoneNumber':
                         phone = item.get('Value')
                 
-                print(f"Payment SUCCESS: Amount={amount}, Phone={phone}, Receipt={mpesa_receipt}")
+                logger.info(f"Payment SUCCESS: Amount={amount}, Phone={phone}, Receipt={mpesa_receipt}")
                 
-                # Find and update the pending payment by matching amount and phone
-                # First try to find by phone number
-                phone_str = str(phone) if phone else ''
-                
+                # Find and update the pending payment by matching amount
                 pending_payments = Payment.objects.filter(
                     status='PENDING',
                     amount=amount
                 )
                 
                 if pending_payments.exists():
-                    # Update the most recent pending payment
                     payment = pending_payments.order_by('-created_at').first()
-                    payment.status = 'COMPLETED'
-                    payment.mpesa_receipt = mpesa_receipt if hasattr(payment, 'mpesa_receipt') else None
+                    payment.status = 'PAID'
+                    payment.mpesa_receipt = mpesa_receipt
                     payment.save()
                     
                     # Update the associated booking to PAID
                     if payment.booking:
                         payment.booking.status = Booking.AppointmentStatus.PAID
                         payment.booking.save()
-                        print(f"Booking {payment.booking.id} updated to PAID")
+                        logger.info(f"Booking {payment.booking.id} updated to PAID")
+
+                    # Update associated equipment request if applicable
+                    if payment.equipment_request:
+                        payment.equipment_request.status = EquipmentRequest.RequestStatus.PAID
+                        payment.equipment_request.save()
+                        logger.info(f"EquipmentRequest {payment.equipment_request.id} updated to PAID")
                     
-                    print(f"Payment {payment.id} marked as COMPLETED")
+                    logger.info(f"Payment {payment.id} marked as PAID with receipt {mpesa_receipt}")
                 else:
-                    print(f"No pending payment found for amount {amount}")
+                    logger.warning(f"No pending payment found for amount {amount}")
                     
             else:
                 # Payment failed or cancelled
-                print(f"Payment FAILED: {result_desc}")
+                logger.warning(f"Payment FAILED or CANCELLED: {result_desc}")
             
             return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
             
         except Exception as e:
-            print(f"Error processing M-Pesa callback: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.error(f"Error processing M-Pesa callback: {e}", exc_info=True)
             return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
     
     return JsonResponse({"ResultCode": 1, "ResultDesc": "Invalid request method"})
-
-
-@csrf_exempt
-def stk_push(patient_profile, doctor, amount, booking):
-    try:
-        # Call Safaricom API client directly
-        cl = MpesaClient()
-        account_reference = 'LifecarePayment'
-        transaction_desc = 'Payment for services'
-        callback_url = 'https://mydomain.com/path'
-
-        response = cl.stk_push(
-            phone_number=patient_profile.user.phone,
-            amount=amount,
-            account_reference=account_reference,
-            transaction_desc=transaction_desc,
-            callback_url=callback_url
-        )
-
-        # If API responded successfully
-        if response.ok:
-            payment = Payment.objects.create(
-                user=patient_profile,
-                doctor=doctor,
-                amount=amount,
-                status="PENDING"
-            )
-
-            booking.status = Booking.AppointmentStatus.PENDING_PAYMENT
-            booking.save()
-
-            # You can notify both doctor & patient here if needed
-            notify_patient(booking)
-            notify_doctor(booking)
-
-            return True
-        else:
-            print("STK Push failed:", response.text)
-            return False
-
-    except Exception as e:
-        print("STK Push error:", str(e))
-        return False
 
 
 
@@ -1520,32 +1455,26 @@ def notify_doctor(booking):
 
 
 def initiate_payment_for_booking(booking, phone_number=None):
-    
     try:
-        # 1. Extract necessary information directly from the booking
         patient_profile = booking.patient
         doctor = booking.doctor
-        amount = int(booking.cost)  # Ensure amount is an integer
+        amount = int(booking.cost)
         
-        # Use provided phone number or fall back to patient's registered phone
         if not phone_number:
             phone_number = patient_profile.phone
         
-        # Validate phone number format
         if not phone_number or len(phone_number) < 10:
             return False, "Invalid phone number format"
         
-        print(f"Initiating STK Push: phone={phone_number}, amount={amount}")
+        logger.info(f"Initiating Booking STK Push: phone={phone_number}, amount={amount}")
         
-        # 2. Prepare STK Push details
         cl = MpesaClient()
         account_reference = 'LifecarePayment'
         transaction_desc = f'Payment for appointment with Dr. {doctor.full_name}'
-        callback_url = os.getenv('MPESA_CALLBACK_URL', 'https://your-domain.com/payments/callback/')
+        callback_url = os.getenv('MPESA_CALLBACK_URL', 'https://yourdomain.com/mpesa/callback/')
 
-        print(f"Callback URL: {callback_url}")
+        logger.info(f"Callback URL: {callback_url}")
 
-        # 3. Call the Mpesa API
         response = cl.stk_push(
             phone_number=phone_number,
             amount=amount,
@@ -1554,16 +1483,13 @@ def initiate_payment_for_booking(booking, phone_number=None):
             callback_url=callback_url
         )
 
-        print(f"STK Push Response: {response.status_code} - {response.text}")
+        logger.info(f"STK Push Response: {response.status_code} - {response.text}")
 
-        # 4. Handle the API response
         if response.ok:
-            # Check if the response contains success indicator
             response_data = response.json() if hasattr(response, 'json') else {}
             response_code = response_data.get('ResponseCode', '')
             
             if response_code == '0' or response.status_code == 200:
-                # Create a payment record to track the transaction
                 Payment.objects.create(
                     user=patient_profile,
                     doctor=doctor,
@@ -1574,19 +1500,15 @@ def initiate_payment_for_booking(booking, phone_number=None):
                 return True, "Payment request sent successfully"
             else:
                 error_desc = response_data.get('ResponseDescription', 'Unknown error')
-                print(f"STK Push failed: {error_desc}")
+                logger.error(f"STK Push failed: {error_desc}")
                 return False, error_desc
         else:
-            # Log the error if the API call itself fails
             error_text = response.text if hasattr(response, 'text') else str(response)
-            print(f"STK Push API Error for booking {booking.id}: {error_text}")
+            logger.error(f"STK Push API Error for booking {booking.id}: {error_text}")
             return False, f"API Error: {error_text[:100]}"
 
     except Exception as e:
-        # Log any other exceptions during the process
-        print(f"An exception occurred in initiate_payment_for_booking for booking {booking.id}: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"An exception occurred in initiate_payment_for_booking for booking {booking.id}: {e}", exc_info=True)
         return False, str(e)
     
 
@@ -1614,7 +1536,7 @@ def initiate_payment_for_equipment(equipment_request):
             callback_url=callback_url
         )
 
-        print(f"Equipment STK Push Response: {response.status_code} - {response.text}")
+        logger.info(f"Equipment STK Push Response: {response.status_code} - {response.text}")
 
         # 4. Handle the API response
         if response.ok:
@@ -1623,7 +1545,7 @@ def initiate_payment_for_equipment(equipment_request):
             # For equipment payments, we'll set doctor to None or first available
             Payment.objects.create(
                 user=patient_profile,
-                doctor=DoctorProfile.objects.first(),  # Placeholder - equipment payments don't have a doctor
+                doctor=None,  # Equipment payments don't require a doctor
                 equipment_request=equipment_request,
                 amount=amount,
                 status="PENDING"
@@ -1635,10 +1557,10 @@ def initiate_payment_for_equipment(equipment_request):
 
             return True
         else:
-            print(f"STK Push API Error for equipment request {equipment_request.id}: {response.text}")
+            logger.error(f"STK Push API Error for equipment request {equipment_request.id}: {response.text}")
             return False
 
     except Exception as e:
-        print(f"An exception occurred in initiate_payment_for_equipment for request {equipment_request.id}: {e}")
+        logger.error(f"An exception occurred in initiate_payment_for_equipment for request {equipment_request.id}: {e}")
         return False
 

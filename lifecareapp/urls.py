@@ -52,8 +52,6 @@ urlpatterns = [
 
     path('bookings/complete/<int:booking_id>/', views.update_appointment_status, name='complete_booking'),
     path('doctor_profile/<int:doctor_id>', views.view_doctor_profile, name='doctor-profile'),
-    path('mpesa/stk/', views.initiate_stk_push, name='stk_push'),
-    path('stk-push', views.stk_push, name='process_stk_push'),
     path('mpesa/callback/', views.mpesa_callback, name='mpesa_callback'),
     #ADMIN URLS!!!!!
     path('admin-dashboard/', views.dashboard_admin, name='admin_dashboard'),
@@ -84,7 +82,7 @@ urlpatterns = [
 
 
     path('doctor/availability/', views.manage_availability, name='manage_availability'),
-    path('doctor/availability/int:availability_id/delete/', views.delete_availability, name='delete_availability'),
+    path('doctor/availability/<int:availability_id>/delete/', views.delete_availability, name='delete_availability'),
 
 
     path('equipment/', views.equipment_list, name='equipment_list'),
